@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateCustomerGroupsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -15,6 +15,7 @@ class CreateCustomerGroupsTable extends Migration
     {
         Schema::create('customer_groups', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('code')->unique();
             $table->string('name');
             $table->boolean('is_user_defined')->default(1);
             $table->timestamps();
@@ -30,4 +31,4 @@ class CreateCustomerGroupsTable extends Migration
     {
         Schema::dropIfExists('customer_groups');
     }
-}
+};

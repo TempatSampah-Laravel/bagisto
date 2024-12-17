@@ -2,89 +2,43 @@
 
 namespace Webkul\Sales\Repositories;
 
-use Illuminate\Container\Container as App;
+use Illuminate\Container\Container;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Webkul\Core\Eloquent\Repository;
-use Webkul\Sales\Contracts\Invoice;
 use Webkul\Sales\Generators\InvoiceSequencer;
 
 class InvoiceRepository extends Repository
 {
     /**
-     * Order repository instance.
-     *
-     * @var \Webkul\Sales\Repositories\OrderRepository
-     */
-    protected $orderRepository;
-
-    /**
-     * Order's item repository instance.
-     *
-     * @var \Webkul\Sales\Repositories\OrderItemRepository
-     */
-    protected $orderItemRepository;
-
-    /**
-     * Invoice's item repository instance.
-     *
-     * @var \Webkul\Sales\Repositories\InvoiceItemRepository
-     */
-    protected $invoiceItemRepository;
-
-    /**
-     * Downloadable link purchased repository instance.
-     *
-     * @var \Webkul\Sales\Repositories\DownloadableLinkPurchasedRepository
-     */
-    protected $downloadableLinkPurchasedRepository;
-
-    /**
      * Create a new repository instance.
      *
-     * @param  \Webkul\Sales\Repositories\OrderRepository  $orderRepository
-     * @param  \Webkul\Sales\Repositories\OrderItemRepository  $orderItemRepository
-     * @param  \Webkul\Sales\Repositories\InvoiceItemRepository  $invoiceItemRepository
-     * @param  \Webkul\Sales\Repositories\DownloadableLinkPurchasedRepository  $downloadableLinkPurchasedRepository
-     * @param  \Illuminate\Container\Container  $app
+     * @return void
      */
     public function __construct(
-        OrderRepository $orderRepository,
-        OrderItemRepository $orderItemRepository,
-        InvoiceItemRepository $invoiceItemRepository,
-        DownloadableLinkPurchasedRepository $downloadableLinkPurchasedRepository,
-        App $app
+        protected OrderRepository $orderRepository,
+        protected OrderItemRepository $orderItemRepository,
+        protected InvoiceItemRepository $invoiceItemRepository,
+        protected DownloadableLinkPurchasedRepository $downloadableLinkPurchasedRepository,
+        Container $container
     ) {
-        $this->orderRepository = $orderRepository;
-
-        $this->orderItemRepository = $orderItemRepository;
-
-        $this->invoiceItemRepository = $invoiceItemRepository;
-
-        $this->invoiceItemRepository = $invoiceItemRepository;
-
-        $this->downloadableLinkPurchasedRepository = $downloadableLinkPurchasedRepository;
-
-        parent::__construct($app);
+        parent::__construct($container);
     }
 
     /**
      * Specify model class name.
-     *
-     * @return string
      */
-    public function model()
+    public function model(): string
     {
-        return Invoice::class;
+        return 'Webkul\Sales\Contracts\Invoice';
     }
 
     /**
      * Create invoice.
      *
-     * @param  array  $data
-     * @param  string $invoiceState
-     * @param  string $orderState
-     * @return \Webkul\Sales\Contracts\Invoice
+     * @param  string  $invoiceState
+     * @param  string  $orderState
+     * @return \Webkul\Sales\Models\Invoice
      */
     public function create(array $data, $invoiceState = null, $orderState = null)
     {
@@ -100,7 +54,7 @@ class InvoiceRepository extends Repository
             if (isset($invoiceState)) {
                 $state = $invoiceState;
             } else {
-                $state = "paid";
+                $state = 'paid';
             }
 
             $invoice = $this->model->create([
@@ -125,6 +79,10 @@ class InvoiceRepository extends Repository
                     $qty = $orderItem->qty_to_invoice;
                 }
 
+                $taxAmount = (($orderItem->tax_amount / $orderItem->qty_ordered) * $qty);
+
+                $baseTaxAmount = (($orderItem->base_tax_amount / $orderItem->qty_ordered) * $qty);
+
                 $invoiceItem = $this->invoiceItemRepository->create([
                     'invoice_id'           => $invoice->id,
                     'order_item_id'        => $orderItem->id,
@@ -132,11 +90,15 @@ class InvoiceRepository extends Repository
                     'sku'                  => $orderItem->sku,
                     'qty'                  => $qty,
                     'price'                => $orderItem->price,
+                    'price_incl_tax'       => $orderItem->price + $taxAmount,
                     'base_price'           => $orderItem->base_price,
+                    'base_price_incl_tax'  => $orderItem->base_price + $baseTaxAmount,
+                    'total_incl_tax'       => ($orderItem->price * $qty) + $taxAmount,
                     'total'                => $orderItem->price * $qty,
                     'base_total'           => $orderItem->base_price * $qty,
-                    'tax_amount'           => (($orderItem->tax_amount / $orderItem->qty_ordered) * $qty),
-                    'base_tax_amount'      => (($orderItem->base_tax_amount / $orderItem->qty_ordered) * $qty),
+                    'base_total_incl_tax'  => ($orderItem->base_price * $qty) + $baseTaxAmount,
+                    'tax_amount'           => $taxAmount,
+                    'base_tax_amount'      => $baseTaxAmount,
                     'discount_amount'      => (($orderItem->discount_amount / $orderItem->qty_ordered) * $qty),
                     'base_discount_amount' => (($orderItem->base_discount_amount / $orderItem->qty_ordered) * $qty),
                     'product_id'           => $orderItem->product_id,
@@ -179,7 +141,7 @@ class InvoiceRepository extends Repository
                                 'invoice'   => $invoice,
                                 'product'   => $childOrderItem->product,
                                 'qty'       => $finalQty,
-                                'vendor_id' => isset($data['vendor_id']) ? $data['vendor_id'] : 0,
+                                'vendor_id' => $data['vendor_id'] ?? 0,
                             ]);
                         }
 
@@ -194,7 +156,7 @@ class InvoiceRepository extends Repository
                         'invoice'   => $invoice,
                         'product'   => $orderItem->product,
                         'qty'       => $qty,
-                        'vendor_id' => isset($data['vendor_id']) ? $data['vendor_id'] : 0,
+                        'vendor_id' => $data['vendor_id'] ?? 0,
                     ]);
                 }
 
@@ -213,6 +175,11 @@ class InvoiceRepository extends Repository
                 $this->orderRepository->updateOrderStatus($order);
             }
 
+            /**
+             * Temporary property has been used to avoid request helper usage in listener.
+             */
+            $invoice->can_create_transaction = request()->has('can_create_transaction') && request()->input('can_create_transaction') == '1';
+
             Event::dispatch('sales.invoice.save.after', $invoice);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -223,6 +190,36 @@ class InvoiceRepository extends Repository
         DB::commit();
 
         return $invoice;
+    }
+
+    /**
+     * Have product to invoice.
+     */
+    public function haveProductToInvoice(array $data): bool
+    {
+        foreach ($data['invoice']['items'] as $qty) {
+            if ((int) $qty) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Is valid quantity.
+     */
+    public function isValidQuantity(array $data): bool
+    {
+        foreach ($data['invoice']['items'] as $itemId => $qty) {
+            $orderItem = $this->orderItemRepository->find($itemId);
+
+            if ($qty > $orderItem->qty_to_invoice) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -244,30 +241,59 @@ class InvoiceRepository extends Repository
     public function collectTotals($invoice)
     {
         $invoice->sub_total = $invoice->base_sub_total = 0;
+        $invoice->sub_total_incl_tax = $invoice->base_sub_total_incl_tax = 0;
         $invoice->tax_amount = $invoice->base_tax_amount = 0;
+        $invoice->shipping_tax_amount = $invoice->shipping_tax_amount = 0;
         $invoice->discount_amount = $invoice->base_discount_amount = 0;
 
-        foreach ($invoice->items as $invoiceItem) {
-            $invoice->sub_total += $invoiceItem->total;
-            $invoice->base_sub_total += $invoiceItem->base_total;
+        foreach ($invoice->items as $item) {
+            $invoice->tax_amount += $item->tax_amount;
+            $invoice->base_tax_amount += $item->base_tax_amount;
 
-            $invoice->tax_amount += $invoiceItem->tax_amount;
-            $invoice->base_tax_amount += $invoiceItem->base_tax_amount;
+            $invoice->discount_amount += $item->discount_amount;
+            $invoice->base_discount_amount += $item->base_discount_amount;
 
-            $invoice->discount_amount += $invoiceItem->discount_amount;
-            $invoice->base_discount_amount += $invoiceItem->base_discount_amount;
+            $invoice->sub_total += $item->total;
+            $invoice->base_sub_total += $item->base_total;
+
+            $invoice->sub_total_incl_tax = (float) $invoice->sub_total_incl_tax + $item->total_incl_tax;
+            $invoice->base_sub_total_incl_tax = (float) $invoice->base_sub_total_incl_tax + $item->base_total_incl_tax;
         }
 
         $invoice->shipping_amount = $invoice->order->shipping_amount;
+        $invoice->shipping_amount_incl_tax = $invoice->order->shipping_amount_incl_tax;
+
         $invoice->base_shipping_amount = $invoice->order->base_shipping_amount;
+        $invoice->base_shipping_amount_incl_tax = $invoice->order->base_shipping_amount_incl_tax;
 
         $invoice->discount_amount += $invoice->order->shipping_discount_amount;
         $invoice->base_discount_amount += $invoice->order->base_shipping_discount_amount;
+
+        if ($invoice->order->shipping_tax_amount) {
+            $invoice->shipping_tax_amount = $invoice->order->shipping_tax_amount;
+
+            $invoice->base_shipping_tax_amount = $invoice->order->base_shipping_tax_amount;
+
+            $invoice->tax_amount += $invoice->order->shipping_tax_amount;
+
+            $invoice->base_tax_amount += $invoice->order->base_shipping_tax_amount;
+
+            foreach ($invoice->order->invoices as $prevInvoice) {
+                if ((float) $prevInvoice->shipping_tax_amount) {
+                    $invoice->shipping_tax_amount = $invoice->base_shipping_tax_amount = 0;
+
+                    $invoice->tax_amount -= $invoice->order->shipping_tax_amount;
+
+                    $invoice->base_tax_amount -= $invoice->order->base_shipping_tax_amount;
+                }
+            }
+        }
 
         if ($invoice->order->shipping_amount) {
             foreach ($invoice->order->invoices as $prevInvoice) {
                 if ((float) $prevInvoice->shipping_amount) {
                     $invoice->shipping_amount = $invoice->base_shipping_amount = 0;
+                    $invoice->shipping_amount_incl_tax = $invoice->base_shipping_amount_incl_tax = 0;
                 }
 
                 if ($prevInvoice->id != $invoice->id) {
@@ -286,8 +312,10 @@ class InvoiceRepository extends Repository
     }
 
     /**
-     * @param \Webkul\Sales\Contracts\Invoice $invoice
-     * @return void
+     * Update state.
+     *
+     * @param  \Webkul\Sales\Models\Invoice  $invoice
+     * @return bool
      */
     public function updateState($invoice, $status)
     {
@@ -295,5 +323,13 @@ class InvoiceRepository extends Repository
         $invoice->save();
 
         return true;
+    }
+
+    /**
+     * Get total amount of pending invoices.
+     */
+    public function getTotalPendingInvoicesAmount(): float
+    {
+        return $this->where('state', 'pending')->sum('grand_total');
     }
 }

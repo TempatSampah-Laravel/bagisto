@@ -3,41 +3,84 @@
 namespace Webkul\Category\Repositories;
 
 use Illuminate\Support\Facades\DB;
-use Webkul\Core\Eloquent\Repository;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Webkul\Category\Contracts\Category;
 use Webkul\Category\Models\CategoryTranslationProxy;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Webkul\Core\Eloquent\Repository;
 
 class CategoryRepository extends Repository
 {
     /**
      * Specify model class name.
-     *
-     * @return mixed
      */
-    public function model()
+    public function model(): string
     {
-        return 'Webkul\Category\Contracts\Category';
+        return Category::class;
+    }
+
+    /**
+     * Get categories.
+     *
+     * @return void
+     */
+    public function getAll(array $params = [])
+    {
+        $queryBuilder = $this->query()
+            ->select('categories.*')
+            ->leftJoin('category_translations', 'category_translations.category_id', '=', 'categories.id');
+
+        foreach ($params as $key => $value) {
+            switch ($key) {
+                case 'name':
+                    $queryBuilder->where('category_translations.name', 'like', '%'.urldecode($value).'%');
+
+                    break;
+                case 'description':
+                    $queryBuilder->where('category_translations.description', 'like', '%'.urldecode($value).'%');
+
+                    break;
+                case 'status':
+                    $queryBuilder->where('categories.status', $value);
+
+                    break;
+                case 'only_children':
+                    $queryBuilder->whereNotNull('categories.parent_id');
+
+                    break;
+                case 'parent_id':
+                    $queryBuilder->where('categories.parent_id', $value);
+
+                    break;
+                case 'locale':
+                    $queryBuilder->where('category_translations.locale', $value);
+
+                    break;
+            }
+        }
+
+        return $queryBuilder->paginate($params['limit'] ?? 10);
     }
 
     /**
      * Create category.
      *
-     * @param  array  $data
      * @return \Webkul\Category\Contracts\Category
      */
     public function create(array $data)
     {
-        Event::dispatch('catalog.category.create.before');
-
-        if (isset($data['locale']) && $data['locale'] == 'all') {
+        if (
+            isset($data['locale'])
+            && $data['locale'] == 'all'
+        ) {
             $model = app()->make($this->model());
 
             foreach (core()->getAllLocales() as $locale) {
                 foreach ($model->translatedAttributes as $attribute) {
                     if (isset($data[$attribute])) {
                         $data[$locale->code][$attribute] = $data[$attribute];
+
                         $data[$locale->code]['locale_id'] = $locale->id;
                     }
                 }
@@ -48,11 +91,37 @@ class CategoryRepository extends Repository
 
         $this->uploadImages($data, $category);
 
+        $this->uploadImages($data, $category, 'banner_path');
+
         if (isset($data['attributes'])) {
             $category->filterableAttributes()->sync($data['attributes']);
         }
 
-        Event::dispatch('catalog.category.create.after', $category);
+        return $category;
+    }
+
+    /**
+     * Update category.
+     *
+     * @param  int  $id
+     * @param  string  $attribute
+     * @return \Webkul\Category\Contracts\Category
+     */
+    public function update(array $data, $id)
+    {
+        $category = $this->find($id);
+
+        $data = $this->setSameAttributeValueToAllLocale($data, 'slug');
+
+        $category->update($data);
+
+        $this->uploadImages($data, $category);
+
+        $this->uploadImages($data, $category, 'banner_path');
+
+        if (isset($data['attributes'])) {
+            $category->filterableAttributes()->sync($data['attributes']);
+        }
 
         return $category;
     }
@@ -60,10 +129,9 @@ class CategoryRepository extends Repository
     /**
      * Specify category tree.
      *
-     * @param  int  $id
      * @return \Webkul\Category\Contracts\Category
      */
-    public function getCategoryTree($id = null)
+    public function getCategoryTree(?int $id = null)
     {
         return $id
             ? $this->model::orderBy('position', 'ASC')->where('id', '!=', $id)->get()->toTree()
@@ -73,14 +141,13 @@ class CategoryRepository extends Repository
     /**
      * Specify category tree.
      *
-     * @param  int  $id
      * @return \Illuminate\Support\Collection
      */
-    public function getCategoryTreeWithoutDescendant($id = null)
+    public function getCategoryTreeWithoutDescendant(?int $id = null)
     {
         return $id
-               ? $this->model::orderBy('position', 'ASC')->where('id', '!=', $id)->whereNotDescendantOf($id)->get()->toTree()
-               : $this->model::orderBy('position', 'ASC')->get()->toTree();
+            ? $this->model::orderBy('position', 'ASC')->where('id', '!=', $id)->whereNotDescendantOf($id)->get()->toTree()
+            : $this->model::orderBy('position', 'ASC')->get()->toTree();
     }
 
     /**
@@ -90,7 +157,17 @@ class CategoryRepository extends Repository
      */
     public function getRootCategories()
     {
-        return $this->getModel()->where('parent_id', NULL)->get();
+        return $this->getModel()->where('parent_id', null)->get();
+    }
+
+    /**
+     * Get child categories.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getChildCategories($parentId)
+    {
+        return $this->getModel()->where('parent_id', $parentId)->get();
     }
 
     /**
@@ -101,13 +178,7 @@ class CategoryRepository extends Repository
      */
     public function getVisibleCategoryTree($id = null)
     {
-        static $categories = [];
-
-        if (array_key_exists($id, $categories)) {
-            return $categories[$id];
-        }
-
-        return $categories[$id] = $id
+        return $id
             ? $this->model::orderBy('position', 'ASC')->where('status', 1)->descendantsAndSelf($id)->toTree($id)
             : $this->model::orderBy('position', 'ASC')->where('status', 1)->get()->toTree();
     }
@@ -127,96 +198,31 @@ class CategoryRepository extends Repository
             ->select(DB::raw(1))
             ->exists();
 
-        return $exists ? false : true;
+        return ! $exists;
     }
 
     /**
-     * Retrive category from slug.
+     * Retrieve category from slug.
      *
-     * @param string $slug
-     * @return \Webkul\Category\Contracts\Category
-     */
-    public function findBySlugOrFail($slug)
-    {
-        $category = $this->model->whereTranslation('slug', $slug)->first();
-
-        if ($category) {
-            return $category;
-        }
-
-        throw (new ModelNotFoundException)->setModel(
-            get_class($this->model), $slug
-        );
-    }
-
-    /**
-     * Retrive category from slug.
-     *
-     * @param string $slug
+     * @param  string  $slug
      * @return \Webkul\Category\Contracts\Category
      */
     public function findBySlug($slug)
     {
-        $category = $this->model->whereTranslation('slug', $slug)->first();
-
-        if ($category) {
+        if ($category = $this->model->whereTranslation('slug', $slug)->first()) {
             return $category;
         }
     }
 
     /**
-     * Find by path.
+     * Retrieve category from slug.
      *
-     * @param  string  $urlPath
+     * @param  string  $slug
      * @return \Webkul\Category\Contracts\Category
      */
-    public function findByPath(string $urlPath)
+    public function findBySlugOrFail($slug)
     {
-        return $this->model->whereTranslation('url_path', $urlPath)->first();
-    }
-
-    /**
-     * Update category.
-     *
-     * @param  array  $data
-     * @param  int  $id
-     * @param  string  $attribute
-     * @return \Webkul\Category\Contracts\Category
-     */
-    public function update(array $data, $id, $attribute = "id")
-    {
-        $category = $this->find($id);
-
-        Event::dispatch('catalog.category.update.before', $id);
-
-        $data = $this->setSameAttributeValueToAllLocale($data, 'slug');
-
-        $category->update($data);
-
-        $this->uploadImages($data, $category);
-
-        if (isset($data['attributes'])) {
-            $category->filterableAttributes()->sync($data['attributes']);
-        }
-
-        Event::dispatch('catalog.category.update.after', $id);
-
-        return $category;
-    }
-
-    /**
-     * Delete category.
-     *
-     * @param  int  $id
-     * @return void
-     */
-    public function delete($id)
-    {
-        Event::dispatch('catalog.category.delete.before', $id);
-
-        parent::delete($id);
-
-        Event::dispatch('catalog.category.delete.after', $id);
+        return $this->model->whereTranslation('slug', $slug)->firstOrFail();
     }
 
     /**
@@ -224,24 +230,28 @@ class CategoryRepository extends Repository
      *
      * @param  array  $data
      * @param  \Webkul\Category\Contracts\Category  $category
-     * @param  string $type
+     * @param  string  $type
      * @return void
      */
-    public function uploadImages($data, $category, $type = "image")
+    public function uploadImages($data, $category, $type = 'logo_path')
     {
         if (isset($data[$type])) {
-            $request = request();
-
             foreach ($data[$type] as $imageId => $image) {
-                $file = $type . '.' . $imageId;
-                $dir = 'category/' . $category->id;
+                $file = $type.'.'.$imageId;
 
-                if ($request->hasFile($file)) {
+                if (request()->hasFile($file)) {
                     if ($category->{$type}) {
                         Storage::delete($category->{$type});
                     }
 
-                    $category->{$type} = $request->file($file)->store($dir);
+                    $manager = new ImageManager;
+
+                    $image = $manager->make(request()->file($file))->encode('webp');
+
+                    $category->{$type} = 'category/'.$category->id.'/'.Str::random(40).'.webp';
+
+                    Storage::put($category->{$type}, $image);
+
                     $category->save();
                 }
             }
@@ -251,6 +261,7 @@ class CategoryRepository extends Repository
             }
 
             $category->{$type} = null;
+
             $category->save();
         }
     }
@@ -268,7 +279,7 @@ class CategoryRepository extends Repository
         $trimmed = [];
 
         foreach ($categories as $key => $category) {
-            if ($category->name != null || $category->name != "") {
+            if (! empty($category->name)) {
                 $trimmed[$key] = [
                     'id'   => $category->id,
                     'name' => $category->name,
@@ -286,8 +297,7 @@ class CategoryRepository extends Repository
      * To Do: Move column from the `category_translations` to `category` table. And remove
      * this created method.
      *
-     * @param  array  $data
-     * @param  string $attributeNames
+     * @param  string  $attributeNames
      * @return array
      */
     private function setSameAttributeValueToAllLocale(array $data, ...$attributeNames)
@@ -298,9 +308,11 @@ class CategoryRepository extends Repository
 
         foreach ($attributeNames as $attributeName) {
             foreach (core()->getAllLocales() as $locale) {
-                foreach ($model->translatedAttributes as $attribute) {
-                    if ($attribute === $attributeName) {
-                        $data[$locale->code][$attribute] = isset($data[$requestedLocale][$attribute]) ?: $data[$data['locale']][$attribute];
+                if ($requestedLocale == $locale->code) {
+                    foreach ($model->translatedAttributes as $attribute) {
+                        if ($attribute === $attributeName) {
+                            $data[$locale->code][$attribute] = $data[$requestedLocale][$attribute] ?? $data[$data['locale']][$attribute];
+                        }
                     }
                 }
             }

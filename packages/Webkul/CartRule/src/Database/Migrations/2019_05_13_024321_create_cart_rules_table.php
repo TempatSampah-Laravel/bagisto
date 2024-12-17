@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateCartRulesTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -17,8 +17,8 @@ class CreateCartRulesTable extends Migration
             $table->increments('id');
             $table->string('name')->nullable();
             $table->string('description')->nullable();
-            $table->date('starts_from')->nullable();
-            $table->date('ends_till')->nullable();
+            $table->dateTime('starts_from')->nullable();
+            $table->dateTime('ends_till')->nullable();
             $table->boolean('status')->default(0);
             $table->integer('coupon_type')->default(1);
             $table->boolean('use_auto_generation')->default(0);
@@ -49,4 +49,4 @@ class CreateCartRulesTable extends Migration
     {
         Schema::dropIfExists('cart_rules');
     }
-}
+};

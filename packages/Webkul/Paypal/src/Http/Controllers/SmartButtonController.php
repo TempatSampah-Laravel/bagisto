@@ -4,52 +4,22 @@ namespace Webkul\Paypal\Http\Controllers;
 
 use Webkul\Checkout\Facades\Cart;
 use Webkul\Paypal\Payment\SmartButton;
-use Webkul\Sales\Repositories\OrderRepository;
 use Webkul\Sales\Repositories\InvoiceRepository;
+use Webkul\Sales\Repositories\OrderRepository;
+use Webkul\Sales\Transformers\OrderResource;
 
 class SmartButtonController extends Controller
 {
     /**
-     * SmartButton $smartButton
-     *
-     * @var \Webkul\Paypal\Payment\SmartButton
-     */
-    protected $smartButton;
-
-    /**
-     * OrderRepository $orderRepository
-     *
-     * @var \Webkul\Sales\Repositories\OrderRepository
-     */
-    protected $orderRepository;
-
-    /**
-     * InvoiceRepository $invoiceRepository
-     *
-     * @var \Webkul\Sales\Repositories\InvoiceRepository
-     */
-    protected $invoiceRepository;
-
-    /**
      * Create a new controller instance.
      *
-     * @param  \Webkul\Paypal\Payment\SmartButton  $smartButton
-     * @param  \Webkul\Attribute\Repositories\OrderRepository  $orderRepository
-     * @param  \Webkul\Sales\Repositories\InvoiceRepository  $invoiceRepository
      * @return void
      */
     public function __construct(
-        SmartButton $smartButton,
-        OrderRepository $orderRepository,
-        InvoiceRepository $invoiceRepository
-    )
-    {
-        $this->smartButton = $smartButton;
-
-        $this->orderRepository = $orderRepository;
-
-        $this->invoiceRepository = $invoiceRepository;
-    }
+        protected SmartButton $smartButton,
+        protected OrderRepository $orderRepository,
+        protected InvoiceRepository $invoiceRepository
+    ) {}
 
     /**
      * Paypal order creation for approval of client.
@@ -74,6 +44,7 @@ class SmartButtonController extends Controller
     {
         try {
             $this->smartButton->captureOrder(request()->input('orderData.orderID'));
+
             return $this->saveOrder();
         } catch (\Exception $e) {
             return response()->json(json_decode($e->getMessage()), 400);
@@ -89,7 +60,7 @@ class SmartButtonController extends Controller
     {
         $cart = Cart::getCart();
 
-        $billingAddressLines = $this->getAddressLines($cart->billing_address->address1);
+        $billingAddressLines = $this->getAddressLines($cart->billing_address->address);
 
         $data = [
             'intent' => 'CAPTURE',
@@ -110,18 +81,10 @@ class SmartButtonController extends Controller
                 ],
 
                 'email_address' => $cart->billing_address->email,
-
-                'phone' => [
-                    'phone_type'   => 'MOBILE',
-
-                    'phone_number' => [
-                        'national_number' => $this->smartButton->formatPhone($cart->billing_address->phone),
-                    ],
-                ],
             ],
 
             'application_context' => [
-                'shipping_preference' => 'SET_PROVIDED_ADDRESS',
+                'shipping_preference' => 'NO_SHIPPING',
             ],
 
             'purchase_units' => [
@@ -155,10 +118,25 @@ class SmartButtonController extends Controller
 
                     'items'    => $this->getLineItems($cart),
                 ],
-            ]
+            ],
         ];
 
-        if ($cart->haveStockableItems() && $cart->shipping_address) {
+        if (! empty($cart->billing_address->phone)) {
+            $data['payer']['phone'] = [
+                'phone_type'   => 'MOBILE',
+
+                'phone_number' => [
+                    'national_number' => $this->smartButton->formatPhone($cart->billing_address->phone),
+                ],
+            ];
+        }
+
+        if (
+            $cart->haveStockableItems()
+            && $cart->shipping_address
+        ) {
+            $data['application_context']['shipping_preference'] = 'SET_PROVIDED_ADDRESS';
+
             $data['purchase_units'][0] = array_merge($data['purchase_units'][0], [
                 'shipping' => [
                     'address' => [
@@ -195,7 +173,7 @@ class SmartButtonController extends Controller
                 'quantity'    => $item->quantity,
                 'name'        => $item->name,
                 'sku'         => $item->sku,
-                'category'    => $item->product->getTypeInstance()->isStockable() ? 'PHYSICAL_GOODS' : 'DIGITAL_GOODS',
+                'category'    => $item->getTypeInstance()->isStockable() ? 'PHYSICAL_GOODS' : 'DIGITAL_GOODS',
             ];
         }
 
@@ -239,7 +217,11 @@ class SmartButtonController extends Controller
 
             $this->validateOrder();
 
-            $order = $this->orderRepository->create(Cart::prepareDataForOrder());
+            $cart = Cart::getCart();
+
+            $data = (new OrderResource($cart))->jsonSerialize();
+
+            $order = $this->orderRepository->create($data);
 
             $this->orderRepository->update(['status' => 'processing'], $order->id);
 
@@ -249,7 +231,7 @@ class SmartButtonController extends Controller
 
             Cart::deActivateCart();
 
-            session()->flash('order', $order);
+            session()->flash('order_id', $order->id);
 
             return response()->json([
                 'success' => true,
@@ -269,7 +251,7 @@ class SmartButtonController extends Controller
      */
     protected function prepareInvoiceData($order)
     {
-        $invoiceData = ["order_id" => $order->id,];
+        $invoiceData = ['order_id' => $order->id];
 
         foreach ($order->items as $item) {
             $invoiceData['invoice']['items'][$item->id] = $item->qty_to_invoice;
@@ -287,26 +269,32 @@ class SmartButtonController extends Controller
     {
         $cart = Cart::getCart();
 
-        $minimumOrderAmount = (float) core()->getConfigData('sales.orderSettings.minimum-order.minimum_order_amount') ?? 0;
+        $minimumOrderAmount = (float) core()->getConfigData('sales.order_settings.minimum_order.minimum_order_amount') ?: 0;
 
-        if (! $cart->checkMinimumOrder()) {
+        if (! Cart::haveMinimumOrderAmount()) {
             throw new \Exception(trans('shop::app.checkout.cart.minimum-order-message', ['amount' => core()->currency($minimumOrderAmount)]));
         }
 
-        if ($cart->haveStockableItems() && ! $cart->shipping_address) {
-            throw new \Exception(trans('Please check shipping address.'));
+        if (
+            $cart->haveStockableItems()
+            && ! $cart->shipping_address
+        ) {
+            throw new \Exception(trans('shop::app.checkout.cart.check-shipping-address'));
         }
 
         if (! $cart->billing_address) {
-            throw new \Exception(trans('Please check billing address.'));
+            throw new \Exception(trans('shop::app.checkout.cart.check-billing-address'));
         }
 
-        if ($cart->haveStockableItems() && ! $cart->selected_shipping_rate) {
-            throw new \Exception(trans('Please specify shipping method.'));
+        if (
+            $cart->haveStockableItems()
+            && ! $cart->selected_shipping_rate
+        ) {
+            throw new \Exception(trans('shop::app.checkout.cart.specify-shipping-method'));
         }
 
         if (! $cart->payment) {
-            throw new \Exception(trans('Please specify payment method.'));
+            throw new \Exception(trans('shop::app.checkout.cart.specify-payment-method'));
         }
     }
 }

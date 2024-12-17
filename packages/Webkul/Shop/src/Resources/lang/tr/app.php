@@ -1,760 +1,1061 @@
 <?php
 
 return [
-    'invalid_vat_format' => 'Girmiş olduğunuz vergi no hatalı',
-    'security-warning' => 'Şüpheli etkinlik tespit edildi!!!',
-    'nothing-to-delete' => 'Silinecek bir şey bulunmadı!',
-
-    'layouts' => [
-        'my-account' => 'Hesabım',
-        'profile' => 'Profil',
-        'address' => 'Adres',
-        'reviews' => 'İncelemeler',
-        'wishlist' => 'Dilek Listesi',
-        'orders' => 'Siparişler',
-        'downloadable-products' => 'İndirilebilir Ürünler'
-    ],
-
-    'common' => [
-        'error' => 'Bir şeyler ters gitti, lütfen tekrar deneyin.',
-        'image-upload-limit' => 'Maksimum resim yükleme boyutu 2 MB',
-        'no-result-found' => 'Kayıt bulunamadı.'
-    ],
-
-    'home' => [
-        'page-title' => config('app.name') . ' - Ana Sayfa',
-        'featured-products' => 'Özel Ürünler',
-        'new-products' => 'Yeni Ürünler',
-        'verify-email' => 'Mail hesabınızı doğrulayınız',
-        'resend-verify-email' => 'Doğrulama Maili Gönder'
-    ],
-
-    'header' => [
-        'title' => 'Hesap',
-        'dropdown-text' => 'Sepet, Sipariş & Dilek Listesini Yönet',
-        'sign-in' => 'Giriş Yap',
-        'sign-up' => 'Kaydol',
-        'account' => 'Hesap',
-        'cart' => 'Alışveriş Sepeti',
-        'profile' => 'Profil',
-        'wishlist' => 'Dilek Listesi',
-        'logout' => 'Çıkış Yap',
-        'search-text' => 'Ürün arayın...'
-    ],
-
-    'minicart' => [
-        'view-cart' => 'Sepeti Görüntüle',
-        'checkout' => 'Satın Al',
-        'cart' => 'Sepet',
-        'zero' => '0'
-    ],
-
-    'footer' => [
-        'subscribe-newsletter' => 'Bültene Kaydol',
-        'subscribe' => 'Abone Ol',
-        'locale' => 'Dil',
-        'currency' => 'Para Birimi',
-    ],
-
-    'subscription' => [
-        'unsubscribe' => 'Bültenden Çık',
-        'subscribe' => 'Abone Ol',
-        'subscribed' => 'Abone kaydınız yapılmış durumda.',
-        'not-subscribed' => 'Bülten aboneliğine kaydınız yapılamadı, lütfen tekrar deneyin.',
-        'already' => 'Bülten aboneliğine kayıtlı durumdasınız.',
-        'unsubscribed' => 'Bülten aboneliğinden çıkış yapıtınız.',
-        'already-unsub' => 'Daha önceden bültenden çıkış yaptınız.'
-    ],
-
-    'search' => [
-        'no-results' => 'Sonuç Bulunamadı',
-        'page-title' => config('app.name') . ' - Arama',
-        'found-results' => 'Arama Sonuçları',
-        'found-result' => 'Arama Sonuçları',
-        'image-search-option' => 'Image Search Option'
-    ],
-
-    'reviews' => [
-        'title' => 'Başlık',
-        'add-review-page-title' => 'İnceleme Ekle',
-        'write-review' => 'İnceleme Yaz',
-        'review-title' => 'İncelemeye bir başlık giriniz',
-        'product-review-page-title' => 'Ürün İnceleme',
-        'rating-reviews' => 'Oylama & İncelemeler',
-        'submit' => 'GÖNDER',
-        'delete-all' => 'Tüm incelemeler başarıyla silindi.',
-        'ratingreviews' => ':rating Oylama & :review İnceleme',
-        'star' => 'Yıldız',
-        'percentage' => ':percentage %',
-        'id-star' => 'star',
-        'name' => 'Adı',
-    ],
-
-    'customer' => [
-        'compare'           => [
-            'text'                  => 'Karşılaştır',
-            'compare_similar_items' => 'Benzer Ürünleri Karşılaştır',
-            'add-tooltip'           => 'Karşılaştırma listesine ürün ekle',
-            'added'                 => 'Ürün karşılaştırma listesine başarıyla eklendi.',
-            'already_added'         => 'Ürün zaten karşılaştırma listesinde yer alıyor.',
-            'removed'               => 'Ürün karşılaştırma listesinden başarıyla kaldırıldı.',
-            'removed-all'           => 'Tüm ürünler, karşılaştırma listesinden başarıyla çıkarıldı.',
-            'empty-text'            => "Karşılaştırma listenizde henüz ürün bulunmuyor.",
-            'product_image'         => 'Ürün Görseli',
-            'actions'               => 'Eylemler',
-        ],
-
-        'signup-text' => [
-            'account_exists' => 'Hesabınız var mı?',
-            'title' => 'Giriş Yapın'
-        ],
-
-        'signup-form' => [
-            'page-title' => 'Yeni Müşteri Kaydı Oluşturun',
-            'title' => 'Kaydol',
-            'firstname' => 'Adınız',
-            'lastname' => 'Soyadınız',
-            'email' => 'E-Mail',
-            'password' => 'Parola',
-            'confirm_pass' => 'Parola (tekrar)',
-            'button_title' => 'Kaydol',
-            'agree' => 'Kabul',
-            'terms' => 'Koşullar',
-            'conditions' => 'Şartlar',
-            'using' => 'bu web sitesini kullanarak',
-            'agreement' => 'Anlaşma',
-            'success' => 'Hesap başarıyla oluşturuldu.',
-            'success-verify' => 'Hesap başarıyla oluşturuldu. Devam edebilmek için lütfen e-mail adresinizi doğrulayın.',
-            'success-verify-email-unsent' => 'Hesap başarıyla oluşturuldu; ancak doğrulama maili gönderilemedi.',
-            'failed' => 'Hata Oluştu! Hesabınız oluşturulamadı, lütfen tekrar deneyiniz.',
-            'already-verified' => 'Hesabınız zaten doğrulanmış, lütfen yeni bir doğrulama maili talep edin.',
-            'verification-not-sent' => 'Doğrulama maili gönderilirken hata oluştu, lütfen tekrar deneyin.',
-            'verification-sent' => 'Doğrulama maili gönderildi',
-            'verified' => 'Hesabınız başarıyla doğrulandı. Şimdi giriş yapabilirsiniz.',
-            'verify-failed' => 'Hesabınızı doğrulayamadık.',
-            'dont-have-account' => 'Kayıtlı hesabınız bulunmuyor.',
-            'customer-registration' => 'Müşteri Kaydı Başarıyla Oluşturuldu.'
-        ],
-
-        'login-text' => [
-            'no_account' => 'Hesabınız yok mu?',
-            'title' => 'Kaydolun',
-        ],
-
-        'login-form' => [
-            'page-title' => 'Müşteri Girişi',
-            'title' => 'Giriş Yap',
-            'email' => 'E-Mail',
-            'password' => 'Parola',
-            'forgot_pass' => 'Parolanızı mı unuttunuz?',
-            'button_title' => 'Giriş Yap',
-            'remember' => 'Beni Hatırla',
-            'footer' => '© Copyright :year Webkul Software, Tüm hakları saklıdır.',
-            'invalid-creds' => 'Lütfen bilgilerinizi kontrol edip tekrar deneyiniz.',
-            'verify-first' => 'Öncelikle mail adresinizi doğrulayınız.',
-            'not-activated' => 'Yönetici aktivasyonu gerekiyor.',
-            'resend-verification' => 'Doğrulama mailini yeniden gönder'
-        ],
-
+    'customers' => [
         'forgot-password' => [
-            'title' => 'Parolayı Sıfırla',
-            'email' => 'E-Mail',
-            'submit' => 'Parola Sıfırlama Maili Gönder',
-            'page_title' => 'Parolanızı mı unuttunuz?'
+            'already-sent'         => 'Zaten Şifre Sıfırlama Postası Gönderildi.',
+            'back'                 => 'Girişe geri dön?',
+            'bagisto'              => 'Bagisto',
+            'email'                => 'E-posta',
+            'email-not-exist'      => 'Bu e-posta adresiyle kullanıcı bulunamadı.',
+            'footer'               => '© Telif Hakkı 2010 - :current_year, Webkul Software (Hindistan\'da kayıtlı). Tüm hakları saklıdır.',
+            'forgot-password-text' => 'Parolanızı unuttuysanız, e-posta adresinizi girerek kurtarabilirsiniz.',
+            'page-title'           => 'Parolanızı mı unuttunuz?',
+            'reset-link-sent'      => 'Şifre sıfırlama bağlantısı e-posta ile gönderildi.',
+            'sign-in-button'       => 'Giriş Yap',
+            'submit'               => 'Parolayı Sıfırla',
+            'title'                => 'Parolayı Kurtar',
         ],
 
         'reset-password' => [
-            'title' => 'Parolayı Sıfırla',
-            'email' => 'Kayıtlı Mail Adresi',
-            'password' => 'Parola',
-            'confirm-password' => 'Parola Doğrula',
-            'back-link-title' => 'Giriş Sayfasına Dön',
-            'submit-btn-title' => 'Parola Sıfırla'
+            'back-link-title'  => 'Girişe Geri Dön',
+            'bagisto'          => 'Bagisto',
+            'confirm-password' => 'Parolayı Onayla',
+            'email'            => 'Kayıtlı E-posta',
+            'footer'           => '© Telif Hakkı 2010 - :current_year, Webkul Software (Hindistan\'da kayıtlı). Tüm hakları saklıdır.',
+            'password'         => 'Parola',
+            'submit-btn-title' => 'Parolayı Sıfırla',
+            'title'            => 'Parolayı Sıfırla',
+        ],
+
+        'login-form' => [
+            'bagisto'             => 'Bagisto',
+            'button-title'        => 'Oturum Aç',
+            'create-your-account' => 'Hesabınızı oluşturun',
+            'email'               => 'E-posta',
+            'footer'              => '© Telif Hakkı 2010 - :current_year, Webkul Software (Hindistan\'da kayıtlı). Tüm hakları saklıdır.',
+            'forgot-pass'         => 'Parolanızı mı unuttunuz?',
+            'form-login-text'     => 'Bir hesabınız varsa, e-posta adresinizle oturum açın.',
+            'invalid-credentials' => 'Kimlik bilgilerinizi kontrol edin ve yeniden deneyin.',
+            'new-customer'        => 'Yeni müşteri misiniz?',
+            'not-activated'       => 'Aktivasyonunuz admin onayı gerektiriyor',
+            'page-title'          => 'Müşteri Girişi',
+            'password'            => 'Parola',
+            'show-password'       => 'Parolayı Göster',
+            'title'               => 'Oturum Aç',
+            'verify-first'        => 'Önce e-posta hesabınızı doğrulayın.',
+        ],
+
+        'signup-form' => [
+            'account-exists'              => 'Zaten bir hesabınız var mı?',
+            'bagisto'                     => 'Bagisto',
+            'button-title'                => 'Kaydol',
+            'confirm-pass'                => 'Parolayı Onayla',
+            'email'                       => 'E-posta',
+            'first-name'                  => 'Ad',
+            'footer'                      => '© Telif Hakkı 2010 - :current_year, Webkul Software (Hindistan\'da kayıtlı). Tüm hakları saklıdır.',
+            'form-signup-text'            => 'Mağazamıza yeniyseniz, sizi üye olarak görmekten mutluluk duyarız.',
+            'last-name'                   => 'Soyad',
+            'page-title'                  => 'Kullanıcı Ol',
+            'password'                    => 'Parola',
+            'sign-in-button'              => 'Giriş Yap',
+            'subscribe-to-newsletter'     => 'Bültenimize abone olun',
+            'success'                     => 'Hesap başarıyla oluşturuldu.',
+            'success-verify'              => 'Hesap başarıyla oluşturuldu, doğrulama için bir e-posta gönderildi.',
+            'success-verify-email-unsent' => 'Hesap başarıyla oluşturuldu, ancak doğrulama e-postası gönderilemedi.',
+            'verification-not-sent'       => 'Hata! Doğrulama e-postası gönderme sorunu, lütfen daha sonra tekrar deneyin.',
+            'verification-sent'           => 'Doğrulama e-postası gönderildi',
+            'verified'                    => 'Hesabınız doğrulandı, şimdi giriş yapmayı deneyin.',
+            'verify-failed'               => 'E-posta hesabınızı doğrulayamıyoruz.',
         ],
 
         'account' => [
-            'dashboard' => 'Profil Düzenle',
-            'menu' => 'Menü',
-
-            'general' => [
-                'no' => 'Hayır',
-                'yes' => 'Evet',
-            ],
+            'home' => 'Anasayfa',
 
             'profile' => [
                 'index' => [
-                    'page-title' => 'Profil',
-                    'title' => 'Profil',
-                    'edit' => 'Düzenle',
-                ],
-
-                'edit-success' => 'Profil başarıyla güncellendi.',
-                'edit-fail' => 'Profil güncellenirken hata oluştu, lütfen tekrar deneyin.',
-                'unmatch' => 'Eski parolanız eşleşmiyor, lütfen tekrar deneyin.',
-
-                'fname' => 'Adınız',
-                'lname' => 'Soyadınız',
-                'gender' => 'Cinsiyet',
-                'other' => 'Diğer',
-                'male' => 'Erkek',
-                'female' => 'Kadın',
-                'dob' => 'Doğum Tarihi',
-                'phone' => 'Telefon',
-                'email' => 'E-Mail',
-                'opassword' => 'Önceki Parola',
-                'password' => 'Parola',
-                'cpassword' => 'Parola Doğrula',
-                'submit' => 'Profil Güncelle',
-
-                'edit-profile' => [
-                    'title' => 'Profil Düzenle',
-                    'page-title' => 'Profil Bilgilerini Düzenle'
-                ]
-            ],
-
-            'address' => [
-                'index' => [
-                    'page-title' => 'Adres',
-                    'title' => 'Adres',
-                    'add' => 'Adres Ekle',
-                    'edit' => 'Düzenşe',
-                    'empty' => 'Henüz kayıtlı adresiniz bulunmuyor. Eklemek için lütfen aşağıdaki linki tıklayınız.',
-                    'create' => 'Adres Ekle',
-                    'delete' => 'Sil',
-                    'make-default' => 'Varsayılan Yap',
-                    'default' => 'Varsayılan',
-                    'contact' => 'İletişim',
-                    'confirm-delete' =>  'Bu adresi silmek istediğinizden emin misiniz?',
-                    'default-delete' => 'Varsayılan adres değiştirilemez.',
-                    'enter-password' => 'Parolanızı Giriniz',
-                ],
-
-                'create' => [
-                    'page-title' => 'Adres Formu Ekle',
-                    'company_name' => 'Şirket Adı',
-                    'first_name' => 'Adınız',
-                    'last_name' => 'Soyadınız',
-                    'vat_id' => 'Vergi No',
-                    'vat_help_note' => '[Not: Vergi no ile beraber ülke kodunu kullanın. Örn. INV01234567891]',
-                    'title' => 'Adres Ekle',
-                    'street-address' => 'Sokak Adresi',
-                    'country' => 'Ülke',
-                    'state' => 'Şehir',
-                    'select-state' => 'Şehir seçiniz.',
-                    'city' => 'İlçe',
-                    'postcode' => 'Posta Kodu',
-                    'phone' => 'Telefon',
-                    'submit' => 'Adres Kaydet',
-                    'success' => 'Adres başarıyla kaydedildi.',
-                    'error' => 'Adres eklenirken hata oluştu!'
+                    'delete'         => 'Sil',
+                    'delete-failed'  => 'Müşteri silinirken hata oluştu.',
+                    'delete-profile' => 'Profili Sil',
+                    'delete-success' => 'Müşteri başarıyla silindi',
+                    'dob'            => 'Doğum Tarihi',
+                    'edit'           => 'Düzenle',
+                    'edit-success'   => 'Profil Başarıyla Güncellendi',
+                    'email'          => 'E-posta',
+                    'enter-password' => 'Şifrenizi Girin',
+                    'first-name'     => 'Ad',
+                    'gender'         => 'Cinsiyet',
+                    'last-name'      => 'Soyadı',
+                    'order-pending'  => 'Müşteri hesabı silinemez çünkü bazı sipariş(ler) bekliyor veya işleniyor durumunda.',
+                    'title'          => 'Profil',
+                    'unmatched'      => 'Eski şifre eşleşmiyor.',
+                    'wrong-password' => 'Yanlış Şifre!',
                 ],
 
                 'edit' => [
-                    'page-title' => 'Adres Düzenle',
-                    'company_name' => 'Şirket Adı',
-                    'first_name' => 'Adınız',
-                    'last_name' => 'Soyadınız',
-                    'vat_id' => 'Vergi No',
-                    'title' => 'Adres Düzenle',
-                    'street-address' => 'Sokak Adresi',
-                    'submit' => 'Adres Kaydet',
-                    'success' => 'Adres Başarıyla Güncellendi.',
+                    'confirm-password'        => 'Şifreyi Onayla',
+                    'current-password'        => 'Mevcut Şifre',
+                    'dob'                     => 'Doğum Tarihi',
+                    'edit'                    => 'Düzenle',
+                    'edit-profile'            => 'Profili Düzenle',
+                    'email'                   => 'E-posta',
+                    'female'                  => 'Kadın',
+                    'first-name'              => 'Ad',
+                    'gender'                  => 'Cinsiyet',
+                    'last-name'               => 'Soyadı',
+                    'male'                    => 'Erkek',
+                    'new-password'            => 'Yeni Şifre',
+                    'other'                   => 'Diğer',
+                    'phone'                   => 'Telefon',
+                    'save'                    => 'Kaydet',
+                    'subscribe-to-newsletter' => 'Bülten aboneliği',
                 ],
-
-                'delete' => [
-                    'success' => 'Adres başarıyla silindi.',
-                    'failure' => 'Adres silinirken hata oluştu!',
-                    'wrong-password' => 'Parolanızı hatalı girdiniz!'
-                ],
-
-                'default-address' => 'Default Address',
             ],
 
-            'order' => [
+            'addresses' => [
                 'index' => [
-                    'page-title' => 'Siparişler',
-                    'title' => 'Siparişler',
-                    'order_id' => 'Sipariş No',
-                    'date' => 'Tarih',
-                    'status' => 'Durum',
-                    'total' => 'Toplam',
-                    'order_number' => 'Sipariş No',
-                    'processing' => 'İşleniyor',
-                    'completed' => 'Tamamlandı',
-                    'canceled' => 'İptal Edildi',
-                    'closed' => 'Kapalı',
-                    'pending' => 'Bekliyor',
-                    'pending-payment' => 'Ödeme Bekliyor',
-                    'fraud' => 'Geçersiz'
+                    'add-address'      => 'Adres Ekle',
+                    'create-success'   => 'Adres başarıyla eklendi.',
+                    'default-address'  => 'Varsayılan Adres',
+                    'default-delete'   => 'Varsayılan adres değiştirilemez.',
+                    'delete'           => 'Sil',
+                    'delete-success'   => 'Adres başarıyla silindi',
+                    'edit'             => 'Düzenle',
+                    'edit-success'     => 'Adres başarıyla güncellendi.',
+                    'empty-address'    => 'Hesabınıza henüz bir adres eklenmedi.',
+                    'security-warning' => 'Şüpheli aktivite tespit edildi!!!',
+                    'set-as-default'   => 'Varsayılan Olarak Ayarla',
+                    'title'            => 'Adres',
+                    'update-success'   => 'Adres başarıyla güncellendi.',
+                ],
+
+                'create' => [
+                    'add-address'    => 'Adres Ekle',
+                    'city'           => 'Şehir',
+                    'company-name'   => 'Şirket Adı',
+                    'country'        => 'Ülke',
+                    'email'          => 'E-posta',
+                    'first-name'     => 'Ad',
+                    'last-name'      => 'Soyadı',
+                    'phone'          => 'Telefon',
+                    'post-code'      => 'Posta Kodu',
+                    'save'           => 'Kaydet',
+                    'select-country' => 'Ülke Seçin',
+                    'set-as-default' => 'Varsayılan Olarak Ayarla',
+                    'state'          => 'Eyalet',
+                    'street-address' => 'Adres',
+                    'title'          => 'Adres',
+                    'vat-id'         => 'KDV Numarası',
+                ],
+
+                'edit' => [
+                    'city'           => 'Şehir',
+                    'company-name'   => 'Şirket Adı',
+                    'country'        => 'Ülke',
+                    'edit'           => 'Düzenle',
+                    'email'          => 'E-posta',
+                    'first-name'     => 'Ad',
+                    'last-name'      => 'Soyadı',
+                    'phone'          => 'Telefon',
+                    'post-code'      => 'Posta Kodu',
+                    'select-country' => 'Ülke Seçin',
+                    'state'          => 'Eyalet',
+                    'street-address' => 'Adres',
+                    'title'          => 'Adres',
+                    'update-btn'     => 'Güncelle',
+                    'vat-id'         => 'KDV Numarası',
+                ],
+            ],
+
+            'orders' => [
+                'action'      => 'İşlem',
+                'action-view' => 'Görüntüle',
+                'empty-order' => 'Son bir ürümüyü pedido yapmadınız',
+                'order'       => 'Pedido',
+                'order-date'  => 'Pedido Tarihi',
+                'order-id'    => 'Pedido ID',
+                'subtotal'    => 'Subtotal',
+                'title'       => 'Pedidos',
+                'total'       => 'Toplam',
+
+                'status' => [
+                    'title' => 'Durum',
+
+                    'options' => [
+                        'canceled'        => 'İptal Edildi',
+                        'closed'          => 'Kapatıldı',
+                        'completed'       => 'Tamamlandı',
+                        'fraud'           => 'Sahtekarlık',
+                        'pending'         => 'Beklemede',
+                        'pending-payment' => 'Ödeme Bekliyor',
+                        'processing'      => 'İşleniyor',
+                    ],
                 ],
 
                 'view' => [
-                    'page-tile' => 'Sipariş #:order_id',
-                    'info' => 'Bilgi',
-                    'placed-on' => 'Sipariş Tarihi',
-                    'products-ordered' => 'Sipariş Edilen Ürünler',
-                    'invoices' => 'Faturalar',
-                    'shipments' => 'Teslimatlar',
-                    'SKU' => 'Barkod',
-                    'product-name' => 'Ürün Adı',
-                    'qty' => 'Miktar',
-                    'item-status' => 'Ürün Durumu',
-                    'item-ordered' => 'Sipariş Verildi (:qty_ordered)',
-                    'item-invoice' => 'Fatura Oluşturuldu (:qty_invoiced)',
-                    'item-shipped' => 'Kargoya Verildi (:qty_shipped)',
-                    'item-canceled' => 'İptal Edildi (:qty_canceled)',
-                    'item-refunded' => 'İade Edildi (:qty_refunded)',
-                    'price' => 'Fiyat',
-                    'total' => 'Toplam',
-                    'subtotal' => 'Ara Toplam',
-                    'shipping-handling' => 'Teslimat & Dağıtım',
-                    'tax' => 'Vergi',
-                    'discount' => 'İndirim',
-                    'tax-percent' => 'Vergi Yüzdesi',
-                    'tax-amount' => 'Vergi Miktarı',
-                    'discount-amount' => 'İndirim Miktarı',
-                    'grand-total' => 'Genel Toplam',
-                    'total-paid' => 'Toplam Ödenen',
-                    'total-refunded' => 'Toplam İade',
-                    'total-due' => 'Toplam Kalan',
-                    'shipping-address' => 'Teslimat Adresi',
-                    'billing-address' => 'Fatura Adresi',
-                    'shipping-method' => 'Teslimat Şekli',
-                    'payment-method' => 'Ödeme Şekli',
-                    'individual-invoice' => 'Fatura #:invoice_id',
-                    'individual-shipment' => 'Teslimat #:shipment_id',
-                    'print' => 'Yazdır',
-                    'invoice-id' => 'Fatura No',
-                    'order-id' => 'Sipariş No',
-                    'order-date' => 'Sipariş Tarihi',
-                    'invoice-date' => 'Fatura tarihi',
-                    'payment-terms' => 'Ödeme şartları',
-                    'bill-to' => 'Fatura Edilen',
-                    'ship-to' => 'Teslim Edilen',
-                    'contact' => 'İletişim',
-                    'refunds' => 'İadeler',
-                    'individual-refund' => 'İade #:refund_id',
-                    'adjustment-refund' => 'İade Düzenlemesi',
-                    'adjustment-fee' => 'Düzenleme Bedeli',
-                    'cancel-btn-title' => 'İptal',
-                    'tracking-number' => 'Takip No',
-                    'cancel-confirm-msg' => 'Bu siparişi silmek istediğinizden emin misiniz?'
-                ]
+                    'billing-address'      => 'Fatura Adresi',
+                    'cancel-btn-title'     => 'İptal',
+                    'cancel-confirm-msg'   => 'Bu siparişi iptal etmek istediğinizden emin misiniz?',
+                    'cancel-error'         => 'Siparişiniz iptal edilemez.',
+                    'cancel-success'       => 'Siparişiniz iptal edildi',
+                    'contact'              => 'İletişim',
+                    'item-invoiced'        => 'Ürün Faturalandı',
+                    'item-refunded'        => 'Ürün İade Edildi',
+                    'item-shipped'         => 'Ürün Gönderildi',
+                    'item-ordered'         => 'Ürün Sipariş Edildi',
+                    'order-id'             => 'Sipariş ID',
+                    'page-title'           => 'Sipariş #:order_id',
+                    'payment-method'       => 'Ödeme Yöntemi',
+                    'reorder-btn-title'    => 'Yeniden Sipariş Ver',
+                    'shipping-address'     => 'Teslimat Adresi',
+                    'shipping-method'      => 'Kargo Yöntemi',
+                    'shipping-and-payment' => 'Teslimat ve Ödeme Detayları',
+                    'status'               => 'Durum',
+                    'title'                => 'Görüntüle',
+                    'total'                => 'Toplam',
+
+                    'information' => [
+                        'discount'                   => 'İndirim',
+                        'excl-tax'                   => 'Vergi Hariç:',
+                        'grand-total'                => 'Genel Toplam',
+                        'info'                       => 'Bilgi',
+                        'item-canceled'              => 'İptal Edildi (:qty_canceled)',
+                        'item-refunded'              => 'İade Edildi (:qty_refunded)',
+                        'invoiced-item'              => 'Faturalandı (:qty_invoiced)',
+                        'item-shipped'               => 'gönderildi (:qty_shipped)',
+                        'item-status'                => 'Ürün Durumu',
+                        'ordered-item'               => 'Sipariş Edildi (:qty_ordered)',
+                        'placed-on'                  => 'Sipariş Tarihi',
+                        'price'                      => 'Fiyat',
+                        'product-name'               => 'Ürün Adı',
+                        'shipping-handling'          => 'Kargo & İşlem Ücreti',
+                        'shipping-handling-excl-tax' => 'Kargo & İşlem Ücreti (Vergi Hariç)',
+                        'shipping-handling-incl-tax' => 'Kargo & İşlem Ücreti (Vergi Dahil)',
+                        'sku'                        => 'Ürün Kodu',
+                        'subtotal'                   => 'Ara Toplam',
+                        'subtotal-excl-tax'          => 'Ara Toplam (Vergi Hariç)',
+                        'subtotal-incl-tax'          => 'Ara Toplam (Vergi Dahil)',
+                        'order-summary'              => 'Sipariş Özeti',
+                        'tax'                        => 'Vergi',
+                        'tax-amount'                 => 'Vergi Tutarı',
+                        'tax-percent'                => 'Vergi Oranı',
+                        'total-due'                  => 'Toplam Tutar',
+                        'total-paid'                 => 'Toplam Ödenen',
+                        'total-refunded'             => 'Toplam İade Edilen',
+                    ],
+
+                    'invoices' => [
+                        'discount'                   => 'İndirim',
+                        'excl-tax'                   => 'Vergi Hariç:',
+                        'grand-total'                => 'Genel Toplam',
+                        'individual-invoice'         => 'Fatura #:invoice_id',
+                        'invoices'                   => 'Faturalar',
+                        'price'                      => 'Fiyat',
+                        'print'                      => 'Yazdır',
+                        'product-name'               => 'Ürün Adı',
+                        'products-ordered'           => 'Sipariş Edilen Ürünler',
+                        'qty'                        => 'Miktar',
+                        'shipping-handling-excl-tax' => 'Kargo & İşlem Ücreti (Vergi Hariç)',
+                        'shipping-handling-incl-tax' => 'Kargo & İşlem Ücreti (Vergi Dahil)',
+                        'shipping-handling'          => 'Kargo & İşlem Ücreti',
+                        'sku'                        => 'Ürün Kodu',
+                        'subtotal-excl-tax'          => 'Ara Toplam (Vergi Hariç)',
+                        'subtotal-incl-tax'          => 'Ara Toplam (Vergi Dahil)',
+                        'subtotal'                   => 'Ara Toplam',
+                        'tax'                        => 'Vergi',
+                        'tax-amount'                 => 'Vergi Tutarı',
+                    ],
+
+                    'shipments' => [
+                        'individual-shipment' => 'Gönderim #:shipment_id',
+                        'product-name'        => 'Ürün Adı',
+                        'qty'                 => 'Miktar',
+                        'shipments'           => 'Gönderimler',
+                        'sku'                 => 'Ürün Kodu',
+                        'subtotal'            => 'Ara Toplam',
+                        'tracking-number'     => 'Takip Numarası',
+                    ],
+
+                    'refunds' => [
+                        'adjustment-fee'             => 'Düzenleme Ücreti',
+                        'adjustment-refund'          => 'Düzenleme İadesi',
+                        'discount'                   => 'İndirim',
+                        'grand-total'                => 'Genel Toplam',
+                        'individual-refund'          => 'İade #:refund_id',
+                        'no-result-found'            => 'Kayıt bulunamadı.',
+                        'order-summary'              => 'Sipariş Özeti',
+                        'price'                      => 'Fiyat',
+                        'product-name'               => 'Ürün Adı',
+                        'qty'                        => 'Miktar',
+                        'refunds'                    => 'İadeler',
+                        'shipping-handling'          => 'Kargo & İşlem Ücreti',
+                        'shipping-handling-excl-tax' => 'Kargo & İşlem Ücreti (Vergi Hariç)',
+                        'shipping-handling-incl-tax' => 'Kargo & İşlem Ücreti (Vergi Dahil)',
+                        'sku'                        => 'Ürün Kodu',
+                        'subtotal'                   => 'Ara Toplam',
+                        'subtotal-excl-tax'          => 'Ara Toplam (Vergi Hariç)',
+                        'subtotal-incl-tax'          => 'Ara Toplam (Vergi Dahil)',
+                        'tax'                        => 'Vergi',
+                        'tax-amount'                 => 'Vergi Tutarı',
+                    ],
+                ],
+
+                'invoice-pdf' => [
+                    'bank-details'               => 'Banka Detayları',
+                    'bill-to'                    => 'Fatura Edilen',
+                    'contact-number'             => 'İletişim Numarası',
+                    'contact'                    => 'İletişim',
+                    'date'                       => 'Fatura Tarihi',
+                    'discount'                   => 'İndirim',
+                    'excl-tax'                   => 'KDV Hariç:',
+                    'grand-total'                => 'Genel Toplam',
+                    'invoice-id'                 => 'Fatura ID',
+                    'invoice'                    => 'Fatura',
+                    'order-date'                 => 'Sipariş Tarihi',
+                    'order-id'                   => 'Sipariş ID',
+                    'payment-method'             => 'Ödeme Yöntemi',
+                    'payment-terms'              => 'Ödeme Koşulları',
+                    'price'                      => 'Fiyat',
+                    'product-name'               => 'Ürün Adı',
+                    'qty'                        => 'Miktar',
+                    'ship-to'                    => 'Gönderilecek Adres',
+                    'shipping-handling-excl-tax' => 'Kargo ve İşlem Ücreti (KDV Hariç)',
+                    'shipping-handling-incl-tax' => 'Kargo ve İşlem Ücreti (KDV Dahil)',
+                    'shipping-handling'          => 'Kargo ve İşlem Ücreti',
+                    'shipping-method'            => 'Kargo Yöntemi',
+                    'sku'                        => 'SKU',
+                    'subtotal-excl-tax'          => 'Ara Toplam (KDV Hariç)',
+                    'subtotal-incl-tax'          => 'Ara Toplam (KDV Dahil)',
+                    'subtotal'                   => 'Ara Toplam',
+                    'tax-amount'                 => 'Vergi Tutarı',
+                    'tax'                        => 'Vergi',
+                    'vat-number'                 => 'Vergi Numarası',
+                ],
+            ],
+
+            'reviews' => [
+                'empty-review' => 'Henüz hiçbir ürünü yorumlamadınız',
+                'title'        => 'Yorumlar',
+            ],
+
+            'downloadable-products' => [
+                'available'           => 'Mevcut',
+                'completed'           => 'Tamamlanmış',
+                'date'                => 'Tarih',
+                'download-error'      => 'İndirme bağlantısı süresi dolmuş.',
+                'expired'             => 'Süresi Dolmuş',
+                'empty-product'       => 'İndirilecek ürününüz yok',
+                'name'                => 'İndirilebilir Ürünler',
+                'orderId'             => 'Sipariş ID',
+                'pending'             => 'Askıda olması',
+                'payment-error'       => 'Bu indirme için ödeme yapılmamış.',
+                'records-found'       => 'Kayıt(lar) bulundu',
+                'remaining-downloads' => 'Kalan İndirmeler',
+                'status'              => 'Durum',
+                'title'               => 'Başlık',
             ],
 
             'wishlist' => [
-                'page-title'           => 'Dilek Listesi',
-                'title'                => 'Dilek Listesi',
-                'deleteall'            => 'Tümünü Sil',
-                'moveall'              => 'Tüm Ürünleri Sepete Taşı',
-                'move-to-cart'         => 'Sepete Taşı',
-                'error'                => 'Ürün dilek listesine eklenemiyor, lütfen daha sonra tekrar deneyin.',
-                'add'                  => 'Ürün dilek listesine başarıyla eklendi.',
-                'remove'               => 'Ürün dilek listesinden başarıyla kaldırıldı.',
-                'add-wishlist-text'    => 'Ürünü dilek listenize ekleyin',
-                'remove-wishlist-text' => 'Ürünü dilek listenizden kaldırın',
-                'moved'                => 'Ürün alışveriş sepetine başarıyla taşındı.',
-                'option-missing'       => 'Ürün seçenekleri bulunamadı; bu yüzden dilek listesine taşınamadı.',
-                'move-error'           => 'Ürün dilek listesine taşınamadı, lütfen tekrar deneyin.',
-                'success'              => 'Ürün dilek listesine taşındı.',
-                'failure'              => 'Ürün dilek listesine taşınamadı, lütfen tekrar deneyin.',
-                'already'              => 'Ürün dilek listenizde yer alıyor.',
-                'removed'              => 'Ürün dilek listesinden kaldırıldı.',
-                'remove-fail'          => 'Ürün dilek listesinden kaldırılamadı, lütfen tekrar deneyin.',
-                'empty'                => 'Dilek listenizde ürün bulunmuyor.',
-                'remove-all-success'   => 'Dilek listenizdeki tüm ürünler kaldırıldı.',
-                'save'                 => 'Save',
-                'share'                => 'Share',
-                'share-wishlist'       => 'Share Wishlist',
-                'wishlist-sharing'     => 'Wishlist Sharing',
-                'shared-link'          => 'Shared Link',
-                'visibility'           => 'Visibility',
-                'public'               => 'Public',
-                'private'              => 'Private',
-                'enable'               => 'Enable',
-                'disable'              => 'Disable',
-                'customer-name'        => ':name\'s Shared Wishlist',
-                'enable-wishlist-info' => 'Enable wishlist sharing to get the link.',
-                'update-message'       => 'Shared wishlist settings updated successfully',
+                'color'              => 'Renk',
+                'delete-all'         => 'Tümünü Sil',
+                'empty'              => 'Dilek listesine hiç ürün eklenmedi.',
+                'move-to-cart'       => 'Sepete Taşı',
+                'moved'              => 'Ürün başarıyla sepete taşındı',
+                'moved-success'      => 'Ürün Başarıyla Sepete Taşındı',
+                'page-title'         => 'Dilek Listesi',
+                'product-removed'    => 'Ürün, Yönetici Tarafından Kaldırıldığı İçin Artık Mevcut Değil',
+                'profile'            => 'Profil',
+                'remove'             => 'Kaldır',
+                'remove-all-success' => 'Dilek listenizden tüm öğeler kaldırıldı',
+                'remove-fail'        => 'Ürün Dilek Listesinden Kaldırılamıyor',
+                'removed'            => 'Ürün Başarıyla Dilek Listesinden Kaldırıldı',
+                'see-details'        => 'Detayları Görüntüle',
+                'success'            => 'Ürün Başarıyla Dilek Listesine Eklendi',
+                'title'              => 'Dilek Listesi',
+            ],
+        ],
+    ],
+
+    'components' => [
+        'accordion' => [
+            'default-content' => 'Varsayılan İçerik',
+            'default-header'  => 'Varsayılan Başlık',
+        ],
+
+        'drawer' => [
+            'default-toggle'  => 'Varsayılan Aç/Kapat',
+        ],
+
+        'media' => [
+            'index' => [
+                'add-attachments' => 'Ek Dosyalar Ekle',
+                'add-image'       => 'Resim/Video Ekle',
+            ],
+        ],
+
+        'layouts' => [
+            'header' => [
+                'account'           => 'Hesap',
+                'bagisto'           => 'Bagisto',
+                'cart'              => 'Sepet',
+                'compare'           => 'Karşılaştır',
+                'dropdown-text'     => 'Sepeti Yönet, Siparişleri ve İstek Listesini Görüntüle',
+                'logout'            => 'Çıkış Yap',
+                'no-category-found' => 'Kategori bulunamadı.',
+                'orders'            => 'Siparişler',
+                'profile'           => 'Profil',
+                'search'            => 'Ara',
+                'search-text'       => 'Ürünleri burada ara',
+                'sign-in'           => 'Giriş Yap',
+                'sign-up'           => 'Kaydol',
+                'submit'            => 'Gönder',
+                'title'             => 'Hesap',
+                'welcome'           => 'Hoş geldiniz',
+                'welcome-guest'     => 'Hoş geldiniz Misafir',
+                'wishlist'          => 'İstek Listesi',
+
+                'desktop' => [
+                    'top' => [
+                        'default-locale' => 'Varsayılan dil',
+                    ],
+                ],
+
+                'mobile' => [
+                    'currencies' => 'Para Birimleri',
+                    'locales'    => 'Yerel Ayarlar',
+                    'login'      => 'Kaydol veya Giriş yap
+',
+                ],
             ],
 
-            'downloadable_products' => [
-                'title' => 'İndirilebilir Ürünler',
-                'order-id' => 'Sipariş No',
-                'date' => 'Tarih',
-                'name' => 'Başlık',
-                'status' => 'Durum',
-                'pending' => 'Bekliyor',
-                'available' => 'Hazır',
-                'expired' => 'Süresi Doldu',
-                'remaining-downloads' => 'Kalan İndirme',
-                'unlimited' => 'Sınırsız',
-                'download-error' => 'İndirme linki süresi doldu.',
-                'payment-error' => 'Payment has not been done for this download.'
+            'footer' => [
+                'about-us'               => 'Hakkımızda',
+                'contact-us'             => 'Bizimle İletişime Geçin',
+                'currency'               => 'Para Birimi',
+                'customer-service'       => 'Müşteri Hizmetleri',
+                'email'                  => 'E-posta',
+                'footer-content'         => 'Alt İçerik',
+                'footer-text'            => '© Telif Hakkı 2010 - :current_year, Webkul Software (Hindistan\'da kayıtlı). Tüm hakları saklıdır.',
+                'locale'                 => 'Yerel Ayar',
+                'newsletter-text'        => 'Eğlenceli Bültenimize Hazır Olun!',
+                'order-return'           => 'Sipariş ve İade',
+                'payment-policy'         => 'Ödeme Politikası',
+                'privacy-cookies-policy' => 'Gizlilik ve Çerez Politikası',
+                'shipping-policy'        => 'Teslimat Politikası',
+                'subscribe'              => 'Abone Ol',
+                'subscribe-newsletter'   => 'Bültenimize Abone Ol',
+                'subscribe-stay-touch'   => 'İletişimde kalmak için abone olun.',
+                'whats-new'              => 'Yenilikler',
+            ],
+        ],
+
+        'datagrid' => [
+            'toolbar' => [
+                'length-of' => ':length adet',
+                'results'   => ':total Sonuç',
+                'selected'  => ':total Seçildi',
+
+                'mass-actions' => [
+                    'must-select-a-mass-action'        => 'Bir toplu işlem seçmelisiniz.',
+                    'must-select-a-mass-action-option' => 'Bir toplu işlem seçeneği seçmelisiniz.',
+                    'no-records-selected'              => 'Hiçbir kayıt seçilmedi.',
+                    'select-action'                    => 'İşlem Seç',
+                ],
+
+                'search' => [
+                    'title' => 'Ara',
+                ],
+
+                'filter' => [
+                    'apply-filter' => 'Filtreleri Uygula',
+                    'title'        => 'Filtrele',
+
+                    'dropdown' => [
+                        'select' => 'Seç',
+
+                        'searchable' => [
+                            'at-least-two-chars' => 'En az 2 karakter girin...',
+                            'no-results'         => 'Sonuç bulunamadı...',
+                        ],
+                    ],
+
+                    'custom-filters' => [
+                        'clear-all' => 'Tümünü Temizle',
+                    ],
+                ],
             ],
 
-            'review' => [
-                'index' => [
-                    'title' => 'İncelemeler',
-                    'page-title' => 'İncelemeler'
-                ],
+            'table' => [
+                'actions'              => 'İşlemler',
+                'next-page'            => 'Sonraki Sayfa',
+                'no-records-available' => 'Kayıt bulunamadı.',
+                'of'                   => 'toplam :total kayıt',
+                'page-navigation'      => 'Sayfa Gezinme',
+                'page-number'          => 'Sayfa Numarası',
+                'previous-page'        => 'Önceki Sayfa',
+                'showing'              => 'Gösteriliyor :firstItem',
+                'to'                   => ':lastItem arasında',
+            ],
+        ],
 
-                'view' => [
-                    'page-tile' => 'İnceleme #:id',
-                ],
+        'modal' => [
+            'default-content' => 'Varsayılan İçerik',
+            'default-header'  => 'Varsayılan Başlık',
 
-                'delete' => [
-                    'confirmation-message' => 'Bu incelemeyi silmek istediğinizden emin misiniz?',
-                ],
+            'confirm' => [
+                'agree-btn'    => 'Kabul',
+                'disagree-btn' => 'Reddet',
+                'message'      => 'Bu işlemi gerçekleştirmek istediğinizden emin misiniz?',
+                'title'        => 'Emin misiniz?',
+            ],
+        ],
 
-                'delete-all' => [
-                    'title' => 'Hepsini sil',
-                    'confirmation-message' => 'Tüm yorumları silmek istediğinizden emin misiniz?',
-                ],
-            ]
-        ]
+        'products' => [
+            'card' => [
+                'add-to-cart'            => 'Sepete Ekle',
+                'add-to-compare'         => 'Karşılaştırma Listesine Ekle',
+                'add-to-compare-success' => 'Öğe karşılaştırma listesine başarıyla eklendi.',
+                'add-to-wishlist'        => 'Dilek Listesine Ekle',
+                'already-in-compare'     => 'Öğe zaten karşılaştırma listesine eklenmiş.',
+                'new'                    => 'Yeni',
+                'review-description'     => 'Bu ürünü değerlendiren ilk kişi olun',
+                'sale'                   => 'Satış',
+            ],
+
+            'carousel' => [
+                'next'     => 'Sonraki',
+                'previous' => 'Önceki',
+                'view-all' => 'Tümünü Görüntüle',
+            ],
+
+            'ratings' => [
+                'title' => 'Değerlendirmeler',
+            ],
+        ],
+
+        'range-slider' => [
+            'max-range' => 'Maksimum Aralık',
+            'min-range' => 'Minimum Aralık',
+            'range'     => 'Aralık:',
+        ],
+
+        'carousel' => [
+            'image-slide' => 'Resim Slaytı',
+            'next'        => 'Sonraki',
+            'previous'    => 'Önceki',
+        ],
+
+        'quantity-changer' => [
+            'decrease-quantity' => 'Miktarı Azalt',
+            'increase-quantity' => 'Miktarı Artır',
+        ],
     ],
 
     'products' => [
-        'layered-nav-title' => 'Ürün Filtrele',
-        'price-label' => 'Olabildiğince Düşük',
-        'remove-filter-link-title' => 'Tümünü Temizle',
-        'filter-to' => ' - ',
-        'sort-by' => 'Sıralama Şekli',
-        'from-a-z' => 'A-Z',
-        'from-z-a' => 'Z-A',
-        'newest-first' => 'Yeniden Eskiye',
-        'oldest-first' => 'Eskiden Yeniye',
-        'cheapest-first' => 'Ucuzdan Pahallıya',
-        'expensive-first' => 'Pahallıdan Ucuza',
-        'show' => 'Göster',
-        'pager-info' => 'Toplam :total üründen :showing adet ürün görüntüleniyor.',
-        'description' => 'Açıklama',
-        'specification' => 'Şartname',
-        'total-reviews' => ':total İnceleme',
-        'total-rating' => ':total_rating Oylama & :total_reviews İnceleme',
-        'by' => ':name\'e göre',
-        'up-sell-title' => 'İlginize çekebilecek başka ürünler bulduk!',
-        'related-product-title' => 'Benzer Ürünler',
-        'cross-sell-title' => 'Daha fazla seçenek',
-        'reviews-title' => 'Oylama & İnceleme',
-        'write-review-btn' => 'İnceleme Yaz',
-        'choose-option' => 'Seçenek seçin',
-        'sale' => 'Satışta',
-        'new' => 'Yeni',
-        'empty' => 'Bu kategoride ürün bulunamadı.',
-        'add-to-cart' => 'Sepete Ekle',
-        'book-now' => 'Hemen Ayırt',
-        'buy-now' => 'Satın Al',
-        'whoops' => 'Ops!',
-        'quantity' => 'Miktar',
-        'in-stock' => 'Stokta',
-        'out-of-stock' => 'Stokta Yok',
-        'view-all' => 'Tümünü Göster',
-        'select-above-options' => 'Lütfen öncelikle seçenek seçin',
-        'less-quantity' => 'Geçerli miktar giriniz.',
-        'samples' => 'Örnekler',
-        'links' => 'Linkler',
-        'sample' => 'Örnek',
-        'name' => 'Adı',
-        'qty' => 'Miktar',
-        'starting-at' => 'Başlangıç Fiyatı',
-        'customize-options' => 'Seçenekleri Özelleştir',
-        'choose-selection' => 'Seçim Yapın',
-        'your-customization' => 'Özelleştirmeniz',
-        'total-amount' => 'Toplam Miktar',
-        'none' => 'Hiçbiri',
-        'available-for-order' => 'Sipariş İçin Uygun',
-        'settings' => 'Settings',
-        'compare_options' => 'Compare Options',
-        'wishlist-options' => 'Wishlist Options',
-        'offers' => 'Buy :qty for :price each and save :discount%',
-        'tax-inclusive' => 'Inclusive of all taxes',
+        'prices' => [
+            'grouped' => [
+                'starting-at' => 'Başlangıç fiyatı',
+            ],
+
+            'configurable' => [
+                'as-low-as' => 'Şunun kadar düşük',
+            ],
+        ],
+
+        'sort-by' => [
+            'title'   => 'Şuna göre sırala',
+        ],
+
+        'view' => [
+            'type' => [
+                'configurable' => [
+                    'select-options'       => 'Lütfen bir seçenek seçin',
+                    'select-above-options' => 'Lütfen yukarıdaki seçenekleri seçin',
+                ],
+
+                'bundle' => [
+                    'none'         => 'Hiçbiri',
+                    'total-amount' => 'Toplam Tutar',
+                ],
+
+                'downloadable' => [
+                    'links'   => 'Bağlantılar',
+                    'sample'  => 'Örnek',
+                    'samples' => 'Örnekler',
+                ],
+
+                'grouped' => [
+                    'name' => 'Ad',
+                ],
+            ],
+
+            'gallery' => [
+                'product-image'   => 'Ürün Resmi',
+                'thumbnail-image' => 'Küçük Resim',
+            ],
+
+            'reviews' => [
+                'attachments'       => 'Ekler',
+                'cancel'            => 'İptal',
+                'comment'           => 'Yorum',
+                'customer-review'   => 'Müşteri Yorumları',
+                'empty-review'      => 'Henüz yorum bulunamadı, ilk yorumu siz yapın',
+                'failed-to-upload'  => 'Resim yüklemesi başarısız oldu',
+                'load-more'         => 'Daha Fazla Yükle',
+                'name'              => 'Adı',
+                'rating'            => 'Derecelendirme',
+                'ratings'           => 'Derecelendirmeler',
+                'submit-review'     => 'Yorumu Gönder',
+                'success'           => 'Yorum başarıyla gönderildi.',
+                'title'             => 'Başlık',
+                'translate'         => 'Çevir',
+                'translating'       => 'Çevriliyor...',
+                'write-a-review'    => 'Yorum Yazın',
+            ],
+
+            'add-to-cart'            => 'Sepete Ekle',
+            'add-to-compare'         => 'Ürün karşılaştırmada',
+            'add-to-wishlist'        => 'Dilek Listesine Ekle',
+            'additional-information' => 'Ek Bilgiler',
+            'already-in-compare'     => 'Ürün zaten karşılaştırmada',
+            'buy-now'                => 'Hemen Al',
+            'compare'                => 'Karşılaştır',
+            'description'            => 'Açıklama',
+            'related-product-title'  => 'İlgili Ürünler',
+            'review'                 => 'Yorumlar',
+            'tax-inclusive'          => 'Tüm vergiler dahil',
+            'up-sell-title'          => 'İşte size başka ilginç ürünler!',
+        ],
+
+        'type' => [
+            'abstract' => [
+                'offers' => ':qty adet için :price her biri ve :discount tasarruf edin',
+            ],
+        ],
     ],
 
-    // 'reviews' => [
-    //     'empty' => 'You Have Not Reviewed Any Of Product Yet'
-    // ]
+    'categories' => [
+        'filters' => [
+            'clear-all' => 'Hepsini Temizle',
+            'filter'    => 'Filtrele',
+            'filters'   => 'Filtreler:',
+            'sort'      => 'Sırala',
+        ],
 
-    'buynow' => [
-        'no-options' => 'Ürünü satın almadan önce lütfen seçenek seçin.'
+        'toolbar' => [
+            'grid' => 'Сітка',
+            'list' => 'Список',
+            'show' => 'Показати',
+        ],
+
+        'view' => [
+            'empty'     => 'Bu kategoride hiç ürün bulunmuyor',
+            'load-more' => 'Daha Fazla Yükle',
+        ],
+    ],
+
+    'search' => [
+        'title'   => ': :query için arama sonuçları',
+        'results' => 'Arama sonuçları',
+
+        'images' => [
+            'index' => [
+                'something-went-wrong' => 'Bir şeyler yanlış gitti, lütfen daha sonra tekrar deneyin.',
+                'size-limit-error'     => 'Boyut Sınırı Hatası',
+                'search'               => 'Ara',
+                'only-images-allowed'  => 'Yalnızca resimler (.jpeg, .jpg, .png, ..) izin verilmiştir.',
+            ],
+
+            'results' => [
+                'analyzed-keywords' => 'Analiz Edilen Anahtar Kelimeler:',
+            ],
+        ],
+    ],
+
+    'compare' => [
+        'already-added'      => 'Ürün zaten karşılaştırma listesine eklenmiş',
+        'delete-all'         => 'Hepsini Sil',
+        'empty-text'         => 'Karşılaştırma listenizde hiç ürün bulunmuyor',
+        'item-add-success'   => 'Ürün karşılaştırma listesine başarıyla eklendi',
+        'product-compare'    => 'Ürün Karşılaştırma',
+        'remove-all-success' => 'Tüm ürünler başarıyla kaldırıldı',
+        'remove-error'       => 'Bir şeyler yanlış gitti, lütfen daha sonra tekrar deneyin',
+        'remove-success'     => 'Ürün başarıyla kaldırıldı',
+        'title'              => 'Ürün Karşılaştırma',
     ],
 
     'checkout' => [
+        'success' => [
+            'info'          => 'Sipariş detaylarınız ve takip bilgileriniz e-posta ile gönderilecektir',
+            'order-id-info' => 'Sipariş numaranız: #:order_id',
+            'thanks'        => 'Siparişiniz için teşekkür ederiz!',
+            'title'         => 'Sipariş başarıyla tamamlandı',
+        ],
+
         'cart' => [
-            'integrity' => [
-                'missing_fields' => 'Bu ürün için zorunlu bazı alanlar girilmemiş.',
-                'missing_options' => 'Bu ürün için seçenek girilmemiş.',
-                'missing_links' => 'Bu ürün için indirilebilir linkler girilmemiş.',
-                'qty_missing' => 'En az bir adet ürün girilmelidir.',
-                'qty_impossible' => 'Bu üründen birden fazla adet girilemez.'
-            ],
-            'create-error' => 'Alışveriş sepeti oluşturulurken hata meydana geldi!',
-            'title' => 'Alışveriş Sepeti',
-            'empty' => 'Alışveriş sepetiniz boş',
-            'update-cart' => 'Sepeti Güncelle',
-            'continue-shopping' => 'Alışverişe Devam Et',
-            'continue-registration' => 'Kayda Devam Et',
-            'proceed-to-checkout' => 'Satın Al',
-            'remove' => 'Kaldır',
-            'remove-link' => 'Kaldır',
-            'move-to-wishlist' => 'Dilek Listesine Ekle',
-            'move-to-wishlist-success' => 'Dilek listesine başarıyla eklendi.',
-            'move-to-wishlist-error' => 'Dilek listesine eklenirken hata oluştu, lütfen tekrar deneyin.',
-            'add-config-warning' => 'Sepete eklemeden önce lütfen seçim yapınız.',
-            'quantity' => [
-                'quantity' => 'Miktar',
-                'success' => 'Sepet başarıyla güncellendi!',
-                'illegal' => 'Miktar en az 1 olmalıdır.',
-                'inventory_warning' => 'Girilen miktar mevcut değil, lütfen yeniden deneyin.',
-                'error' => 'Ürün güncellemesi yapılamıyor, lütfen tekrar deneyin.'
+            'continue-to-checkout'      => 'Ödemeye Devam Et',
+            'illegal'                   => 'Miktar sıfırdan küçük olamaz.',
+            'inactive'                  => 'Ürün devre dışı bırakıldı ve sepetten kaldırıldı',
+            'inactive-add'              => 'Devre dışı ürün sepete eklenemez.',
+            'inventory-warning'         => 'İstenen miktar şu anda stokta bulunmuyor, lütfen daha sonra tekrar deneyin',
+            'item-add-to-cart'          => 'Ürün Başarıyla Eklendi',
+            'minimum-order-message'     => 'Minimum sipariş miktarı',
+            'missing-fields'            => 'Bu ürün için bazı gerekli alanlar eksik',
+            'missing-options'           => 'Bu ürün için seçenekler eksik',
+            'paypal-payment-cancelled'  => 'Paypal ödemesi iptal edildi.',
+            'qty-missing'               => 'En az bir ürünün miktarı 1\'den fazla olmalıdır.',
+            'return-to-shop'            => 'Alışverişe Geri Dön',
+            'rule-applied'              => 'Sepet kuralı uygulandı',
+            'select-hourly-duration'    => 'Bir saatlik süre aralığı seçin.',
+            'success-remove'            => 'Ürün başarıyla sepetten kaldırıldı.',
+            'suspended-account-message' => 'Hesabınız askıya alınmıştır.',
+
+            'index' => [
+                'bagisto'                  => 'Bagisto',
+                'cart'                     => 'Sepet',
+                'continue-shopping'        => 'Alışverişe Devam Et',
+                'empty-product'            => 'Sepetinizde ürün bulunmuyor.',
+                'excl-tax'                 => 'KDV Hariç:',
+                'home'                     => 'Anasayfa',
+                'items-selected'           => ':count Ürün Seçildi',
+                'move-to-wishlist'         => 'Favorilere Taşı',
+                'move-to-wishlist-success' => 'Seçilen ürünler başarıyla favorilere taşındı.',
+                'price'                    => 'Fiyat',
+                'product-name'             => 'Ürün Adı',
+                'quantity'                 => 'Miktar',
+                'quantity-update'          => 'Miktar başarıyla güncellendi',
+                'remove'                   => 'Kaldır',
+                'remove-selected-success'  => 'Seçilen ürünler başarıyla sepetten kaldırıldı.',
+                'see-details'              => 'Detayları Gör',
+                'select-all'               => 'Hepsini Seç',
+                'select-cart-item'         => 'Alışveriş Sepeti Öğesini Seç',
+                'tax'                      => 'Vergi',
+                'total'                    => 'Toplam',
+                'update-cart'              => 'Sepeti Güncelle',
+                'view-cart'                => 'Sepeti Görüntüle',
+
+                'cross-sell' => [
+                    'title' => 'Daha fazla seçenek',
+                ],
             ],
 
-            'item' => [
-                'error_remove' => 'Sepetten kaldırılacak ürün bulunamadı.',
-                'success' => 'Ürün başarıyla sepete eklendi.',
-                'success-remove' => 'Ürün sepetten başarıyla kaldırıldı.',
-                'error-add' => 'Ürün sepete eklenirken hata oluştu, lütfen tekrar deneyin.',
-                'inactive' => 'An item is inactive and was removed from cart.',
-                'inactive-add' => 'Inactive item cannot be added to cart.',
+            'mini-cart' => [
+                'continue-to-checkout' => 'Ödemeye Devam Et',
+                'empty-cart'           => 'Sepetiniz boş',
+                'excl-tax'             => 'KDV Hariç:',
+                'offer-on-orders'      => '1. siparişinizde %30\'a varan İNDİRİM kazanın',
+                'remove'               => 'Kaldır',
+                'see-details'          => 'Detayları Gör',
+                'shopping-cart'        => 'Alışveriş Sepeti',
+                'subtotal'             => 'Ara Toplam',
+                'view-cart'            => 'Sepeti Görüntüle',
             ],
-            'quantity-error' => 'Girilen miktar mevcut değil.',
-            'cart-subtotal' => 'Sepet Ara Toplam',
-            'cart-remove-action' => 'Sepeti boşaltmak istediğinizden emin misiniz?',
-            'partial-cart-update' => 'Sadece bazı ürünler güncellendi.',
-            'link-missing' => '',
-            'event' => [
-                'expired' => 'Bu eylemin geçerliliği sona erdi.'
+
+            'summary' => [
+                'cart-summary'              => 'Sepet Özeti',
+                'delivery-charges-excl-tax' => 'Teslimat Ücretleri (KDV Hariç)',
+                'delivery-charges-incl-tax' => 'Teslimat Ücretleri (KDV Dahil)',
+                'delivery-charges'          => 'Teslimat Ücretleri',
+                'discount-amount'           => 'İndirim Miktarı',
+                'grand-total'               => 'Genel Toplam',
+                'place-order'               => 'Sipariş Ver',
+                'proceed-to-checkout'       => 'Ödemeye Devam Et',
+                'sub-total-excl-tax'        => 'Ara Toplam (KDV Hariç)',
+                'sub-total-incl-tax'        => 'Ara Toplam (KDV Dahil)',
+                'sub-total'                 => 'Ara Toplam',
+                'tax'                       => 'Vergi',
+
+                'estimate-shipping' => [
+                    'country'        => 'Ülke',
+                    'info'           => 'Kargo ve vergi tahmini almak için hedefinizi girin.',
+                    'postcode'       => 'Posta Kodu',
+                    'select-country' => 'Ülke Seçin',
+                    'select-state'   => 'Bölge Seçin',
+                    'state'          => 'Bölge',
+                    'title'          => 'Kargo ve Vergi Tahmini',
+                ],
             ],
-            'minimum-order-message' => 'Minimum order amount is :amount'
         ],
 
         'onepage' => [
-            'title' => 'Satın Al',
-            'information' => 'Bilgiler',
-            'shipping' => 'Teslimat',
-            'payment' => 'Ödeme',
-            'complete' => 'Tamamla',
-            'review' => 'İnceleme',
-            'billing-address' => 'Fatura Adresi',
-            'sign-in' => 'Giriş Yap',
-            'company-name' => 'Şirket Adı',
-            'first-name' => 'Ad',
-            'last-name' => 'Soyad',
-            'email' => 'E-Mail',
-            'address1' => 'Adres',
-            'city' => 'İlçe',
-            'state' => 'Şehir',
-            'select-state' => 'Şehir seçiniz',
-            'postcode' => 'Posta Kodu',
-            'phone' => 'Telefon',
-            'country' => 'Ülke',
-            'order-summary' => 'Sipariş Özeti',
-            'use_for_shipping' => 'Teslimat adresi olarak kullan',
-            'continue' => 'Devam et',
-            'shipping-method' => 'Teslimat Türü Seç',
-            'payment-methods' => 'Ödeme Türü Seç',
-            'payment-method' => 'Ödeme Türü',
-            'summary' => 'Sipariş Özeti',
-            'price' => 'Fiyat',
-            'quantity' => 'Miktar',
-            'shipping-address' => 'Teslimat Adresi',
-            'contact' => 'İletişim',
-            'place-order' => 'Siparişi Oluştur',
-            'new-address' => 'Yeni Adres Ekle',
-            'save_as_address' => 'Adresi Kaydet',
-            'apply-coupon' => 'Kuponu Uygula',
-            'amt-payable' => 'Ödenecek Tutar',
-            'got' => 'Alınan',
-            'free' => 'Ücretsiz',
-            'coupon-used' => 'Kullanılan Kupon',
-            'applied' => 'Uygulanan',
-            'back' => 'Geri',
-            'cash-desc' => 'Kapıda Ödeme',
-            'money-desc' => 'Havale/EFT',
-            'paypal-desc' => 'Paypal',
-            'free-desc' => 'Ücretsiz Kargo',
-            'flat-desc' => 'Sabit Ücret',
-            'password' => 'Parola',
-            'login-exist-message' => 'Kayıtlı hesabınız bulunuyor, lütfen giriş yapınız ya da ziyaretçi olarak satın alın.',
-            'enter-coupon-code' => 'Kupon Kodu Girin'
+            'address' => [
+                'add-new'                => 'Yeni adres ekleyin',
+                'add-new-address'        => 'Yeni adres ekleyin',
+                'back'                   => 'Geri',
+                'billing-address'        => 'Fatura Adresi',
+                'check-billing-address'  => 'Fatura adresi eksik.',
+                'check-shipping-address' => 'Kargo adresi eksik.',
+                'city'                   => 'Şehir',
+                'company-name'           => 'Şirket Adı',
+                'confirm'                => 'Onayla',
+                'country'                => 'Ülke',
+                'email'                  => 'E-posta',
+                'first-name'             => 'Ad',
+                'last-name'              => 'Soyadı',
+                'postcode'               => 'Posta Kodu',
+                'proceed'                => 'Devam Et',
+                'same-as-billing'        => 'Gönderim için aynı adresi kullanmak istiyor musunuz?',
+                'save'                   => 'Kaydet',
+                'save-address'           => 'Adresi Adres Defterine Kaydet',
+                'select-country'         => 'Ülke Seç',
+                'select-state'           => 'Bölge Seç',
+                'shipping-address'       => 'Teslimat Adresi',
+                'state'                  => 'Bölge',
+                'street-address'         => 'Sokak Adresi',
+                'telephone'              => 'Telefon',
+                'title'                  => 'Adres',
+            ],
+
+            'index' => [
+                'checkout' => 'Ödeme',
+                'home'     => 'Anasayfa',
+            ],
+
+            'payment' => [
+                'payment-method' => 'Ödeme Yöntemi',
+            ],
+
+            'shipping' => [
+                'shipping-method' => 'Teslimat Yöntemi',
+            ],
+
+            'summary' => [
+                'cart-summary'              => 'Sepet Özeti',
+                'delivery-charges-excl-tax' => 'Teslimat Ücretleri (KDV Hariç)',
+                'delivery-charges-incl-tax' => 'Teslimat Ücretleri (KDV Dahil)',
+                'delivery-charges'          => 'Teslimat Ücretleri',
+                'discount-amount'           => 'İndirim Miktarı',
+                'excl-tax'                  => 'KDV Hariç:',
+                'grand-total'               => 'Genel Toplam',
+                'place-order'               => 'Sipariş Ver',
+                'price_&_qty'               => ':price × :qty',
+                'processing'                => 'İşleniyor',
+                'sub-total-excl-tax'        => 'Ara Toplam (KDV Hariç)',
+                'sub-total-incl-tax'        => 'Ara Toplam (KDV Dahil)',
+                'sub-total'                 => 'Ara Toplam',
+                'tax'                       => 'Vergi',
+            ],
         ],
 
-        'total' => [
-            'order-summary' => 'Sipariş Özeti',
-            'sub-total' => 'Ürünler',
-            'grand-total' => 'Genel Toplam',
-            'delivery-charges' => 'Kargo Ücreti',
-            'tax' => 'Vergi',
-            'discount' => 'İndirim',
-            'price' => 'fiyat',
-            'disc-amount' => 'İndirim Miktarı',
-            'new-grand-total' => 'Yeni Genel Toplam',
-            'coupon' => 'Kupon',
-            'coupon-applied' => 'Uygulanan Kupon',
-            'remove-coupon' => 'Kupon Kaldır',
-            'cannot-apply-coupon' => 'Kupon Uygulanamaz',
-            'invalid-coupon' => 'Kupon kodu geçersiz.',
-            'success-coupon' => 'Kupon kodu başarıyla uygulandı.',
-            'coupon-apply-issue' => 'Kupon kodu uygulanamaz.'
+        'coupon' => [
+            'already-applied' => 'Kupon kodu zaten uygulanmış.',
+            'applied'         => 'Kupon uygulandı',
+            'apply'           => 'Kuponu Uygula',
+            'apply-issue'     => 'Kupon kodu uygulanamıyor.',
+            'button-title'    => 'Uygula',
+            'code'            => 'Kupon Kodu',
+            'discount'        => 'Kupon İndirimi',
+            'enter-your-code' => 'Kodunuzu girin',
+            'error'           => 'Bir şeyler yanlış gitti',
+            'invalid'         => 'Kupon kodu geçersiz.',
+            'remove'          => 'Kuponu Kaldır',
+            'subtotal'        => 'Ara Toplam',
+            'success-apply'   => 'Kupon kodu başarıyla uygulandı.',
         ],
 
-        'success' => [
-            'title' => 'Sipariş başarıyla oluşturuldu.',
-            'thanks' => 'Sipariş için teşekkür ederiz!',
-            'order-id-info' => 'Sipariş numaranız #:order_id',
-            'info' => 'Size sipariş detayları ve takip bilgilerini mail olarak ileteceğiz.'
-        ]
+        'login' => [
+            'email'    => 'E-posta',
+            'password' => 'Şifre',
+            'title'    => 'Giriş Yap',
+        ],
     ],
 
-    'mail' => [
-        'order' => [
-            'subject' => 'Yeni Sipariş Doğrulaması',
-            'heading' => 'Sipariş Doğrulaması',
-            'dear' => 'Sayın :customer_name',
-            'dear-admin' => 'Sayın :admin_name',
-            'greeting' => 'Sipariş verdiğiniz için teşekkür ederiz. :order_id nolu sipariş :created_at tarihinde oluşturuldu.',
-            'greeting-admin' => ':order_id no\'lu sipariş :created_at tarihinde verildi.',
-            'summary' => 'Sipariş Özeti',
-            'shipping-address' => 'Teslimat Adresi',
-            'billing-address' => 'Fatura Adresi',
-            'contact' => 'İletişim',
-            'shipping' => 'Teslimat Şekli',
-            'payment' => 'Ödeme Şekli',
-            'price' => 'Fiyat',
-            'quantity' => 'Miktar',
-            'subtotal' => 'Ara Toplam',
-            'shipping-handling' => 'Teslimat & Dağıtım',
-            'tax' => 'Vergi',
-            'discount' => 'İndirim',
-            'grand-total' => 'Genel Toplam',
-            'final-summary' => 'Bizi tercih ettiğiniz için teşekkür ederiz. Ürün kargoya teslim edildikten sonra takip numarası iletilecektir.',
-            'help' => 'Soru ve görüşleriniz için lütfen bizimle iletişime geçiniz: :support_email',
-            'thanks' => 'Teşekkürler!',
-
-            'comment' => [
-                'subject' => 'Siparişinize #:order_id yeni yorum yapıldı.',
-                'dear' => 'Sayın :customer_name',
-                'final-summary' => 'Bizi tercih ettiğiniz için teşekkür ederiz.',
-                'help' => 'Soru ve görüşleriniz için lütfen bizimle iletişime geçiniz: :support_email',
-                'thanks' => 'Teşekkürler!',
-            ],
-
-            'cancel' => [
-                'subject' => 'Sipariş İptal Doğrulaması',
-                'heading' => 'Sipariş İptal Edildi',
-                'dear' => 'Sayın :customer_name',
-                'greeting' => '#:order_id no\'lu siparişiniz :created_at tarihinde iptal edilmiştir.',
-                'summary' => 'Sipariş Özeti',
-                'shipping-address' => 'Teslimat Adresi',
-                'billing-address' => 'Fatura Adresi',
-                'contact' => 'İletişim',
-                'shipping' => 'Teslimat Şekli',
-                'payment' => 'Ödeme Şekli',
-                'subtotal' => 'Ara Toplam',
-                'shipping-handling' => 'Teslimat & Dağıtım',
-                'tax' => 'Vergi',
-                'discount' => 'İndirim',
-                'grand-total' => 'Genel Toplam',
-                'final-summary' => 'Bizi tercih ettiğiniz için teşekkür ederiz.',
-                'help' => 'Soru ve görüşleriniz için lütfen bizimle iletişime geçiniz: :support_email',
-                'thanks' => 'Teşekkürler!',
-            ]
+    'home' => [
+        'contact' => [
+            'about'         => 'Bize bir not bırakın ve en kısa sürede size geri döneceğiz',
+            'desc'          => 'Aklınızda ne var?',
+            'describe-here' => 'Burayı açıklayın',
+            'email'         => 'E-posta',
+            'message'       => 'Mesaj',
+            'name'          => 'Ad',
+            'phone-number'  => 'Telefon Numarası',
+            'submit'        => 'Gönder',
+            'title'         => 'Bize Ulaşın',
         ],
 
-        'invoice' => [
-            'heading' => '#:order_id no\'lu siparişiniz için #:invoice_id no\'lu fatura oluşturuldu.',
-            'subject' => '#:order_id no\'lu siparişinizin faturası',
-            'summary' => 'Fatura Özeti',
-            'reminder' => [
-                'subject' => 'Invoice reminder',
-                'your-invoice-is-overdue' => 'Your invoice :invoice is overdue by :time.',
-                'please-make-your-payment-as-soon-as-possible' => 'Please make your payment as soon as possible.',
-                'if-you-ve-already-paid-just-disregard-this-email' => 'If you\'ve already paid, just disregard this email.',
-            ],
+        'index' => [
+            'categories-carousel' => 'Kategoriler Karuseli',
+            'image-carousel'      => 'Görüntü Karuseli',
+            'offer'               => 'İlk siparişinizde %40’a kadar indirim kazanın, ŞİMDİ ALIŞVERİŞ YAPIN',
+            'product-carousel'    => 'Ürün Karuseli',
+            'resend-verify-email' => 'Doğrulama e-postasını yeniden gönder',
+            'verify-email'        => 'E-posta hesabınızı doğrulayın',
         ],
 
-        'shipment' => [
-            'heading' => '#:order_id no\'lu siparişiniz için #:shipment_id no\'lu teslimat oluşturuldu.',
-            'inventory-heading' => '#:order_id no\'lu siparişiniz için #:shipment_id no\'lu teslimat oluşturuldu.',
-            'subject' => '#:order_id no\'lu siparişinizin teslimatı',
-            'inventory-subject' => '#:order_id no\'lu siparişiniz için teslimat oluşturuldu.',
-            'summary' => 'Teslimat Özeti',
-            'carrier' => 'Kargo Şirketi',
-            'tracking-number' => 'Takip Numarası',
-            'greeting' => ':order_id no\'lu sipariş :created_at tarihinde oluşturuldu.',
+        'thanks-for-contact' => 'Yorumlarınız ve sorularınız için bize başvurduğunuz için teşekkür ederiz. Size çok yakında yanıt vereceğiz.',
+    ],
+
+    'partials' => [
+        'pagination' => [
+            'next-page'          => 'Sonraki Sayfa',
+            'pagination-showing' => 'Toplam :total girdinin :firstItem ile :lastItem arası gösteriliyor',
+            'prev-page'          => 'Önceki Sayfa',
+        ],
+    ],
+
+    'errors' => [
+        'go-to-home' => 'Anasayfaya Git',
+
+        '404' => [
+            'description' => 'Üzgünüz! Aradığınız sayfa tatilde. Aradığınızı bulamadık gibi görünüyor.',
+            'title'       => '404 Sayfa Bulunamadı',
         ],
 
-        'refund' => [
-            'heading' => '#:order_id siparişi için #:refund_id iadesi',
-            'subject' => '#:order_id siparişi iadesi',
-            'summary' => 'İade Özeti',
-            'adjustment-refund' => 'İade Düzenlemesi',
-            'adjustment-fee' => 'Düzenleme Bedeli'
+        '401' => [
+            'description' => 'Üzgünüz! Bu sayfaya erişme izniniz yok gibi görünüyor. Gerekli kimlik bilgilerini eksik gördük.',
+            'title'       => '401 Yetkisiz Erişim',
         ],
 
-        'forget-password' => [
-            'subject' => 'Müşteri Parolası Sıfırlama',
-            'dear' => 'Sayın :name',
-            'info' => 'Parola sıfırlama talebinde bulunduğunuz için bu maili hesabınıza kayıtlı mail adresinize gönderdik.',
-            'reset-password' => 'Parola Yenile',
-            'final-summary' => 'Eğer parola yenileme talebinde bulunmadıysanız bu maili silebilirsiniz.',
-            'thanks' => 'Teşekkürler!'
+        '403' => [
+            'description' => 'Üzgünüz! Bu sayfa yasaklanmış durumda. İçeriği görüntülemek için gerekli izinlere sahip değilsiniz gibi görünüyor.',
+            'title'       => '403 Yasak',
         ],
 
-        'update-password' => [
-            'subject' => 'Şifre güncellendi',
-            'dear' => 'Sayın :name',
-            'info' => 'Bu e-postayı, şifrenizi güncellediğiniz için alıyorsunuz.',
-            'thanks' => 'Teşekkürler!'
+        '500' => [
+            'description' => 'Üzgünüz! Bir şeyler yanlış gitti. Aradığınız sayfayı yüklerken sorun yaşadığımız görünüyor.',
+            'title'       => '500 İç Sunucu Hatası',
         ],
 
-        'customer' => [
-            'new' => [
-                'dear' => 'Sayın :customer_name',
-                'username-email' => 'KullanıcıAdı/EMail',
-                'subject' => 'Yeni Müşteri Kaydı',
-                'password' => 'Parola',
-                'summary' => 'Hesabınız başarıyla oluşturuldu. Detaylar aşağıda yer almaktadır:',
-                'thanks' => 'Teşekkürler!',
-            ],
+        '503' => [
+            'description' => 'Üzgünüz! Geçici olarak bakımda gibi görünüyoruz. Lütfen biraz sonra tekrar kontrol edin.',
+            'title'       => '503 Hizmet Kullanılamıyor',
+        ],
+    ],
 
+    'layouts' => [
+        'address'               => 'Adres',
+        'downloadable-products' => 'İndirilebilir Ürünler',
+        'my-account'            => 'Hesabım',
+        'orders'                => 'Siparişler',
+        'profile'               => 'Profil',
+        'reviews'               => 'Yorumlar',
+        'wishlist'              => 'İstek Listesi',
+    ],
+
+    'subscription' => [
+        'already'             => 'Zaten bültenimize abonesiniz.',
+        'subscribe-success'   => 'Bültenimize başarıyla abone oldunuz.',
+        'unsubscribe-success' => 'Bülten aboneliğiniz başarıyla iptal edildi.',
+    ],
+
+    'emails' => [
+        'dear'   => 'Sayın :customer_name',
+        'thanks' => 'Herhangi bir yardıma ihtiyacınız varsa lütfen <a href=":link" style=":style">:email</a> adresinden bizimle iletişime geçin.<br/>Teşekkürler!',
+
+        'customers' => [
             'registration' => [
-                'subject' => 'Yeni Müşteri Kaydı',
-                'customer-registration' => 'Müşteri Başarıyla Oluşturuldu',
-                'dear' => 'Sayın :customer_name',
-                'dear-admin' => 'Sayın :admin_name',
-                'greeting' => 'Bizi tercih ettiğiniz için teşekkür ederiz. Aramıza hoşgeldiniz!',
-                'greeting-admin' => 'Bir yeni müşteri kaydınız var.',
-                'summary' => 'Hesabınız başarıyla oluşturuldu; hemen kayıtlı bilgilerinizle giriş yapabilirsiniz. Giriş yaptıktan sonra, yaptığınız siparişleri inceleme, dilek listesine erişim ve hesap bilgilerini düzenleme gibi pek çok seçeneklere ulaşabilirsiniz.',
-                'thanks' => 'Teşekkürler!',
+                'credentials-description' => 'Hesabınız oluşturuldu. Hesap detaylarınız aşağıdadır.',
+                'description'             => 'Hesabınız başarıyla oluşturuldu ve şimdi e-posta adresiniz ve parola bilgilerinizle giriş yapabilirsiniz. Giriş yaptıktan sonra, geçmiş siparişleri inceleme, favorileri gözden geçirme ve hesap bilgilerinizi düzenleme gibi diğer hizmetlere erişebilirsiniz.',
+                'greeting'                => 'Hoş geldiniz ve bize kaydolduğunuz için teşekkür ederiz!',
+                'password'                => 'Şifre',
+                'sign-in'                 => 'Giriş yap',
+                'subject'                 => 'Yeni Müşteri Kaydı',
+                'username-email'          => 'Kullanıcı adı/E-posta',
+            ],
+
+            'forgot-password' => [
+                'description'    => 'Bu e-postayı şifre sıfırlama isteği aldığımız için alıyorsunuz.',
+                'greeting'       => 'Şifremi Unuttum!',
+                'reset-password' => 'Şifre Sıfırla',
+                'subject'        => 'Şifre Sıfırlama E-postası',
+            ],
+
+            'update-password' => [
+                'description' => 'Bu e-postayı şifrenizi güncellediğiniz için alıyorsunuz.',
+                'greeting'    => 'Şifre Güncellendi!',
+                'subject'     => 'Şifre Güncelleme',
             ],
 
             'verification' => [
-                'heading' => config('app.name') . ' - Mail Doğrulaması',
-                'subject' => 'Doğrulama Maili',
-                'verify' => 'Hesabınızı Doğrulayın',
-                'summary' => 'Bu mail adresi hesabınızı doğrulamanız için gönderildi.
-                Bu mail adresinin hesabınızla ilişkisini tamamlamak için lütfen linke tıklayınız.'
+                'description'  => 'E-posta adresinizi doğrulamak için lütfen aşağıdaki düğmeye tıklayın.',
+                'greeting'     => 'Hoş geldiniz!',
+                'subject'      => 'Hesap Doğrulama E-postası',
+                'verify-email' => 'E-posta Adresini Doğrula',
             ],
 
-            'subscription' => [
-                'subject' => 'Bülten Maili',
-                'greeting' => 'Aramıza Hoşgeldiniz: ' . config('app.name') . ' - Bülten Aboneliği',
-                'unsubscribe' => 'Bültenden Çıkış',
-                'summary' => 'Gelen kutunuzda yer verdiğiniz için teşekkür ederiz. ' . config('app.name') . ' maillerini almak istemezseniz bültenden çıkış yapabilirsiniz.'
-            ]
-        ]
-    ],
+            'commented' => [
+                'description' => 'Not: :note',
+                'subject'     => 'Yeni yorum eklendi',
+            ],
 
-    'webkul' => [
-        'copy-right' => '© Copyright :year Webkul Software, Tüm Hakları Saklıdır.',
-    ],
+            'subscribed' => [
+                'description' => 'Tebrikler ve bülten topluluğumuza hoş geldiniz! Sizi en son haberler, trendler ve özel tekliflerle güncel tutmaktan heyecan duyuyoruz.',
+                'greeting'    => 'Bültenimize hoş geldiniz!',
+                'subject'     => 'Bültenimize Abone Oldunuz',
+                'unsubscribe' => 'Aboneliği iptal et',
+            ],
+        ],
 
-    'response' => [
-        'create-success' => ':name başarıyla oluşturuldu.',
-        'update-success' => ':name başarıyla güncellendi.',
-        'delete-success' => ':name başarıyla silindi.',
-        'submit-success' => ':name başarıyla iletildi.'
+        'contact-us' => [
+            'contact-from'    => 'Web Sitesi İletişim Formu aracılığıyla',
+            'reply-to-mail'   => 'lütfen bu e-postaya yanıt verin.',
+            'reach-via-phone' => 'Alternatif olarak, bize telefonla şu numaradan ulaşabilirsiniz:',
+            'inquiry-from'    => 'Şuradan gelen talep',
+            'to'              => 'İletişim için',
+        ],
+
+        'orders' => [
+            'created' => [
+                'greeting' => ':created_at tarihindeki :order_id numaralı siparişiniz için teşekkürler',
+                'subject'  => 'Yeni Sipariş Onayı',
+                'summary'  => 'Sipariş Özeti',
+                'title'    => 'Sipariş Onayı!',
+            ],
+
+            'invoiced' => [
+                'greeting' => ':created_at tarihindeki :order_id numaralı siparişiniz için faturanız #:invoice_id oluşturuldu',
+                'subject'  => 'Yeni Fatura Onayı',
+                'summary'  => 'Fatura Özeti',
+                'title'    => 'Fatura Onayı!',
+            ],
+
+            'shipped' => [
+                'greeting' => ':created_at tarihindeki :order_id numaralı siparişiniz gönderildi',
+                'subject'  => 'Yeni Sevkiyat Onayı',
+                'summary'  => 'Sevkiyat Özeti',
+                'title'    => 'Sipariş Gönderildi!',
+            ],
+
+            'refunded' => [
+                'greeting' => ':created_at tarihindeki :order_id numaralı siparişiniz için geri ödeme başlatıldı',
+                'subject'  => 'Yeni Geri Ödeme Onayı',
+                'summary'  => 'Geri Ödeme Özeti',
+                'title'    => 'Sipariş Geri Ödendi!',
+            ],
+
+            'canceled' => [
+                'greeting' => ':created_at tarihindeki :order_id numaralı siparişiniz iptal edildi',
+                'subject'  => 'Yeni Sipariş İptal Edildi',
+                'summary'  => 'Sipariş Özeti',
+                'title'    => 'Sipariş İptal Edildi!',
+            ],
+
+            'commented' => [
+                'subject' => 'Yeni yorum eklendi',
+                'title'   => ':created_at tarihindeki :order_id numaralı siparişinize yeni bir yorum eklendi',
+            ],
+
+            'billing-address'            => 'Fatura Adresi',
+            'carrier'                    => 'Kargo',
+            'contact'                    => 'İletişim',
+            'discount'                   => 'İndirim',
+            'excl-tax'                   => 'Vergi Hariç: ',
+            'grand-total'                => 'Genel Toplam',
+            'name'                       => 'Ad',
+            'payment'                    => 'Ödeme',
+            'price'                      => 'Fiyat',
+            'qty'                        => 'Adet',
+            'shipping-address'           => 'Teslimat Adresi',
+            'shipping-handling-excl-tax' => 'Kargo İşlemi (Vergi Hariç)',
+            'shipping-handling-incl-tax' => 'Kargo İşlemi (Vergi Dahil)',
+            'shipping-handling'          => 'Kargo İşlemi',
+            'shipping'                   => 'Kargo',
+            'sku'                        => 'SKU',
+            'subtotal-excl-tax'          => 'Ara Toplam (Vergi Hariç)',
+            'subtotal-incl-tax'          => 'Ara Toplam (Vergi Dahil)',
+            'subtotal'                   => 'Ara Toplam',
+            'tax'                        => 'Vergi',
+            'tracking-number'            => 'Takip Numarası: :tracking_number',
+        ],
     ],
 ];

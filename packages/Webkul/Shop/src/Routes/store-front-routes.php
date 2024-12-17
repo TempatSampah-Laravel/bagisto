@@ -1,85 +1,75 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Webkul\CMS\Http\Controllers\Shop\PagePresenterController;
+use Webkul\Shop\Http\Controllers\CompareController;
 use Webkul\Shop\Http\Controllers\HomeController;
+use Webkul\Shop\Http\Controllers\PageController;
 use Webkul\Shop\Http\Controllers\ProductController;
-use Webkul\Shop\Http\Controllers\ReviewController;
+use Webkul\Shop\Http\Controllers\ProductsCategoriesProxyController;
 use Webkul\Shop\Http\Controllers\SearchController;
 use Webkul\Shop\Http\Controllers\SubscriptionController;
 
-Route::group(['middleware' => ['web', 'locale', 'theme', 'currency']], function () {
-    /**
-     * Cart merger middleware. This middleware will take care of the items
-     * which are deactivated at the time of buy now functionality. If somehow
-     * user redirects without completing the checkout then this will merge
-     * full cart.
-     *
-     * If some routes are not able to merge the cart, then place the route in this
-     * group.
-     */
-    Route::group(['middleware' => ['cart.merger']], function () {
-        /**
-         * CMS pages.
-         */
-        Route::get('page/{slug}', [PagePresenterController::class, 'presenter'])->name('shop.cms.page');
+/**
+ * CMS pages.
+ */
+Route::get('page/{slug}', [PageController::class, 'view'])
+    ->name('shop.cms.page')
+    ->middleware('cache.response');
 
-        /**
-         * Fallback route.
-         */
-        Route::fallback(\Webkul\Shop\Http\Controllers\ProductsCategoriesProxyController::class . '@index')
-            ->defaults('_config', [
-                'product_view' => 'shop::products.view',
-                'category_view' => 'shop::products.index'
-            ])
-            ->name('shop.productOrCategory.index');
-    });
+/**
+ * Fallback route.
+ */
+Route::fallback(ProductsCategoriesProxyController::class.'@index')
+    ->name('shop.product_or_category.index')
+    ->middleware('cache.response');
 
-    /**
-     * Store front home.
-     */
-    Route::get('/', [HomeController::class, 'index'])->defaults('_config', [
-        'view' => 'shop::home.index'
-    ])->name('shop.home.index');
+/**
+ * Store front home.
+ */
+Route::get('/', [HomeController::class, 'index'])
+    ->name('shop.home.index')
+    ->middleware('cache.response');
 
-    /**
-     * Store front search.
-     */
-    Route::get('/search', [SearchController::class, 'index'])->defaults('_config', [
-        'view' => 'shop::search.search'
-    ])->name('shop.search.index');
+Route::get('contact-us', [HomeController::class, 'contactUs'])
+    ->name('shop.home.contact_us')
+    ->middleware('cache.response');
 
-    Route::post('/upload-search-image', [HomeController::class, 'upload'])->name('shop.image.search.upload');
+Route::post('contact-us/send-mail', [HomeController::class, 'sendContactUsMail'])
+    ->name('shop.home.contact_us.send_mail')
+    ->middleware('cache.response');
 
-    /**
-     * Subscription routes.
-     */
-    Route::get('/subscribe', [SubscriptionController::class, 'subscribe'])->name('shop.subscribe');
+/**
+ * Store front search.
+ */
+Route::get('search', [SearchController::class, 'index'])
+    ->name('shop.search.index')
+    ->middleware('cache.response');
 
-    Route::get('/unsubscribe/{token}', [SubscriptionController::class, 'unsubscribe'])->name('shop.unsubscribe');
+Route::post('search/upload', [SearchController::class, 'upload'])->name('shop.search.upload');
 
-    /**
-     * Product and categories routes.
-     */
-    Route::get('/reviews/{slug}', [ReviewController::class, 'show'])->defaults('_config', [
-        'view' => 'shop::products.reviews.index'
-    ])->name('shop.reviews.index');
+/**
+ * Subscription routes.
+ */
+Route::controller(SubscriptionController::class)->group(function () {
+    Route::post('subscription', 'store')->name('shop.subscription.store');
 
-    Route::get('/product/{slug}/review', [ReviewController::class, 'create'])->defaults('_config', [
-        'view' => 'shop::products.reviews.create'
-    ])->name('shop.reviews.create');
+    Route::get('subscription/{token}', 'destroy')->name('shop.subscription.destroy');
+});
 
-    Route::post('/product/{slug}/review', [ReviewController::class, 'store'])->defaults('_config', [
-        'redirect' => 'shop.home.index'
-    ])->name('shop.reviews.store');
+/**
+ * Compare products
+ */
+Route::get('compare', [CompareController::class, 'index'])
+    ->name('shop.compare.index')
+    ->middleware('cache.response');
 
-    Route::get('/downloadable/download-sample/{type}/{id}', [ProductController::class, 'downloadSample'])->name('shop.downloadable.download_sample');
+/**
+ * Downloadable products
+ */
+Route::controller(ProductController::class)->group(function () {
+    Route::get('downloadable/download-sample/{type}/{id}', 'downloadSample')->name('shop.downloadable.download_sample');
 
-    Route::get('/product/{id}/{attribute_id}', [ProductController::class, 'download'])->defaults('_config', [
-        'view' => 'shop.products.index'
+    Route::get('product/{id}/{attribute_id}', 'download')->defaults('_config', [
+        'view' => 'shop.products.index',
     ])->name('shop.product.file.download');
-
-    Route::get('products/get-filter-attributes/{categoryId}', [ProductController::class, 'getFilterAttributes'])->name('admin.catalog.products.get-filter-attributes');
-
-    Route::get('products/get-category-product-maximum-price/{categoryId}', [ProductController::class, 'getCategoryProductMaximumPrice'])->name('admin.catalog.products.get-category-product-maximum-price');
 });

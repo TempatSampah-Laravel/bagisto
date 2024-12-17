@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateProductDownloadableLinksTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -15,6 +15,7 @@ class CreateProductDownloadableLinksTable extends Migration
     {
         Schema::create('product_downloadable_links', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('product_id')->unsigned();
             $table->string('url')->nullable();
             $table->string('file')->nullable();
             $table->string('file_name')->nullable();
@@ -26,11 +27,9 @@ class CreateProductDownloadableLinksTable extends Migration
             $table->string('sample_type')->nullable();
             $table->integer('downloads')->default(0);
             $table->integer('sort_order')->nullable();
-
-            $table->integer('product_id')->unsigned();
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-
             $table->timestamps();
+
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }
 
@@ -43,4 +42,4 @@ class CreateProductDownloadableLinksTable extends Migration
     {
         Schema::dropIfExists('product_downloadable_links');
     }
-}
+};

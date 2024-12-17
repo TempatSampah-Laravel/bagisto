@@ -2,28 +2,41 @@
 
 namespace App\Providers;
 
+use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\ParallelTesting;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap any application services.
-     *
-     * @return void
+     * Register any application services.
      */
-    public function boot()
+    public function register(): void
     {
-        Schema::defaultStringLength(191);
+        $allowedIPs = array_map('trim', explode(',', config('app.debug_allowed_ips')));
+
+        $allowedIPs = array_filter($allowedIPs);
+
+        if (empty($allowedIPs)) {
+            return;
+        }
+
+        if (in_array(Request::ip(), $allowedIPs)) {
+            Debugbar::enable();
+        } else {
+            Debugbar::disable();
+        }
     }
 
     /**
-     * Register any application services.
-     *
-     * @return void
+     * Bootstrap any application services.
      */
-    public function register()
+    public function boot(): void
     {
-
+        ParallelTesting::setUpTestDatabase(function (string $database, int $token) {
+            Artisan::call('db:seed');
+        });
     }
 }

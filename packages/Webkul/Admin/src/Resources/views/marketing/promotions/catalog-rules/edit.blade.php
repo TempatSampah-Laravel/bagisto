@@ -1,532 +1,874 @@
-@extends('admin::layouts.content')
+<x-admin::layouts>
+    <x-slot:title>
+        @lang('admin::app.marketing.promotions.catalog-rules.edit.title')
+    </x-slot>
 
-@section('page_title')
-    {{ __('admin::app.promotions.catalog-rules.edit-title') }}
-@stop
+    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.before', ['catalogRule' => $catalogRule]) !!}
 
-@section('content')
-    <div class="content">
-        <catalog-rule></catalog-rule>
-    </div>
-@stop
+    <x-admin::form
+        :action="route('admin.marketing.promotions.catalog_rules.update', $catalogRule->id)"
+        method="PUT"
+        enctype="multipart/form-data"
+    >
 
-@push('scripts')
-    <script type="text/x-template" id="catalog-rule-template">
-        <div>
-            <form method="POST" action="{{ route('admin.catalog-rules.update', $catalogRule->id) }}" @submit.prevent="onSubmit">
-                <div class="page-header">
-                    <div class="page-title">
-                        <h1>
-                        <i class="icon angle-left-icon back-link"
-                            onclick="window.location = '{{ route('admin.catalog-rules.index') }}'"></i>
+        {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.create.create_form_controls.before', ['catalogRule' => $catalogRule]) !!}
 
-                            {{ __('admin::app.promotions.catalog-rules.edit-title') }}
-                        </h1>
-                    </div>
+        <div class="mt-3 flex items-center justify-between gap-4 max-sm:flex-wrap">
+            <p class="text-xl font-bold text-gray-800 dark:text-white">
+                @lang('admin::app.marketing.promotions.catalog-rules.edit.title')
+            </p>
 
-                    <div class="page-action">
-                        <button type="submit" class="btn btn-lg btn-primary">
-                            {{ __('admin::app.promotions.catalog-rules.save-btn-title') }}
-                        </button>
-                    </div>
-                </div>
+            <div class="flex items-center gap-x-2.5">
+                <!-- Back Button -->
+                <a
+                    href="{{ route('admin.marketing.promotions.catalog_rules.index') }}"
+                    class="transparent-button hover:bg-gray-200 dark:text-white dark:hover:bg-gray-800"
+                >
+                    @lang('admin::app.marketing.promotions.catalog-rules.edit.back-btn')
+                </a>
 
-                <div class="page-content">
-                    <div class="form-container">
-                        @csrf()
-
-                        {!! view_render_event('bagisto.admin.promotions.catalog-rules.create.before') !!}
-
-                        <accordian :title="'{{ __('admin::app.promotions.catalog-rules.rule-information') }}'" :active="true">
-                            <div slot="body">
-                                <div class="control-group" :class="[errors.has('name') ? 'has-error' : '']">
-                                    <label for="name" class="required">{{ __('admin::app.promotions.catalog-rules.name') }}</label>
-                                    <input v-validate="'required'" class="control" id="name" name="name" data-vv-as="&quot;{{ __('admin::app.promotions.catalog-rules.name') }}&quot;" value="{{ old('name') ?: $catalogRule->name }}"/>
-                                    <span class="control-error" v-if="errors.has('name')">@{{ errors.first('name') }}</span>
-                                </div>
-
-                                <div class="control-group">
-                                    <label for="description">{{ __('admin::app.promotions.catalog-rules.description') }}</label>
-                                    <textarea class="control" id="description" name="description">{{ old('description') ?: $catalogRule->description }}</textarea>
-                                </div>
-
-                                <div class="control-group">
-                                    <label for="status">{{ __('admin::app.promotions.catalog-rules.status') }}</label>
-
-                                    <label class="switch">
-                                        <input type="checkbox" id="status" name="status" value="{{ $catalogRule->status }}" {{ $catalogRule->status ? 'checked' : '' }}>
-                                        <span class="slider round"></span>
-                                    </label>
-                                </div>
-
-                                <div class="control-group" :class="[errors.has('channels[]') ? 'has-error' : '']">
-                                    <label for="channels" class="required">{{ __('admin::app.promotions.catalog-rules.channels') }}</label>
-
-                                    @php
-                                        $selectedOptionIds = old('channels') ?: $catalogRule->channels->pluck('id')->toArray();
-                                    @endphp
-
-                                    <select class="control" id="channels" name="channels[]" v-validate="'required'" data-vv-as="&quot;{{ __('admin::app.promotions.catalog-rules.channels') }}&quot;" multiple="multiple">
-
-                                        @foreach(core()->getAllChannels() as $channel)
-                                            <option value="{{ $channel->id }}" {{ in_array($channel->id, $selectedOptionIds) ? 'selected' : '' }}>
-                                                {{ core()->getChannelName($channel) }}
-                                            </option>
-                                        @endforeach
-
-                                    </select>
-
-                                    <span class="control-error" v-if="errors.has('channels[]')">@{{ errors.first('channels[]') }}</span>
-                                </div>
-
-                                <div class="control-group" :class="[errors.has('customer_groups[]') ? 'has-error' : '']">
-                                    <label for="customer_groups" class="required">{{ __('admin::app.promotions.catalog-rules.customer-groups') }}</label>
-
-                                    @php
-                                        $selectedOptionIds = old('customer_groups') ?: $catalogRule->customer_groups->pluck('id')->toArray();
-                                    @endphp
-
-                                    <select class="control" id="customer_groups" name="customer_groups[]" v-validate="'required'" data-vv-as="&quot;{{ __('admin::app.promotions.catalog-rules.customer-groups') }}&quot;" multiple="multiple">
-
-                                        @foreach(app('Webkul\Customer\Repositories\CustomerGroupRepository')->all() as $customerGroup)
-                                            <option value="{{ $customerGroup->id }}" {{ in_array($customerGroup->id, $selectedOptionIds) ? 'selected' : '' }}>
-                                                {{ $customerGroup->name }}
-                                            </option>
-                                        @endforeach
-
-                                    </select>
-
-                                    <span class="control-error" v-if="errors.has('customer_groups[]')">@{{ errors.first('customer_groups[]') }}</span>
-                                </div>
-
-                                <div class="control-group date">
-                                    <label for="starts_from">{{ __('admin::app.promotions.catalog-rules.from') }}</label>
-                                    <date>
-                                        <input type="text" name="starts_from" class="control" value="{{ old('starts_from') ?: $catalogRule->starts_from }}"/>
-                                    </date>
-                                </div>
-
-                                <div class="control-group date">
-                                    <label for="ends_till">{{ __('admin::app.promotions.catalog-rules.to') }}</label>
-                                    <date>
-                                        <input type="text" name="ends_till" class="control" value="{{ old('ends_till') ?: $catalogRule->ends_till }}"/>
-                                    </date>
-                                </div>
-
-                                <div class="control-group">
-                                    <label for="sort_order">{{ __('admin::app.promotions.catalog-rules.priority') }}</label>
-                                    <input type="text" class="control" id="sort_order" name="sort_order" value="{{ $catalogRule->sort_order }}" {{ $catalogRule->status ? 'checked' : '' }}/>
-                                </div>
-                            </div>
-                        </accordian>
-
-                        <accordian :title="'{{ __('admin::app.promotions.catalog-rules.conditions') }}'" :active="false">
-                            <div slot="body">
-                                <div class="control-group">
-                                    <label for="condition_type">{{ __('admin::app.promotions.catalog-rules.condition-type') }}</label>
-
-                                    <select class="control" id="condition_type" name="condition_type" v-model="condition_type">
-                                        <option value="1">{{ __('admin::app.promotions.catalog-rules.all-conditions-true') }}</option>
-                                        <option value="2">{{ __('admin::app.promotions.catalog-rules.any-condition-true') }}</option>
-                                    </select>
-                                </div>
-
-                                <div class="table catalog-rule-conditions" style="margin-top: 20px; overflow-x: unset;">
-                                    <table>
-                                        <tbody>
-                                            <catalog-rule-condition-item
-                                                v-for='(condition, index) in conditions'
-                                                :condition="condition"
-                                                :key="index"
-                                                :index="index"
-                                                @onRemoveCondition="removeCondition($event)">
-                                            </catalog-rule-condition-item>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <button type="button" class="btn btn-lg btn-primary" style="margin-top: 20px;" @click="addCondition">
-                                    {{ __('admin::app.promotions.catalog-rules.add-condition') }}
-                                </button>
-                            </div>
-                        </accordian>
-
-                        <accordian :title="'{{ __('admin::app.promotions.catalog-rules.actions') }}'" :active="false">
-                            <div slot="body">
-                                <div class="control-group" :class="[errors.has('action_type') ? 'has-error' : '']">
-                                    <label for="action_type" class="required">{{ __('admin::app.promotions.catalog-rules.action-type') }}</label>
-
-                                    @php
-                                        $selectedOption = old('action_type') ?: $catalogRule->action_type;
-                                    @endphp
-
-                                    <select class="control" id="action_type" name="action_type" v-validate="'required'" data-vv-as="&quot;{{ __('admin::app.promotions.catalog-rules.action-type') }}&quot;">
-                                        <option value="by_percent" {{ $selectedOption == 'by_percent' ? 'selected' : '' }}>
-                                            {{ __('admin::app.promotions.catalog-rules.percentage-product-price') }}
-                                        </option>
-                                        <option value="by_fixed" {{ $selectedOption == 'by_fixed' ? 'selected' : '' }}>
-                                            {{ __('admin::app.promotions.catalog-rules.fixed-amount') }}
-                                        </option>
-                                    </select>
-
-                                    <span class="control-error" v-if="errors.has('action_type')">@{{ errors.first('action_type') }}</span>
-                                </div>
-
-                                <div class="control-group" :class="[errors.has('discount_amount') ? 'has-error' : '']">
-                                    <label for="discount_amount" class="required">{{ __('admin::app.promotions.catalog-rules.discount-amount') }}</label>
-
-                                    <input v-validate="'required'" class="control" id="discount_amount" name="discount_amount" data-vv-as="&quot;{{ __('admin::app.promotions.catalog-rules.discount-amount') }}&quot;" value="{{ old('discount_amount') ?: $catalogRule->discount_amount }}"/>
-
-                                    <span class="control-error" v-if="errors.has('discount_amount')">@{{ errors.first('discount_amount') }}</span>
-                                </div>
-
-                                <div class="control-group">
-                                    <label for="end_other_rules">{{ __('admin::app.promotions.catalog-rules.end-other-rules') }}</label>
-
-                                    @php
-                                        $selectedOption = old('end_other_rules') ?: $catalogRule->end_other_rules;
-                                    @endphp
-
-                                    <select class="control" id="end_other_rules" name="end_other_rules">
-                                        <option value="0" {{ ! $selectedOption ? 'selected' : '' }}>
-                                            {{ __('admin::app.promotions.catalog-rules.no') }}
-                                        </option>
-
-                                        <option value="1" {{ $selectedOption ? 'selected' : '' }}>
-                                            {{ __('admin::app.promotions.catalog-rules.yes') }}
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                        </accordian>
-
-                        {!! view_render_event('bagisto.admin.promotions.catalog-rules.create.after') !!}
-                    </div>
-                </div>
-            </form>
+                <!-- Save buton -->
+                <button
+                    type="submit"
+                    class="primary-button"
+                >
+                    @lang('admin::app.marketing.promotions.catalog-rules.edit.save-btn')
+                </button>
+            </div>
         </div>
-    </script>
 
-    <script type="text/x-template" id="catalog-rule-condition-item-template">
-        <tr>
-            <td class="attribute">
-                <div class="control-group">
-                    <select :name="['conditions[' + index + '][attribute]']" class="control" v-model="condition.attribute">
-                        <option value="">{{ __('admin::app.promotions.catalog-rules.choose-condition-to-add') }}</option>
-                        <optgroup v-for='(conditionAttribute, index) in condition_attributes' :label="conditionAttribute.label">
-                            <option v-for='(childAttribute, index) in conditionAttribute.children' :value="childAttribute.key">
-                                @{{ childAttribute.label }}
+        <!-- Edit Catalog form -->
+        <v-catalog-rule-edit-form>
+            <!-- Shimmer Effect -->
+            <x-admin::shimmer.marketing.promotions.catalog-rules />
+        </v-catalog-rule-edit-form>
+
+        {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.create.create_form_controls.after', ['catalogRule' => $catalogRule]) !!}
+
+    </x-admin::form>
+
+    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.after', ['catalogRule' => $catalogRule]) !!}
+
+    @pushOnce('scripts')
+        <!-- v catalog rule edit form template -->
+        <script
+            type="text/x-template"
+            id="v-catalog-rule-edit-form-template"
+        >
+            <div class="mt-3.5 flex gap-2.5 max-xl:flex-wrap">
+                <div class="flex flex-1 flex-col gap-2 max-xl:flex-auto">
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.general.before', ['catalogRule' => $catalogRule]) !!}
+
+                    <!-- General Form -->
+                    <div class="box-shadow rounded bg-white p-4 dark:bg-gray-900">
+                        <p class="mb-4 text-base font-semibold text-gray-800 dark:text-white">
+                            @lang('admin::app.marketing.promotions.catalog-rules.edit.general')
+                        </p>
+
+                        <x-admin::form.control-group>
+                            <x-admin::form.control-group.label class="required">
+                                @lang('admin::app.marketing.promotions.catalog-rules.edit.name')
+                            </x-admin::form.control-group.label>
+
+                            <x-admin::form.control-group.control
+                                type="text"
+                                id="name"
+                                name="name"
+                                rules="required"
+                                :value="old('name') ?? $catalogRule->name"
+                                :label="trans('admin::app.marketing.promotions.catalog-rules.edit.name')"
+                                :placeholder="trans('admin::app.marketing.promotions.catalog-rules.edit.name')"
+                            />
+
+                            <x-admin::form.control-group.error control-name="name" />
+                        </x-admin::form.control-group>
+
+                        <x-admin::form.control-group class="!mb-0">
+                            <x-admin::form.control-group.label>
+                                @lang('admin::app.marketing.promotions.catalog-rules.edit.description')
+                            </x-admin::form.control-group.label>
+
+                            <x-admin::form.control-group.control
+                                type="textarea"
+                                class="text-gray-600 dark:text-gray-300"
+                                id="description"
+                                name="description"
+                                :value="old('description') ?? $catalogRule->description"
+                                :label="trans('admin::app.marketing.promotions.catalog-rules.edit.description')"
+                                :placeholder="trans('admin::app.marketing.promotions.catalog-rules.edit.description')"
+                            />
+
+                            <x-admin::form.control-group.error control-name="description" />
+                        </x-admin::form.control-group>
+                    </div>
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.general.after', ['catalogRule' => $catalogRule]) !!}
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.conditions.before', ['catalogRule' => $catalogRule]) !!}
+
+                    <!-- Conditions -->
+                    <div class="box-shadow rounded bg-white p-4 dark:bg-gray-900">
+                        <div class="flex items-center justify-between gap-4">
+                            <p class="text-base font-semibold text-gray-800 dark:text-white">
+                                @lang('admin::app.marketing.promotions.catalog-rules.edit.conditions')
+                            </p>
+
+                            <x-admin::form.control-group class="!mb-0">
+                                <x-admin::form.control-group.control
+                                    type="select"
+                                    class="text-gray-400 dark:border-gray-800 ltr:pr-10 rtl:pl-10"
+                                    id="condition_type"
+                                    name="condition_type"
+                                    v-model="conditionType"
+                                    :label="trans('admin::app.marketing.promotions.catalog-rules.condition-type')"
+                                    :placeholder="trans('admin::app.marketing.promotions.catalog-rules.condition-type')"
+                                >
+                                    <option value="1">
+                                        @lang('admin::app.marketing.promotions.catalog-rules.edit.all-conditions-true')
+                                    </option>
+
+                                    <option value="2">
+                                        @lang('admin::app.marketing.promotions.catalog-rules.edit.any-conditions-true')
+                                    </option>
+                                </x-admin::form.control-group.control>
+
+                                <x-admin::form.control-group.error control-name="condition_type" />
+                            </x-admin::form.control-group>
+                        </div>
+
+                        <v-catalog-rule-condition-item
+                            v-for='(condition, index) in conditions'
+                            :condition="condition"
+                            :key="index"
+                            :index="index"
+                            @onRemoveCondition="removeCondition($event)"
+                        >
+                        </v-catalog-rule-condition-item>
+
+                        <div
+                            class="secondary-button mt-4 max-w-max"
+                            @click="addCondition"
+                        >
+                            @lang('admin::app.marketing.promotions.catalog-rules.edit.add-condition')
+                        </div>
+
+                    </div>
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.conditions.after', ['catalogRule' => $catalogRule]) !!}
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.actions.before', ['catalogRule' => $catalogRule]) !!}
+
+                    <!-- Actions -->
+                    <div class="box-shadow rounded bg-white p-4 dark:bg-gray-900">
+                        <div class="grid gap-1.5">
+                            <p class="mb-4 text-base font-semibold text-gray-800 dark:text-white">
+                                @lang('admin::app.marketing.promotions.catalog-rules.edit.actions')
+                            </p>
+
+                            <div class="flex gap-4 max-sm:flex-wrap">
+                                <div class="w-full">
+                                    @php($selectedOption = old('action_type') ?? $catalogRule->action_type)
+
+                                    <x-admin::form.control-group>
+                                        <x-admin::form.control-group.label class="required">
+                                            @lang('admin::app.marketing.promotions.catalog-rules.edit.action-type')
+                                        </x-admin::form.control-group.label>
+
+                                        <x-admin::form.control-group.control
+                                            type="select"
+                                            class="h-[39px]"
+                                            id="action_type"
+                                            name="action_type"
+                                            rules="required"
+                                            :value="old('action_type') ?? $selectedOption"
+                                            :label="trans('admin::app.marketing.promotions.catalog-rules.edit.action-type')"
+                                        >
+                                            <option
+                                                value="by_percent"
+                                                {{ $selectedOption == 'by_percent' ? 'selected' : '' }}
+                                            >
+                                                @lang('admin::app.marketing.promotions.catalog-rules.edit.percentage-product-price')
+                                            </option>
+
+                                            <option
+                                                value="by_fixed"
+                                                {{ $selectedOption == 'by_fixed' ? 'selected' : '' }}
+                                            >
+                                                @lang('admin::app.marketing.promotions.catalog-rules.edit.fixed-amount')
+                                            </option>
+                                        </x-admin::form.control-group.control>
+
+                                        <x-admin::form.control-group.error control-name="action_type" />
+                                    </x-admin::form.control-group>
+                                </div>
+
+                                <div class="w-full">
+                                    <x-admin::form.control-group>
+                                        <x-admin::form.control-group.label class="required">
+                                            @lang('admin::app.marketing.promotions.catalog-rules.edit.discount-amount')
+                                        </x-admin::form.control-group.label>
+
+                                        <x-admin::form.control-group.control
+                                            type="text"
+                                            id="discount_amount"
+                                            name="discount_amount"
+                                            rules="required"
+                                            :value="old('discount_amount') ?? $catalogRule->discount_amount"
+                                            :label="trans('admin::app.marketing.promotions.catalog-rules.edit.discount-amount')"
+                                            :placeholder="trans('admin::app.marketing.promotions.catalog-rules.edit.discount-amount')"
+                                        />
+
+                                        <x-admin::form.control-group.error control-name="discount_amount" />
+                                    </x-admin::form.control-group>
+                                </div>
+
+                                <div class="w-full">
+                                    @php($selectedOption = old('end_other_rules') ?? $catalogRule->end_other_rules)
+
+                                    <x-admin::form.control-group>
+                                        <x-admin::form.control-group.label>
+                                            @lang('admin::app.marketing.promotions.catalog-rules.edit.end-other-rules')
+                                        </x-admin::form.control-group.label>
+
+                                        <x-admin::form.control-group.control
+                                            type="select"
+                                            class="h-[39px]"
+                                            id="end_other_rules"
+                                            name="end_other_rules"
+                                            :value="old('end_other_rules') ?? $selectedOption"
+                                            :label="trans('admin::app.marketing.promotions.catalog-rules.edit.end-other-rules')"
+                                        >
+                                            <option
+                                                value="0"
+                                                {{ ! $selectedOption ? 'selected' : '' }}
+                                            >
+                                                @lang('admin::app.marketing.promotions.catalog-rules.edit.no')
+                                            </option>
+
+                                            <option
+                                                value="1"
+                                                {{ $selectedOption ? 'selected' : '' }}
+                                            >
+                                                @lang('admin::app.marketing.promotions.catalog-rules.edit.yes')
+                                            </option>
+                                        </x-admin::form.control-group.control>
+
+                                        <x-admin::form.control-group.error control-name="end_other_rules" />
+                                    </x-admin::form.control-group>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.actions.after', ['catalogRule' => $catalogRule]) !!}
+
+                </div>
+
+                <!-- Rightsub components -->
+                <div class="flex w-[360px] max-w-full flex-col gap-2 max-sm:w-full">
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.accordion.settings.before', ['catalogRule' => $catalogRule]) !!}
+
+                    <!-- Settings -->
+                    <x-admin::accordion>
+                        <x-slot:header>
+                            <div class="flex items-center justify-between">
+                                <p class="p-2.5 text-base font-semibold text-gray-800 dark:text-white">
+                                    @lang('admin::app.marketing.promotions.catalog-rules.edit.settings')
+                                </p>
+                            </div>
+                        </x-slot>
+
+                        <x-slot:content>
+                            <x-admin::form.control-group>
+                                <x-admin::form.control-group.label>
+                                    @lang('admin::app.marketing.promotions.catalog-rules.edit.priority')
+                                </x-admin::form.control-group.label>
+
+                                <x-admin::form.control-group.control
+                                    type="text"
+                                    id="sort_order"
+                                    name="sort_order"
+                                    :value="old('sort_order') ?? $catalogRule->sort_order"
+                                    :label="trans('admin::app.marketing.promotions.catalog-rules.edit.priority')"
+                                    :placeholder="trans('admin::app.marketing.promotions.catalog-rules.edit.priority')"
+                                />
+
+                                <x-admin::form.control-group.error control-name="sort_order" />
+                            </x-admin::form.control-group>
+
+                            <!--Channels-->
+                            <div class="mb-4">
+                                <x-admin::form.control-group.label class="required">
+                                    @lang('admin::app.marketing.promotions.catalog-rules.edit.channels')
+                                </x-admin::form.control-group.label>
+
+                                @php($selectedOptionIds = old('channels') ?: $catalogRule->channels->pluck('id')->toArray())
+
+                                @foreach(core()->getAllChannels() as $channel)
+                                    <x-admin::form.control-group class="!mb-2 flex items-center gap-2.5">
+                                        <x-admin::form.control-group.control
+                                            type="checkbox"
+                                            :id="'channel_' . '_' . $channel->id"
+                                            name="channels[]"
+                                            rules="required"
+                                            :value="$channel->id"
+                                            :for="'channel_' . '_' . $channel->id"
+                                            :label="trans('admin::app.marketing.promotions.catalog-rules.edit.channels')"
+                                            :checked="in_array($channel->id, $selectedOptionIds)"
+                                        />
+
+                                        <label
+                                            class="cursor-pointer text-xs font-medium text-gray-600 dark:text-gray-300"
+                                            for="{{ 'channel_' . '_' . $channel->id }}"
+                                        >
+                                            {{ core()->getChannelName($channel) }}
+                                        </label>
+                                    </x-admin::form.control-group>
+                                @endforeach
+
+                                <x-admin::form.control-group.error control-name="channels[]" />
+                            </div>
+
+                            <!-- Customer Groups -->
+                            <div class="mb-4">
+                                <x-admin::form.control-group.label class="required">
+                                    @lang('admin::app.marketing.promotions.catalog-rules.edit.customer-groups')
+                                </x-admin::form.control-group.label>
+
+                                @php($selectedOptionIds = old('customer_groups') ?: $catalogRule->customer_groups->pluck('id')->toArray())
+
+                                @foreach(app('Webkul\Customer\Repositories\CustomerGroupRepository')->all() as $customerGroup)
+                                    <x-admin::form.control-group class="!mb-2 flex items-center gap-2.5">
+                                        <x-admin::form.control-group.control
+                                            type="checkbox"
+                                            :id="'customer_group_' . '_' . $customerGroup->id"
+                                            name="customer_groups[]"
+                                            rules="required"
+                                            :value="$customerGroup->id"
+                                            :for="'customer_group_' . '_' . $customerGroup->id"
+                                            :label="trans('admin::app.marketing.promotions.catalog-rules.edit.customer-groups')"
+                                            :checked="in_array($customerGroup->id, $selectedOptionIds)"
+                                        />
+
+                                        <label
+                                            class="cursor-pointer text-xs font-medium text-gray-600 dark:text-gray-300"
+                                            for="{{ 'customer_group_' . '_' . $customerGroup->id }}"
+                                        >
+                                            {{ $customerGroup->name }}
+                                        </label>
+                                    </x-admin::form.control-group>
+                                @endforeach
+
+                                <x-admin::form.control-group.error control-name="customer_groups[]" />
+                            </div>
+
+                            <!-- Status -->
+                            <x-admin::form.control-group class="!mb-0">
+                                <x-admin::form.control-group.label>
+                                    @lang('admin::app.marketing.promotions.catalog-rules.edit.status')
+                                </x-admin::form.control-group.label>
+
+                                <x-admin::form.control-group.control
+                                    type="switch"
+                                    name="status"
+                                    :value="$catalogRule->status"
+                                    :label="trans('admin::app.marketing.promotions.catalog-rules.edit.status')"
+                                    :checked="(boolean) $catalogRule->status"
+                                />
+
+                                <x-admin::form.control-group.error control-name="status" />
+                            </x-admin::form.control-group>
+                        </x-slot>
+                    </x-admin::accordion>
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.accordion.settings.after', ['catalogRule' => $catalogRule]) !!}
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.accordion.marketing_time.before', ['catalogRule' => $catalogRule]) !!}
+
+                    <!-- Marketing Time -->
+                    <x-admin::accordion>
+                        <x-slot:header>
+                            <div class="flex items-center justify-between">
+                                <p class="p-2.5 text-base font-semibold text-gray-800 dark:text-white">
+                                    @lang('admin::app.marketing.promotions.catalog-rules.edit.marketing-time')
+                                </p>
+                            </div>
+                        </x-slot>
+
+                        <x-slot:content>
+                            <div class="flex gap-4">
+                                <x-admin::form.control-group class="!mb-0">
+                                    <x-admin::form.control-group.label>
+                                        @lang('admin::app.marketing.promotions.catalog-rules.edit.from')
+                                    </x-admin::form.control-group.label>
+
+                                    <x-admin::form.control-group.control
+                                        type="date"
+                                        id="starts_from"
+                                        name="starts_from"
+                                        :value="(old('starts_from') ?? $catalogRule->starts_from) ?? null"
+                                        :label="trans('admin::app.marketing.promotions.catalog-rules.edit.from')"
+                                        :placeholder="trans('admin::app.marketing.promotions.catalog-rules.edit.from')"
+                                    />
+
+                                    <x-admin::form.control-group.error control-name="starts_from" />
+                                </x-admin::form.control-group>
+
+                                <x-admin::form.control-group class="!mb-0">
+                                    <x-admin::form.control-group.label>
+                                        @lang('admin::app.marketing.promotions.catalog-rules.edit.to')
+                                    </x-admin::form.control-group.label>
+
+                                    <x-admin::form.control-group.control
+                                        type="date"
+                                        id="ends_till"
+                                        name="ends_till"
+                                        :value="(old('ends_till') ?? $catalogRule->ends_till) ?? null"
+                                        :label="trans('admin::app.marketing.promotions.catalog-rules.edit.to')"
+                                        :placeholder="trans('admin::app.marketing.promotions.catalog-rules.edit.to')"
+                                    />
+
+                                    <x-admin::form.control-group.error control-name="ends_till" />
+                                </x-admin::form.control-group>
+                            </div>
+                        </x-slot>
+                    </x-admin::accordion>
+
+                    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.edit.card.accordion.marketing_time.after', ['catalogRule' => $catalogRule]) !!}
+
+                </div>
+            </div>
+        </script>
+
+        <!-- v catalog rule edit form component -->
+        <script type="module">
+            app.component('v-catalog-rule-edit-form', {
+                template: '#v-catalog-rule-edit-form-template',
+
+                data() {
+                    return {
+                        conditionType: {{ old('condition_type') ?: $catalogRule->condition_type }},
+
+                        conditions: @json($catalogRule->conditions ?: [])
+                    }
+                },
+
+                methods: {
+                    addCondition() {
+                        this.conditions.push({
+                            'attribute': '',
+                            'operator': '==',
+                            'value': '',
+                        });
+                    },
+
+                    removeCondition(condition) {
+                        let index = this.conditions.indexOf(condition)
+
+                        this.conditions.splice(index, 1)
+                    },
+
+                    onSubmit(e) {
+                        this.$root.onSubmit(e)
+                    },
+
+                    redirectBack(fallbackUrl) {
+                        this.$root.redirectBack(fallbackUrl)
+                    }
+                }
+            })
+        </script>
+
+        <!-- v catalog rule condition item form template -->
+        <script
+            type="text/x-template"
+            id="v-catalog-rule-condition-item-template"
+        >
+            <div class="mt-4 flex justify-between gap-4">
+                <div class="flex flex-1 gap-4 max-sm:flex-1 max-sm:flex-wrap">
+                    <select
+                        :name="['conditions[' + index + '][attribute]']"
+                        :id="['conditions[' + index + '][attribute]']"
+                        class="custom-select min:w-1/3 flex h-10 w-1/3 rounded-md border bg-white px-3 py-1.5 text-sm font-normal text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 ltr:pr-10 rtl:pl-10"
+                        v-model="condition.attribute"
+                    >
+                        <option value="">@lang('admin::app.marketing.promotions.catalog-rules.edit.choose-condition-to-add')</option>
+
+                        <optgroup
+                            v-for='(conditionAttribute, index) in conditionAttributes'
+                            :label="conditionAttribute.label"
+                        >
+                            <option
+                                v-for='(childAttribute, index) in conditionAttribute.children'
+                                :value="childAttribute.key"
+                                :text="childAttribute.label"
+                            >
                             </option>
                         </optgroup>
                     </select>
-                </div>
-            </td>
 
-            <td class="operator">
-                <div class="control-group" v-if="matchedAttribute">
-                    <select :name="['conditions[' + index + '][operator]']" class="control" v-model="condition.operator">
-                        <option v-for='operator in condition_operators[matchedAttribute.type]' :value="operator.operator">
-                            @{{ operator.label }}
+                    <select
+                        :name="['conditions[' + index + '][operator]']"
+                        class="custom-select min:w-1/3 flex h-10 w-1/3 rounded-md border bg-white px-3 py-1.5 text-sm font-normal text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 ltr:pr-10 rtl:pl-10"
+                        v-model="condition.operator"
+                        v-if="matchedAttribute"
+                    >
+                        <option
+                            v-for='operator in conditionOperators[matchedAttribute.type]'
+                            :value="operator.operator"
+                            :text="operator.label"
+                        >
                         </option>
                     </select>
-                </div>
-            </td>
 
-            <td class="value">
-                <div v-if="matchedAttribute">
-                    <input type="hidden" :name="['conditions[' + index + '][attribute_type]']" v-model="matchedAttribute.type">
+                    <div v-if="matchedAttribute">
+                        <input
+                            type="hidden"
+                            :name="['conditions[' + index + '][attribute_type]']"
+                            v-model="matchedAttribute.type"
+                        >
 
-                    <div v-if="matchedAttribute.key == 'product|category_ids'">
-                        <tree-view value-field="id" id-field="id" :name-field="'conditions[' + index + '][value]'" input-type="checkbox" :items='matchedAttribute.options' :value='condition.value' :behavior="'no'" fallback-locale="{{ config('app.fallback_locale') }}"></tree-view>
-                    </div>
-
-                    <div v-else>
-                        <div class="control-group" v-if="matchedAttribute.type == 'text' || matchedAttribute.type == 'price' || matchedAttribute.type == 'decimal' || matchedAttribute.type == 'integer'">
-                            <input class="control" :name="['conditions[' + index + '][value]']" v-model="condition.value"/>
+                        <div v-if="matchedAttribute.key == 'product|category_ids'">
+                            <x-admin::tree.view
+                                input-type="checkbox"
+                                selection-type="individual"
+                                id-field="id"
+                                ::name-field="'conditions[' + index + '][value]'"
+                                value-field="id"
+                                ::items='matchedAttribute.options'
+                                ::value='condition.value'
+                                :fallback-locale="config('app.fallback_locale')"
+                            />
                         </div>
 
-                        <div class="control-group date" v-if="matchedAttribute.type == 'date'">
-                            <date>
-                                <input class="control" :name="['conditions[' + index + '][value]']" v-model="condition.value"/>
-                            </date>
-                        </div>
+                        <div v-else>
+                            <div
+                                v-if="matchedAttribute.type == 'text'
+                                    || matchedAttribute.type == 'price'
+                                    || matchedAttribute.type == 'decimal'
+                                    || matchedAttribute.type == 'integer'"
+                            >
+                                <v-field
+                                    :name="`conditions[${index}][value]`"
+                                    v-slot="{ field, errorMessage}"
+                                    :id="`conditions[${index}][value]`"
+                                    :rules="matchedAttribute.type == 'price' ? 'regex:^[0-9]+(\.[0-9]+)?$' : ''
+                                        || matchedAttribute.type == 'decimal' ? 'regex:^[0-9]+(\.[0-9]+)?$' : ''
+                                        || matchedAttribute.type == 'integer' ? 'regex:^[0-9]+(\.[0-9]+)?$' : ''
+                                        || matchedAttribute.type == 'text' ? 'regex:^([A-Za-z0-9_ \'\-]+)$' : ''"
+                                    label="@lang('admin::app.marketing.promotions.catalog-rules.edit.conditions')"
+                                    v-model="condition.value"
+                                >
+                                    <input
+                                        type="text"
+                                        :class="{ 'border border-red-500': errorMessage }"
+                                        class="min:w-1/3 flex h-10 w-[289px] rounded-md border bg-white px-3 py-1.5 text-sm font-normal text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 ltr:pr-10 rtl:pl-10"
+                                        v-bind="field"
+                                    />
+                                </v-field>
 
-                        <div class="control-group date" v-if="matchedAttribute.type == 'datetime'">
-                            <datetime>
-                                <input class="control" :name="['conditions[' + index + '][value]']" v-model="condition.value"/>
-                            </datetime>
-                        </div>
+                                <v-error-message
+                                    :name="`conditions[${index}][value]`"
+                                    class="mt-1 text-xs italic text-red-500"
+                                    as="p"
+                                >
+                                </v-error-message>
+                            </div>
 
-                        <div class="control-group" v-if="matchedAttribute.type == 'boolean'">
-                            <select :name="['conditions[' + index + '][value]']" class="control" v-model="condition.value">
-                                <option value="1">{{ __('admin::app.promotions.catalog-rules.yes') }}</option>
-                                <option value="0">{{ __('admin::app.promotions.catalog-rules.no') }}</option>
-                            </select>
-                        </div>
+                            <div v-if="matchedAttribute.type == 'date'">
+                                <x-admin::flat-picker.date class="!w-[140px]" ::allow-input="false">
+                                    <input
+                                        type="date"
+                                        class="flex min-h-[39px] w-full rounded-md border px-3 py-2 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
+                                        :name="['conditions[' + index + '][value]']"
+                                        v-model="condition.value"
+                                    />
+                                </x-admin::flat-picker.date>
+                            </div>
 
-                        <div class="control-group" v-if="matchedAttribute.type == 'select' || matchedAttribute.type == 'radio'">
-                            <select :name="['conditions[' + index + '][value]']" class="control" v-model="condition.value" v-if="matchedAttribute.key != 'catalog|state'">
-                                <option v-for='option in matchedAttribute.options' :value="option.id">
-                                    @{{ option.admin_name }}
-                                </option>
-                            </select>
+                            <div v-if="matchedAttribute.type == 'datetime'">
+                                <x-admin::flat-picker.date class="!w-[140px]" ::allow-input="false">
+                                    <input
+                                        type="datetime"
+                                        class="flex min-h-[39px] w-full rounded-md border px-3 py-2 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
+                                        :name="['conditions[' + index + '][value]']"
+                                        v-model="condition.value"
+                                    />
+                                </x-admin::flat-picker.date>
+                            </div>
 
-                            <select :name="['conditions[' + index + '][value]']" class="control" v-model="condition.value" v-else>
-                                <optgroup v-for='option in matchedAttribute.options' :label="option.admin_name">
-                                    <option v-for='state in option.states' :value="state.code">
-                                        @{{ state.admin_name }}
+                            <div v-if="matchedAttribute.type == 'boolean'">
+                                <select
+                                    :name="['conditions[' + index + '][value]']"
+                                    class="custom-select inline-flex max-h-10 w-full max-w-[196px] cursor-pointer appearance-none items-center justify-between gap-x-1 rounded-md border bg-white px-3 py-1.5 text-sm font-normal text-gray-600 transition-all marker:shadow hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 ltr:pl-3 rtl:pr-3"
+                                    v-model="condition.value"
+                                >
+                                    <option value="1">
+                                        @lang('admin::app.marketing.promotions.catalog-rules.edit.yes')
                                     </option>
-                                </optgroup>
-                            </select>
-                        </div>
 
-                        <div class="control-group" v-if="matchedAttribute.type == 'multiselect' || matchedAttribute.type == 'checkbox'">
-                            <select :name="['conditions[' + index + '][value][]']" class="control" v-model="condition.value" multiple>
-                                <option v-for='option in matchedAttribute.options' :value="option.id">
-                                    @{{ option.admin_name }}
-                                </option>
-                            </select>
+                                    <option value="0">
+                                        @lang('admin::app.marketing.promotions.catalog-rules.edit.no')
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div v-if="matchedAttribute.type == 'select' || matchedAttribute.type == 'radio'">
+                                <select
+                                    :name="['conditions[' + index + '][value]']"
+                                    class="custom-select min:w-1/3 flex h-10 w-[289px] rounded-md border bg-white px-3 py-1.5 text-sm font-normal text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 ltr:pr-10 rtl:pl-10"
+                                    v-if="matchedAttribute.key != 'catalog|state'"
+                                    v-model="condition.value"
+                                >
+                                    <option
+                                        v-for='option in matchedAttribute.options'
+                                        :value="option.id"
+                                        :text="option.admin_name"
+                                    >
+                                    </option>
+                                </select>
+
+                                <select
+                                    :name="['conditions[' + index + '][value]']"
+                                    class="custom-select min:w-1/3 flex h-10 w-[289px] rounded-md border bg-white px-3 py-1.5 text-sm font-normal text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 ltr:pr-10 rtl:pl-10"
+                                    v-model="condition.value"
+                                    v-else
+                                >
+                                    <optgroup
+                                        v-for='option in matchedAttribute.options'
+                                        :label="option.admin_name"
+                                    >
+                                        <option
+                                            v-for='state in option.states'
+                                            :value="state.code"
+                                            :text="state.admin_name"
+                                        >
+                                        </option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <div v-if="matchedAttribute.type == 'multiselect' || matchedAttribute.type == 'checkbox'">
+                                <select
+                                    :name="['conditions[' + index + '][value][]']"
+                                    class="custom-select min:w-1/3 flex h-10 w-[289px] rounded-md border bg-white px-3 py-1.5 text-sm font-normal text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 ltr:pr-10 rtl:pl-10"
+                                    v-model="condition.value"
+                                    multiple
+                                >
+                                    <option
+                                        v-for='option in matchedAttribute.options'
+                                        :value="option.id"
+                                        :text="option.admin_name"
+                                    >
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </td>
 
-            <td class="actions">
-                <i class="icon trash-icon" @click="removeCondition"></i>
-            </td>
-        </tr>
-    </script>
+                <span
+                    class="icon-delete max-h-9 max-w-9 cursor-pointer rounded-md p-1.5 text-2xl transition-all hover:bg-gray-100 dark:hover:bg-gray-950 max-sm:place-self-center"
+                    @click="removeCondition"
+                >
+                </span>
+            </div>
+        </script>
 
-    <script>
-        Vue.component('catalog-rule', {
-            template: '#catalog-rule-template',
+        <!-- v catalog rule condition item component -->
+        <script type="module">
+            app.component('v-catalog-rule-condition-item', {
+                template: "#v-catalog-rule-condition-item-template",
 
-            inject: ['$validator'],
+                props: ['index', 'condition'],
 
-            data: function() {
-                return {
-                    condition_type: {{ old('condition_type') ?: $catalogRule->condition_type }},
+                data() {
+                    return {
+                        conditionAttributes: @json(app('\Webkul\CatalogRule\Repositories\CatalogRuleRepository')->getConditionAttributes()),
 
-                    conditions: @json($catalogRule->conditions ?: [])
-                }
-            },
+                        attributeTypeIndexes: {
+                            'product': 0
+                        },
 
-            methods: {
-                addCondition: function() {
-                    this.conditions.push({
-                        'attribute': '',
-                        'operator': '==',
-                        'value': '',
-                    });
+                        conditionOperators: {
+                            'price': [{
+                                    'operator': '==',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-equal-to')"
+                                }, {
+                                    'operator': '!=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-not-equal-to')"
+                                }, {
+                                    'operator': '>=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-greater-than')"
+                                }, {
+                                    'operator': '<=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-less-than')"
+                                }, {
+                                    'operator': '>',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.greater-than')"
+                                }, {
+                                    'operator': '<',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.less-than')"
+                                }],
+                            'decimal': [{
+                                    'operator': '==',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-equal-to')"
+                                }, {
+                                    'operator': '!=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-not-equal-to')"
+                                }, {
+                                    'operator': '>=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-greater-than')"
+                                }, {
+                                    'operator': '<=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-less-than')"
+                                }, {
+                                    'operator': '>',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.greater-than')"
+                                }, {
+                                    'operator': '<',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.less-than')"
+                                }],
+                            'integer': [{
+                                    'operator': '==',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-equal-to')"
+                                }, {
+                                    'operator': '!=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-not-equal-to')"
+                                }, {
+                                    'operator': '>=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-greater-than')"
+                                }, {
+                                    'operator': '<=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-less-than')"
+                                }, {
+                                    'operator': '>',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.greater-than')"
+                                }, {
+                                    'operator': '<',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.less-than')"
+                                }],
+                            'text': [{
+                                    'operator': '==',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-equal-to')"
+                                }, {
+                                    'operator': '!=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-not-equal-to')"
+                                }, {
+                                    'operator': '{}',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.contain')"
+                                }, {
+                                    'operator': '!{}',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.does-not-contain')"
+                                }],
+                            'boolean': [{
+                                    'operator': '==',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-equal-to')"
+                                }, {
+                                    'operator': '!=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-not-equal-to')"
+                                }],
+                            'date': [{
+                                    'operator': '==',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-equal-to')"
+                                }, {
+                                    'operator': '!=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-not-equal-to')"
+                                }, {
+                                    'operator': '>=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-greater-than')"
+                                }, {
+                                    'operator': '<=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-less-than')"
+                                }, {
+                                    'operator': '>',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.greater-than')"
+                                }, {
+                                    'operator': '<',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.less-than')"
+                                }],
+                            'datetime': [{
+                                    'operator': '==',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-equal-to')"
+                                }, {
+                                    'operator': '!=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-not-equal-to')"
+                                }, {
+                                    'operator': '>=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-greater-than')"
+                                }, {
+                                    'operator': '<=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.equals-or-less-than')"
+                                }, {
+                                    'operator': '>',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.greater-than')"
+                                }, {
+                                    'operator': '<',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.less-than')"
+                                }],
+                            'select': [{
+                                    'operator': '==',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-equal-to')"
+                                }, {
+                                    'operator': '!=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-not-equal-to')"
+                                }],
+                            'radio': [{
+                                    'operator': '==',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-equal-to')"
+                                }, {
+                                    'operator': '!=',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.is-not-equal-to')"
+                                }],
+                            'multiselect': [{
+                                    'operator': '{}',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.contains')"
+                                }, {
+                                    'operator': '!{}',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.does-not-contain')"
+                                }],
+                            'checkbox': [{
+                                    'operator': '{}',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.contains')"
+                                }, {
+                                    'operator': '!{}',
+                                    'label': "@lang('admin::app.marketing.promotions.catalog-rules.edit.does-not-contain')"
+                                }]
+                        }
+                    }
                 },
 
-                removeCondition: function(condition) {
-                    let index = this.conditions.indexOf(condition)
+                computed: {
+                    matchedAttribute() {
+                        if (this.condition.attribute == '')
+                            return;
 
-                    this.conditions.splice(index, 1)
+                        let self = this;
+
+                        let attributeIndex = this.attributeTypeIndexes[this.condition.attribute.split("|")[0]];
+
+                        let matchedAttribute = this.conditionAttributes[attributeIndex]['children'].filter(function (attribute) {
+                            return attribute.key == self.condition.attribute;
+                        });
+
+                        if (matchedAttribute[0]['type'] == 'multiselect' || matchedAttribute[0]['type'] == 'checkbox') {
+                            this.condition.value = this.condition.value
+                                ? (Array.isArray(this.condition.value) ? this.condition.value : [])
+                                : [];
+                        }
+
+                        return matchedAttribute[0];
+                    }
                 },
 
-                onSubmit: function(e) {
-                    this.$root.onSubmit(e)
-                },
-
-                redirectBack: function(fallbackUrl) {
-                    this.$root.redirectBack(fallbackUrl)
-                }
-            }
-        });
-
-        Vue.component('catalog-rule-condition-item', {
-            template: '#catalog-rule-condition-item-template',
-
-            props: ['index', 'condition'],
-
-            data: function() {
-                return {
-                    condition_attributes: @json(app('\Webkul\CatalogRule\Repositories\CatalogRuleRepository')->getConditionAttributes()),
-
-                    attribute_type_indexes: {
-                        'product': 0
+                methods: {
+                    removeCondition() {
+                        this.$emit('onRemoveCondition', this.condition)
                     },
-
-                    condition_operators: {
-                        'price': [{
-                                'operator': '==',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-equal-to') }}'
-                            }, {
-                                'operator': '!=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-not-equal-to') }}'
-                            }, {
-                                'operator': '>=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-greater-than') }}'
-                            }, {
-                                'operator': '<=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-less-than') }}'
-                            }, {
-                                'operator': '<=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.greater-than') }}'
-                            }, {
-                                'operator': '<=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.less-than') }}'
-                            }],
-                        'decimal': [{
-                                'operator': '==',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-equal-to') }}'
-                            }, {
-                                'operator': '!=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-not-equal-to') }}'
-                            }, {
-                                'operator': '>=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-greater-than') }}'
-                            }, {
-                                'operator': '<=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-less-than') }}'
-                            }, {
-                                'operator': '>',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.greater-than') }}'
-                            }, {
-                                'operator': '<',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.less-than') }}'
-                            }],
-                        'integer': [{
-                                'operator': '==',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-equal-to') }}'
-                            }, {
-                                'operator': '!=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-not-equal-to') }}'
-                            }, {
-                                'operator': '>=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-greater-than') }}'
-                            }, {
-                                'operator': '<=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-less-than') }}'
-                            }, {
-                                'operator': '>',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.greater-than') }}'
-                            }, {
-                                'operator': '<',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.less-than') }}'
-                            }],
-                        'text': [{
-                                'operator': '==',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-equal-to') }}'
-                            }, {
-                                'operator': '!=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-not-equal-to') }}'
-                            }, {
-                                'operator': '{}',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.contain') }}'
-                            }, {
-                                'operator': '!{}',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.does-not-contain') }}'
-                            }],
-                        'boolean': [{
-                                'operator': '==',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-equal-to') }}'
-                            }, {
-                                'operator': '!=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-not-equal-to') }}'
-                            }],
-                        'date': [{
-                                'operator': '==',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-equal-to') }}'
-                            }, {
-                                'operator': '!=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-not-equal-to') }}'
-                            }, {
-                                'operator': '>=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-greater-than') }}'
-                            }, {
-                                'operator': '<=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-less-than') }}'
-                            }, {
-                                'operator': '>',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.greater-than') }}'
-                            }, {
-                                'operator': '<',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.less-than') }}'
-                            }],
-                        'datetime': [{
-                                'operator': '==',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-equal-to') }}'
-                            }, {
-                                'operator': '!=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-not-equal-to') }}'
-                            }, {
-                                'operator': '>=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-greater-than') }}'
-                            }, {
-                                'operator': '<=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.equals-or-less-than') }}'
-                            }, {
-                                'operator': '>',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.greater-than') }}'
-                            }, {
-                                'operator': '<',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.less-than') }}'
-                            }],
-                        'select': [{
-                                'operator': '==',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-equal-to') }}'
-                            }, {
-                                'operator': '!=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-not-equal-to') }}'
-                            }],
-                        'radio': [{
-                                'operator': '==',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-equal-to') }}'
-                            }, {
-                                'operator': '!=',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.is-not-equal-to') }}'
-                            }],
-                        'multiselect': [{
-                                'operator': '{}',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.contains') }}'
-                            }, {
-                                'operator': '!{}',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.does-not-contain') }}'
-                            }],
-                        'checkbox': [{
-                                'operator': '{}',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.contains') }}'
-                            }, {
-                                'operator': '!{}',
-                                'label': '{{ __('admin::app.promotions.catalog-rules.does-not-contain') }}'
-                            }]
-                    }
                 }
-            },
-
-            computed: {
-                matchedAttribute: function () {
-                    if (this.condition.attribute == '')
-                        return;
-
-                    let self = this;
-
-                    let attributeIndex = this.attribute_type_indexes[this.condition.attribute.split("|")[0]];
-
-                    matchedAttribute = this.condition_attributes[attributeIndex]['children'].filter(function (attribute) {
-                        return attribute.key == self.condition.attribute;
-                    });
-
-                    if (matchedAttribute[0]['type'] == 'multiselect' || matchedAttribute[0]['type'] == 'checkbox') {
-                        // this.condition.operator = '{}';
-
-                        this.condition.value = this.condition.value == '' && this.condition.value != undefined
-                                ? []
-                                : Array.isArray(this.condition.value) ? this.condition.value : [];
-                    }
-
-                    return matchedAttribute[0];
-                }
-            },
-
-            methods: {
-                removeCondition: function() {
-                    this.$emit('onRemoveCondition', this.condition)
-                }
-            }
-        });
-    </script>
-@endpush
+            });
+        </script>
+    @endPushOnce
+</x-admin::layouts>

@@ -2,42 +2,22 @@
 
 namespace Webkul\Paypal\Http\Controllers;
 
-use Webkul\Paypal\Helpers\Ipn;
 use Webkul\Checkout\Facades\Cart;
+use Webkul\Paypal\Helpers\Ipn;
 use Webkul\Sales\Repositories\OrderRepository;
+use Webkul\Sales\Transformers\OrderResource;
 
 class StandardController extends Controller
 {
     /**
-     * OrderRepository $orderRepository
-     *
-     * @var \Webkul\Sales\Repositories\OrderRepository
-     */
-    protected $orderRepository;
-
-    /**
-     * IPN $ipnHelper
-     *
-     * @var \Webkul\Paypal\Helpers\Ipn
-     */
-    protected $ipnHelper;
-
-    /**
      * Create a new controller instance.
      *
-     * @param  \Webkul\Attribute\Repositories\OrderRepository  $orderRepository
-     * @param  \Webkul\Paypal\Helpers\Ipn  $ipnHelper
      * @return void
      */
     public function __construct(
-        OrderRepository $orderRepository,
-        Ipn $ipnHelper
-    )
-    {
-        $this->orderRepository = $orderRepository;
-
-        $this->ipnHelper = $ipnHelper;
-    }
+        protected OrderRepository $orderRepository,
+        protected Ipn $ipnHelper
+    ) {}
 
     /**
      * Redirects to the paypal.
@@ -56,7 +36,7 @@ class StandardController extends Controller
      */
     public function cancel()
     {
-        session()->flash('error', 'Paypal payment has been canceled.');
+        session()->flash('error', trans('shop::app.checkout.cart.paypal-payment-cancelled'));
 
         return redirect()->route('shop.checkout.cart.index');
     }
@@ -68,13 +48,17 @@ class StandardController extends Controller
      */
     public function success()
     {
-        $order = $this->orderRepository->create(Cart::prepareDataForOrder());
+        $cart = Cart::getCart();
+
+        $data = (new OrderResource($cart))->jsonSerialize();
+
+        $order = $this->orderRepository->create($data);
 
         Cart::deActivateCart();
 
-        session()->flash('order', $order);
+        session()->flash('order_id', $order->id);
 
-        return redirect()->route('shop.checkout.success');
+        return redirect()->route('shop.checkout.onepage.success');
     }
 
     /**

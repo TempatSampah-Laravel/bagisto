@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateTaxMappingsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -15,18 +15,13 @@ class CreateTaxMappingsTable extends Migration
     {
         Schema::create('tax_categories_tax_rates', function (Blueprint $table) {
             $table->increments('id');
-
             $table->integer('tax_category_id')->unsigned();
-
-            $table->foreign('tax_category_id')->references('id')->on('tax_categories')->onDelete('cascade');
-
             $table->integer('tax_rate_id')->unsigned();
-
-            $table->foreign('tax_rate_id')->references('id')->on('tax_rates')->onDelete('cascade');
+            $table->timestamps();
 
             $table->unique(['tax_category_id', 'tax_rate_id'], 'tax_map_index_unique');
-
-            $table->timestamps();
+            $table->foreign('tax_category_id')->references('id')->on('tax_categories')->onDelete('cascade');
+            $table->foreign('tax_rate_id')->references('id')->on('tax_rates')->onDelete('cascade');
         });
     }
 
@@ -39,4 +34,4 @@ class CreateTaxMappingsTable extends Migration
     {
         Schema::dropIfExists('tax_categories_tax_rates');
     }
-}
+};

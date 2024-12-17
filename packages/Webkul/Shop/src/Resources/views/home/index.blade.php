@@ -1,53 +1,81 @@
-@extends('shop::layouts.master')
-
 @php
     $channel = core()->getCurrentChannel();
-
-    $homeSEO = $channel->home_seo;
-
-    if (isset($homeSEO)) {
-        $homeSEO = json_decode($channel->home_seo);
-
-        $metaTitle = $homeSEO->meta_title;
-
-        $metaDescription = $homeSEO->meta_description;
-
-        $metaKeywords = $homeSEO->meta_keywords;
-    }
 @endphp
 
-@section('page_title')
-    {{ isset($metaTitle) ? $metaTitle : "" }}
-@endsection
+<!-- SEO Meta Content -->
+@push ('meta')
+    <meta
+        name="title"
+        content="{{ $channel->home_seo['meta_title'] ?? '' }}"
+    />
 
-@section('head')
+    <meta
+        name="description"
+        content="{{ $channel->home_seo['meta_description'] ?? '' }}"
+    />
 
-    @if (isset($homeSEO))
-        @isset($metaTitle)
-            <meta name="title" content="{{ $metaTitle }}" />
-        @endisset
+    <meta
+        name="keywords"
+        content="{{ $channel->home_seo['meta_keywords'] ?? '' }}"
+    />
+@endPush
 
-        @isset($metaDescription)
-            <meta name="description" content="{{ $metaDescription }}" />
-        @endisset
+<x-shop::layouts>
+    <!-- Page Title -->
+    <x-slot:title>
+        {{  $channel->home_seo['meta_title'] ?? '' }}
+    </x-slot>
+    
+    <!-- Loop over the theme customization -->
+    @foreach ($customizations as $customization)
+        @php ($data = $customization->options) @endphp
 
-        @isset($metaKeywords)
-            <meta name="keywords" content="{{ $metaKeywords }}" />
-        @endisset
-    @endif
-@endsection
+        <!-- Static content -->
+        @switch ($customization->type)
+            @case ($customization::IMAGE_CAROUSEL)
+                <!-- Image Carousel -->
+                <x-shop::carousel
+                    :options="$data"
+                    aria-label="{{ trans('shop::app.home.index.image-carousel') }}"
+                />
 
-@section('content-wrapper')
-    {!! view_render_event('bagisto.shop.home.content.before') !!}
+                @break
+            @case ($customization::STATIC_CONTENT)
+                <!-- push style -->
+                @if (! empty($data['css']))
+                    @push ('styles')
+                        <style>
+                            {{ $data['css'] }}
+                        </style>
+                    @endpush
+                @endif
 
-    @if (! is_null($channel->home_page_content))
-        {!! DbView::make($channel)->field('home_page_content')->with(['sliderData' => $sliderData])->render() !!}
-    @else
-        @include('shop::home.slider', ['sliderData' => $sliderData])
-        @include('shop::home.featured-products')
-        @include('shop::home.new-products')
-    @endif
+                <!-- render html -->
+                @if (! empty($data['html']))
+                    {!! $data['html'] !!}
+                @endif
 
-    {{ view_render_event('bagisto.shop.home.content.after') }}
+                @break
+            @case ($customization::CATEGORY_CAROUSEL)
+                <!-- Categories carousel -->
+                <x-shop::categories.carousel
+                    :title="$data['title'] ?? ''"
+                    :src="route('shop.api.categories.index', $data['filters'] ?? [])"
+                    :navigation-link="route('shop.home.index')"
+                    aria-label="{{ trans('shop::app.home.index.categories-carousel') }}"
+                />
 
-@endsection
+                @break
+            @case ($customization::PRODUCT_CAROUSEL)
+                <!-- Product Carousel -->
+                <x-shop::products.carousel
+                    :title="$data['title'] ?? ''"
+                    :src="route('shop.api.products.index', $data['filters'] ?? [])"
+                    :navigation-link="route('shop.search.index', $data['filters'] ?? [])"
+                    aria-label="{{ trans('shop::app.home.index.product-carousel') }}"
+                />
+
+                @break
+        @endswitch
+    @endforeach
+</x-shop::layouts>

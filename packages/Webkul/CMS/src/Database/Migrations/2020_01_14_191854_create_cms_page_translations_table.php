@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateCmsPageTranslationsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -17,13 +17,13 @@ class CreateCmsPageTranslationsTable extends Migration
             $table->increments('id');
             $table->string('page_title');
             $table->string('url_key');
-            $table->text('html_content')->nullable();
+            $table->longtext('html_content')->nullable();
             $table->text('meta_title')->nullable();
             $table->text('meta_description')->nullable();
             $table->text('meta_keywords')->nullable();
             $table->string('locale');
-
             $table->integer('cms_page_id')->unsigned();
+
             $table->unique(['cms_page_id', 'url_key', 'locale']);
             $table->foreign('cms_page_id')->references('id')->on('cms_pages')->onDelete('cascade');
         });
@@ -38,4 +38,4 @@ class CreateCmsPageTranslationsTable extends Migration
     {
         Schema::dropIfExists('cms_page_translations');
     }
-}
+};

@@ -2,43 +2,24 @@
 
 namespace Webkul\Shop\Http\Controllers;
 
-use Webkul\Shop\Http\Controllers\Controller;
-use Webkul\Core\Repositories\SliderRepository;
-use Webkul\Product\Repositories\SearchRepository;
+use Illuminate\Support\Facades\Mail;
+use Webkul\Shop\Http\Requests\ContactRequest;
+use Webkul\Shop\Mail\ContactUs;
+use Webkul\Theme\Repositories\ThemeCustomizationRepository;
 
 class HomeController extends Controller
 {
     /**
-     * Slider repository instance.
-     *
-     * @var \Webkul\Core\Repositories\SliderRepository
+     * Using const variable for status
      */
-    protected $sliderRepository;
-
-    /**
-     * Search repository instance.
-     *
-     * @var \Webkul\Core\Repositories\SearchRepository
-     */
-    protected $searchRepository;
+    const STATUS = 1;
 
     /**
      * Create a new controller instance.
      *
-     * @param  \Webkul\Core\Repositories\SliderRepository  $sliderRepository
-     * @param  \Webkul\Product\Repositories\SearchRepository  $searchRepository
      * @return void
      */
-    public function __construct(
-        SliderRepository $sliderRepository,
-        SearchRepository $searchRepository
-    ) {
-        $this->sliderRepository = $sliderRepository;
-
-        $this->searchRepository = $searchRepository;
-
-        parent::__construct();
-    }
+    public function __construct(protected ThemeCustomizationRepository $themeCustomizationRepository) {}
 
     /**
      * Loads the home page for the storefront.
@@ -47,9 +28,15 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $sliderData = $this->sliderRepository->getActiveSliders();
+        visitor()->visit();
 
-        return view($this->_config['view'], compact('sliderData'));
+        $customizations = $this->themeCustomizationRepository->orderBy('sort_order')->findWhere([
+            'status'     => self::STATUS,
+            'channel_id' => core()->getCurrentChannel()->id,
+            'theme_code' => core()->getCurrentChannel()->theme,
+        ]);
+
+        return view('shop::home.index', compact('customizations'));
     }
 
     /**
@@ -63,12 +50,37 @@ class HomeController extends Controller
     }
 
     /**
-     * Upload image for product search with machine learning.
+     * Summary of contact.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
-    public function upload()
+    public function contactUs()
     {
-        return $this->searchRepository->uploadSearchImage(request()->all());
+        return view('shop::home.contact-us');
+    }
+
+    /**
+     * Summary of store.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function sendContactUsMail(ContactRequest $contactRequest)
+    {
+        try {
+            Mail::queue(new ContactUs($contactRequest->only([
+                'name',
+                'email',
+                'contact',
+                'message',
+            ])));
+
+            session()->flash('success', trans('shop::app.home.thanks-for-contact'));
+        } catch (\Exception $e) {
+            session()->flash('error', $e->getMessage());
+
+            report($e);
+        }
+
+        return back();
     }
 }

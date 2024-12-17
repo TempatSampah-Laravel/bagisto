@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateCountryStatesTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -15,11 +15,11 @@ class CreateCountryStatesTable extends Migration
     {
         Schema::create('country_states', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('country_id')->nullable()->unsigned();
             $table->string('country_code')->nullable();
             $table->string('code')->nullable();
             $table->string('default_name')->nullable();
-            
-            $table->integer('country_id')->nullable()->unsigned();
+
             $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
         });
     }
@@ -33,4 +33,4 @@ class CreateCountryStatesTable extends Migration
     {
         Schema::dropIfExists('country_states');
     }
-}
+};

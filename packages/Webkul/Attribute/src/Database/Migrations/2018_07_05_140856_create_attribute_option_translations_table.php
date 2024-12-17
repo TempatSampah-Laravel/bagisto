@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateAttributeOptionTranslationsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -15,10 +15,11 @@ class CreateAttributeOptionTranslationsTable extends Migration
     {
         Schema::create('attribute_option_translations', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('attribute_option_id')->unsigned();
             $table->string('locale');
             $table->text('label')->nullable();
-            $table->integer('attribute_option_id')->unsigned();
-            $table->unique(['attribute_option_id', 'locale']);
+
+            $table->unique(['attribute_option_id', 'locale'], 'attribute_option_locale_unique');
             $table->foreign('attribute_option_id')->references('id')->on('attribute_options')->onDelete('cascade');
         });
     }
@@ -32,4 +33,4 @@ class CreateAttributeOptionTranslationsTable extends Migration
     {
         Schema::dropIfExists('attribute_option_translations');
     }
-}
+};

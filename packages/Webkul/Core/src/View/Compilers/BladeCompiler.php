@@ -16,19 +16,22 @@ class BladeCompiler extends BaseBladeCompiler
     {
         $tokens = $this->getOpenAndClosingPhpTokens($contents);
 
-        if (config('view.tracer')
+        if (
+            config('view.tracer')
             && strpos($this->getPath(), 'tracer/style.blade.php') == false
             && strpos($this->getPath(), 'master.blade.php') == false
         ) {
             $finalPath = str_replace('/Providers/..', '', str_replace(base_path(), '', $this->getPath()));
-            
-            $contents = '<div class="path-hint" data-toggle="tooltip" data-title="' . $finalPath . '" data-id="' . uniqid() . '"><span class="testing"></span>' . $contents . '</div>';
+
+            $contents = '<div class="path-hint" data-toggle="tooltip" data-title="'.$finalPath.'" data-id="'.uniqid().'"><span class="testing"></span>'.$contents.'</div>';
         }
 
-        if ($tokens->isNotEmpty() && $tokens->last() !== T_CLOSE_TAG) {
+        if (
+            $tokens->isNotEmpty()
+            && $tokens->last() !== T_CLOSE_TAG
+        ) {
             $contents .= ' ?>';
         }
-
 
         return $contents."<?php /**PATH {$this->getPath()} ENDPATH**/ ?>";
     }

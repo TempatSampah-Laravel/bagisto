@@ -2,11 +2,12 @@
 
 namespace Webkul\Product\Models;
 
-use Webkul\Core\Eloquent\TranslatableModel;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Webkul\Product\Database\Factories\ProductDownloadableLinkFactory;
+use Illuminate\Support\Facades\Storage;
+use Webkul\Core\Eloquent\TranslatableModel;
 use Webkul\Product\Contracts\ProductDownloadableLink as ProductDownloadableLinkContract;
+use Webkul\Product\Database\Factories\ProductDownloadableLinkFactory;
 
 class ProductDownloadableLink extends TranslatableModel implements ProductDownloadableLinkContract
 {
@@ -45,7 +46,7 @@ class ProductDownloadableLink extends TranslatableModel implements ProductDownlo
      */
     public function file_url(): string
     {
-        return Storage::url($this->path);
+        return Storage::url($this->file);
     }
 
     /**
@@ -61,7 +62,7 @@ class ProductDownloadableLink extends TranslatableModel implements ProductDownlo
      */
     public function sample_file_url(): string
     {
-        return Storage::url($this->path);
+        return Storage::url($this->sample_file);
     }
 
     /**
@@ -72,9 +73,6 @@ class ProductDownloadableLink extends TranslatableModel implements ProductDownlo
         return $this->sample_file_url();
     }
 
-    /**
-     * @return array
-     */
     public function toArray(): array
     {
         $array = parent::toArray();
@@ -92,10 +90,8 @@ class ProductDownloadableLink extends TranslatableModel implements ProductDownlo
 
     /**
      * Create a new factory instance for the model.
-     *
-     * @return ProductDownloadableLinkFactory
      */
-    protected static function newFactory(): ProductDownloadableLinkFactory
+    protected static function newFactory(): Factory
     {
         return ProductDownloadableLinkFactory::new();
     }

@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateProductBundleOptionsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -15,11 +15,11 @@ class CreateProductBundleOptionsTable extends Migration
     {
         Schema::create('product_bundle_options', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('product_id')->unsigned();
             $table->string('type');
             $table->boolean('is_required')->default(1);
             $table->integer('sort_order')->default(0);
 
-            $table->integer('product_id')->unsigned();
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }
@@ -33,4 +33,4 @@ class CreateProductBundleOptionsTable extends Migration
     {
         Schema::dropIfExists('product_bundle_options');
     }
-}
+};

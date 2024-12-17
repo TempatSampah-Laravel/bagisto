@@ -2,65 +2,24 @@
 
 namespace Webkul\CartRule\Listeners;
 
-use Webkul\CartRule\Repositories\CartRuleRepository;
-use Webkul\CartRule\Repositories\CartRuleCustomerRepository;
 use Webkul\CartRule\Repositories\CartRuleCouponRepository;
 use Webkul\CartRule\Repositories\CartRuleCouponUsageRepository;
+use Webkul\CartRule\Repositories\CartRuleCustomerRepository;
+use Webkul\CartRule\Repositories\CartRuleRepository;
 
 class Order
 {
     /**
-     * CartRuleRepository object
-     *
-     * @var \Webkul\CartRule\Repositories\CartRuleRepository
-     */
-    protected $cartRuleRepository;
-
-    /**
-     * CartRuleCustomerRepository object
-     *
-     * @var \Webkul\CartRule\Repositories\CartRuleCustomerRepository
-     */
-    protected $cartRuleCustomerRepository;
-
-    /**
-     * CartRuleCouponRepository object
-     *
-     * @var \Webkul\CartRule\Repositories\CartRuleCouponRepository
-     */
-    protected $cartRuleCouponRepository;
-
-    /**
-     * CartRuleCouponUsageRepository object
-     *
-     * @var \Webkul\CartRule\Repositories\CartRuleCouponUsageRepository
-     */
-    protected $cartRuleCouponUsageRepository;
-
-    /**
      * Create a new listener instance.
      *
-     * @param  \Webkul\CartRule\Repositories\CartRuleRepository  $cartRuleRepository
-     * @param  \Webkul\CartRule\Repositories\CartRuleCustomerRepository  $cartRuleCustomerRepository
-     * @param  \Webkul\CartRule\Repositories\CartRuleCouponRepository  $cartRuleCouponRepository
-     * @param  \Webkul\CartRule\Repositories\CartRuleCouponUsageRepository  $cartRuleCouponUsageRepository
      * @return void
      */
     public function __construct(
-        CartRuleRepository $cartRuleRepository,
-        CartRuleCustomerRepository $cartRuleCustomerRepository,
-        CartRuleCouponRepository $cartRuleCouponRepository,
-        CartRuleCouponUsageRepository $cartRuleCouponUsageRepository
-    )
-    {
-        $this->cartRuleRepository = $cartRuleRepository;
-
-        $this->cartRuleCustomerRepository = $cartRuleCustomerRepository;
-
-        $this->cartRuleCouponRepository = $cartRuleCouponRepository;
-
-        $this->cartRuleCouponUsageRepository = $cartRuleCouponUsageRepository;
-    }
+        protected CartRuleRepository $cartRuleRepository,
+        protected CartRuleCustomerRepository $cartRuleCustomerRepository,
+        protected CartRuleCouponRepository $cartRuleCouponRepository,
+        protected CartRuleCouponUsageRepository $cartRuleCouponUsageRepository
+    ) {}
 
     /**
      * Save cart rule and cart rule coupon properties after place order

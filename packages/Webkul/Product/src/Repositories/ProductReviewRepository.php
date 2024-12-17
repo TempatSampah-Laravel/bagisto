@@ -2,17 +2,14 @@
 
 namespace Webkul\Product\Repositories;
 
-use Illuminate\Container\Container as App;
 use Webkul\Core\Eloquent\Repository;
 
 class ProductReviewRepository extends Repository
 {
     /**
      * Specify Model class name
-     *
-     * @return mixed
      */
-    function model()
+    public function model(): string
     {
         return 'Webkul\Product\Contracts\ProductReview';
     }
@@ -20,13 +17,14 @@ class ProductReviewRepository extends Repository
     /**
      * Retrieve review for customerId
      *
-     * @param int $customerId
+     * @return \Illuminate\Support\Collection
      */
-    function getCustomerReview()
+    public function getCustomerReview()
     {
-        $customerId = auth()->guard('customer')->user()->id;
-
-        $reviews = $this->model->where(['customer_id'=> $customerId])->with('product')->paginate(5);
+        $reviews = $this->model
+            ->where(['customer_id' => auth()->guard('customer')->user()->id])
+            ->with('product')
+            ->paginate(5);
 
         return $reviews;
     }

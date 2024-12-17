@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateTaxCategoriesTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -15,17 +15,9 @@ class CreateTaxCategoriesTable extends Migration
     {
         Schema::create('tax_categories', function (Blueprint $table) {
             $table->increments('id');
-
-            $table->integer('channel_id')->unsigned();
-
-            $table->foreign('channel_id')->references('id')->on('channels')->onDelete('cascade');
-
             $table->string('code')->unique();
-
-            $table->string('name')->unique();
-
+            $table->string('name');
             $table->longtext('description');
-
             $table->timestamps();
         });
     }
@@ -39,4 +31,4 @@ class CreateTaxCategoriesTable extends Migration
     {
         Schema::dropIfExists('tax_categories');
     }
-}
+};

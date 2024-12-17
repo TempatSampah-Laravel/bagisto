@@ -6,13 +6,10 @@ use Webkul\Core\Eloquent\Repository;
 
 class AttributeOptionTranslationRepository extends Repository
 {
-
     /**
      * Specify Model class name
-     *
-     * @return mixed
      */
-    function model()
+    public function model(): string
     {
         return 'Webkul\Attribute\Contracts\AttributeOptionTranslation';
     }

@@ -3,7 +3,6 @@
 namespace Webkul\CartRule\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Routing\Router;
 
 class CartRuleServiceProvider extends ServiceProvider
 {
@@ -12,9 +11,9 @@ class CartRuleServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot(Router $router)
+    public function boot()
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
 
         $this->app->register(EventServiceProvider::class);
     }

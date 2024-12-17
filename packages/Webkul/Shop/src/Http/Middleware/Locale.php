@@ -2,49 +2,39 @@
 
 namespace Webkul\Shop\Http\Middleware;
 
-use Webkul\Core\Repositories\LocaleRepository;
 use Closure;
+use Webkul\Core\Repositories\LocaleRepository;
 
 class Locale
 {
     /**
-     * @var LocaleRepository
+     * Create a middleware instance.
+     *
+     * @return void
      */
-    protected $locale;
+    public function __construct(protected LocaleRepository $localeRepository) {}
 
     /**
-     * @param \Webkul\Core\Repositories\LocaleRepository $locale
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return mixed
      */
-    public function __construct(LocaleRepository $locale)
-    {
-        $this->locale = $locale;
-    }
-
-    /**
-    * Handle an incoming request.
-    *
-    * @param  \Illuminate\Http\Request  $request
-    * @param  \Closure  $next
-    * @return mixed
-    */
     public function handle($request, Closure $next)
     {
-        $locale = core()->getRequestedLocaleCode('locale', false);
+        $locales = core()->getCurrentChannel()->locales->pluck('code')->toArray();
+        $localeCode = core()->getRequestedLocaleCode('locale', false);
 
-        if ($locale) {
-            if ($this->locale->findOneByField('code', $locale)) {
-                app()->setLocale($locale);
-
-                session()->put('locale', $locale);
-            }
-        } else {
-            if ($locale = session()->get('locale')) {
-                app()->setLocale($locale);
-            } else {
-                app()->setLocale(core()->getDefaultChannel()->default_locale->code);
-            }
+        if (! $localeCode || ! in_array($localeCode, $locales)) {
+            $localeCode = session()->get('locale');
         }
 
+        if (! $localeCode || ! in_array($localeCode, $locales)) {
+            $localeCode = core()->getCurrentChannel()->default_locale->code;
+        }
+
+        app()->setLocale($localeCode);
+        session()->put('locale', $localeCode);
         unset($request['locale']);
 
         return $next($request);

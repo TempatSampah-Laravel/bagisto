@@ -8,39 +8,33 @@ use Webkul\Core\Repositories\CurrencyRepository;
 class Currency
 {
     /**
-     * @var CurrencyRepository
+     * Create a middleware instance.
+     *
+     * @return void
      */
-    protected $currency;
+    public function __construct(protected CurrencyRepository $currencyRepository) {}
 
     /**
-     * @param \Webkul\Core\Repositories\CurrencyRepository $locale
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return mixed
      */
-    public function __construct(CurrencyRepository $currency)
-    {
-        $this->currency = $currency;
-    }
-
-    /**
-    * Handle an incoming request.
-    *
-    * @param  \Illuminate\Http\Request  $request
-    * @param  \Closure  $next
-    * @return mixed
-    */
     public function handle($request, Closure $next)
     {
-        $currencyCode = request()->get('currency');
+        $currencies = core()->getCurrentChannel()->currencies->pluck('code')->toArray();
+        $currencyCode = core()->getRequestedLocaleCode('currency', false);
 
-        if ($currency = $currencyCode) {
-            if ($this->currency->findOneByField('code', $currency)) {
-                session()->put('currency', $currency);
-            }
-        } else {
-            if (! session()->get('currency')) {
-                session()->put('currency', core()->getChannelBaseCurrencyCode());
-            }
+        if (! $currencyCode || ! in_array($currencyCode, $currencies)) {
+            $currencyCode = session()->get('currency');
         }
 
+        if (! $currencyCode || ! in_array($currencyCode, $currencies)) {
+            $currencyCode = core()->getCurrentChannel()->base_currency->code;
+        }
+
+        core()->setCurrentCurrency($currencyCode);
+        session()->put('currency', $currencyCode);
         unset($request['currency']);
 
         return $next($request);

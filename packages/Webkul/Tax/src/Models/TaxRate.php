@@ -2,11 +2,12 @@
 
 namespace Webkul\Tax\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Webkul\Tax\Database\Factories\TaxRateFactory;
-use Webkul\Tax\Contracts\TaxRate as TaxRateContract;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Webkul\Tax\Contracts\TaxRate as TaxRateContract;
+use Webkul\Tax\Database\Factories\TaxRateFactory;
 
 class TaxRate extends Model implements TaxRateContract
 {
@@ -17,7 +18,6 @@ class TaxRate extends Model implements TaxRateContract
      *
      * @var array
      */
-
     protected $table = 'tax_rates';
 
     protected $fillable = [
@@ -38,10 +38,8 @@ class TaxRate extends Model implements TaxRateContract
 
     /**
      * Create a new factory instance for the model.
-     *
-     * @return TaxRateFactory
      */
-    protected static function newFactory(): TaxRateFactory
+    protected static function newFactory(): Factory
     {
         return TaxRateFactory::new();
     }

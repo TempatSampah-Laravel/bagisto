@@ -2,43 +2,60 @@
 
 use Illuminate\Support\Facades\Route;
 use Webkul\Admin\Http\Controllers\DashboardController;
-use Webkul\Admin\Http\Controllers\ExportController;
+use Webkul\Admin\Http\Controllers\DataGrid\DataGridController;
+use Webkul\Admin\Http\Controllers\DataGrid\SavedFilterController;
+use Webkul\Admin\Http\Controllers\MagicAIController;
 use Webkul\Admin\Http\Controllers\TinyMCEController;
-use Webkul\User\Http\Controllers\AccountController;
-use Webkul\User\Http\Controllers\SessionController;
+use Webkul\Admin\Http\Controllers\User\AccountController;
+use Webkul\Admin\Http\Controllers\User\SessionController;
 
 /**
- * Extra routes.
+ * Dashboard routes.
  */
-Route::group(['middleware' => ['web', 'admin', 'admin_locale'], 'prefix' => config('app.admin_url')], function () {
-    /**
-     * Tinymce file upload handler.
-     */
-    Route::post('tinymce/upload', [TinyMCEController::class, 'upload'])
-        ->name('admin.tinymce.upload');
+Route::controller(DashboardController::class)->prefix('dashboard')->group(function () {
+    Route::get('', 'index')->name('admin.dashboard.index');
 
-    /**
-     * Dashboard routes.
-     */
-    Route::get('dashboard', [DashboardController::class, 'index'])->defaults('_config', [
-        'view' => 'admin::dashboard.index',
-    ])->name('admin.dashboard.index');
-
-    /**
-     * Admin profile routes.
-     */
-    Route::get('/account', [AccountController::class, 'edit'])->defaults('_config', [
-        'view' => 'admin::account.edit',
-    ])->name('admin.account.edit');
-
-    Route::put('/account', [AccountController::class, 'update'])->name('admin.account.update');
-
-    Route::get('/logout', [SessionController::class, 'destroy'])->defaults('_config', [
-        'redirect' => 'admin.session.create',
-    ])->name('admin.session.destroy');
-
-    /**
-     * DataGrid export.
-     */
-    Route::post('/export', [ExportController::class, 'export'])->name('admin.datagrid.export');
+    Route::get('stats', 'stats')->name('admin.dashboard.stats');
 });
+
+/**
+ * Datagrid routes.
+ */
+Route::controller(DataGridController::class)->prefix('datagrid')->group(function () {
+    Route::get('look-up', 'lookUp')->name('admin.datagrid.look_up');
+
+    Route::controller(SavedFilterController::class)->prefix('saved-filters')->group(function () {
+        Route::post('', 'store')->name('admin.datagrid.saved_filters.store');
+
+        Route::get('', 'get')->name('admin.datagrid.saved_filters.index');
+
+        Route::put('{id}', 'update')->name('admin.datagrid.saved_filters.update');
+
+        Route::delete('{id}', 'destroy')->name('admin.datagrid.saved_filters.destroy');
+    });
+});
+
+/**
+ * Tinymce file upload handler.
+ */
+Route::post('tinymce/upload', [TinyMCEController::class, 'upload'])->name('admin.tinymce.upload');
+
+/**
+ * AI Routes
+ */
+Route::controller(MagicAIController::class)->prefix('magic-ai')->group(function () {
+    Route::post('content', 'content')->name('admin.magic_ai.content');
+
+    Route::post('image', 'image')->name('admin.magic_ai.image');
+});
+
+/**
+ * Admin profile routes.
+ */
+Route::controller(AccountController::class)->prefix('account')->group(function () {
+    Route::get('', 'edit')->name('admin.account.edit');
+
+    Route::put('', 'update')->name('admin.account.update');
+});
+
+Route::delete('logout', [SessionController::class, 'destroy'])->name('admin.session.destroy');

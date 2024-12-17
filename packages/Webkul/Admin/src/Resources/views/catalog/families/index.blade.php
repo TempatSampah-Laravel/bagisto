@@ -1,32 +1,28 @@
-@extends('admin::layouts.content')
+<x-admin::layouts>
+    <x-slot:title>
+        @lang('admin::app.catalog.families.index.title')
+    </x-slot>
 
-@section('page_title')
-    {{ __('admin::app.catalog.families.title') }}
-@stop
+    <div class="flex items-center justify-between gap-4 max-sm:flex-wrap">
+        <p class="text-xl font-bold text-gray-800 dark:text-white">
+            @lang('admin::app.catalog.families.index.title')
+        </p>
 
-@section('content')
-    <div class="content">
-        <div class="page-header">
-            <div class="page-title">
-                <h1>{{ __('admin::app.catalog.families.title') }}</h1>
-            </div>
-
-            <div class="page-action">
-                <a href="{{ route('admin.catalog.families.create') }}" class="btn btn-lg btn-primary">
-                    {{ __('admin::app.catalog.families.add-family-btn-title') }}
+        <div class="flex items-center gap-x-2.5">
+            @if (bouncer()->hasPermission('catalog.families.create'))
+                <a href="{{ route('admin.catalog.families.create') }}">
+                    <div class="primary-button">
+                        @lang('admin::app.catalog.families.index.add')
+                    </div>
                 </a>
-            </div>
+            @endif
         </div>
-
-        {!! view_render_event('bagisto.admin.catalog.families.list.before') !!}
-
-        <div class="page-content">
-
-            {!! app('Webkul\Admin\DataGrids\AttributeFamilyDataGrid')->render() !!}
-
-        </div>
-
-        {!! view_render_event('bagisto.admin.catalog.families.list.after') !!}
-        
     </div>
-@stop
+
+    {!! view_render_event('bagisto.admin.catalog.families.list.before') !!}
+
+    <x-admin::datagrid :src="route('admin.catalog.families.index')" />
+
+    {!! view_render_event('bagisto.admin.catalog.families.list.after') !!}
+
+</x-admin::layouts>

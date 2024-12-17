@@ -7,7 +7,7 @@ use Astrotomic\Translatable\Locales as BaseLocales;
 class Locales extends BaseLocales
 {
     /**
-     * @return void
+     * Load.
      */
     public function load(): void
     {

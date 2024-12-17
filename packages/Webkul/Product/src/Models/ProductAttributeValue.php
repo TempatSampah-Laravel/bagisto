@@ -2,12 +2,13 @@
 
 namespace Webkul\Product\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Webkul\Attribute\Models\AttributeProxy;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Webkul\Product\Database\Factories\ProductAttributeValueFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Webkul\Attribute\Models\AttributeProxy;
 use Webkul\Product\Contracts\ProductAttributeValue as ProductAttributeValueContract;
+use Webkul\Product\Database\Factories\ProductAttributeValueFactory;
 
 class ProductAttributeValue extends Model implements ProductAttributeValueContract
 {
@@ -26,17 +27,17 @@ class ProductAttributeValue extends Model implements ProductAttributeValueContra
      * @var array
      */
     public static $attributeTypeFields = [
-        'text' => 'text_value',
-        'textarea' => 'text_value',
-        'price' => 'float_value',
-        'boolean' => 'boolean_value',
-        'select' => 'integer_value',
+        'text'        => 'text_value',
+        'textarea'    => 'text_value',
+        'price'       => 'float_value',
+        'boolean'     => 'boolean_value',
+        'select'      => 'integer_value',
         'multiselect' => 'text_value',
-        'datetime' => 'datetime_value',
-        'date' => 'date_value',
-        'file' => 'text_value',
-        'image' => 'text_value',
-        'checkbox' => 'text_value',
+        'datetime'    => 'datetime_value',
+        'date'        => 'date_value',
+        'file'        => 'text_value',
+        'image'       => 'text_value',
+        'checkbox'    => 'text_value',
     ];
 
     /**
@@ -49,6 +50,7 @@ class ProductAttributeValue extends Model implements ProductAttributeValueContra
         'attribute_id',
         'locale',
         'channel',
+        'unique_id',
         'text_value',
         'boolean_value',
         'integer_value',
@@ -76,10 +78,8 @@ class ProductAttributeValue extends Model implements ProductAttributeValueContra
 
     /**
      * Create a new factory instance for the model.
-     *
-     * @return ProductAttributeValueFactory
      */
-    protected static function newFactory(): ProductAttributeValueFactory
+    protected static function newFactory(): Factory
     {
         return ProductAttributeValueFactory::new();
     }

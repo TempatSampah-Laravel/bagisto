@@ -2,8 +2,8 @@
 
 namespace Webkul\Product\Database\Factories;
 
-use Webkul\Product\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Webkul\Product\Models\Product;
 
 class ProductFactory extends Factory
 {
@@ -15,28 +15,33 @@ class ProductFactory extends Factory
     protected $model = Product::class;
 
     /**
+     * States.
+     *
      * @var string[]
      */
     protected $states = [
         'simple',
+        'configurable',
         'virtual',
+        'grouped',
         'downloadable',
-        'booking',
+        'bundle',
     ];
 
     /**
      * Define the model's default state.
-     *
-     * @return array
      */
     public function definition(): array
     {
         return [
-            'sku' => $this->faker->uuid,
+            'sku'                 => $this->faker->uuid,
             'attribute_family_id' => 1,
         ];
     }
 
+    /**
+     * Simple state.
+     */
     public function simple(): ProductFactory
     {
         return $this->state(function (array $attributes) {
@@ -46,6 +51,9 @@ class ProductFactory extends Factory
         });
     }
 
+    /**
+     * Virtual state.
+     */
     public function virtual(): ProductFactory
     {
         return $this->state(function (array $attributes) {
@@ -55,6 +63,33 @@ class ProductFactory extends Factory
         });
     }
 
+    /**
+     * Grouped state.
+     */
+    public function grouped(): ProductFactory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'grouped',
+            ];
+        });
+    }
+
+    /**
+     * Configurable state.
+     */
+    public function configurable(): ProductFactory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'configurable',
+            ];
+        });
+    }
+
+    /**
+     * Downloadable state.
+     */
     public function downloadable(): ProductFactory
     {
         return $this->state(function (array $attributes) {
@@ -64,11 +99,14 @@ class ProductFactory extends Factory
         });
     }
 
-    public function booking(): ProductFactory
+    /**
+     * Bundle state.
+     */
+    public function bundle(): ProductFactory
     {
         return $this->state(function (array $attributes) {
             return [
-                'type' => 'booking',
+                'type' => 'bundle',
             ];
         });
     }

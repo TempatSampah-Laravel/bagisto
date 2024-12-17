@@ -2,34 +2,16 @@
 
 namespace Webkul\CatalogRule\Listeners;
 
-use Webkul\CatalogRule\Helpers\CatalogRuleIndex;
+use Webkul\CatalogRule\Jobs\UpdateCreateProductIndex as UpdateCreateProductIndexJob;
 
 class Product
 {
     /**
-     * Product Repository Object
-     * 
-     * @var \Webkul\CatalogRule\Helpers\CatalogRuleIndex
-     */
-    protected $catalogRuleIndexHelper;
-
-    /**
-     * Create a new listener instance.
-     * 
-     * @param  \Webkul\CatalogRule\Helpers\CatalogRuleIndex  $catalogRuleIndexHelper
-     * @return void
-     */
-    public function __construct(CatalogRuleIndex $catalogRuleIndexHelper)
-    {
-        $this->catalogRuleIndexHelper = $catalogRuleIndexHelper;
-    }
-
-    /**
      * @param  \Webkul\Product\Contracts\Product  $product
      * @return void
      */
-    public function createProductRuleIndex($product)
+    public function afterUpdate($product)
     {
-        $this->catalogRuleIndexHelper->reindexProduct($product);
+        UpdateCreateProductIndexJob::dispatch($product);
     }
 }

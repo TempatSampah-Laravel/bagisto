@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateCatalogRuleProductsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -21,17 +21,14 @@ class CreateCatalogRuleProductsTable extends Migration
             $table->string('action_type')->nullable();
             $table->decimal('discount_amount', 12, 4)->default(0);
             $table->integer('sort_order')->unsigned()->default(0);
-            
             $table->integer('product_id')->unsigned();
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            
             $table->integer('customer_group_id')->unsigned();
-            $table->foreign('customer_group_id')->references('id')->on('customer_groups')->onDelete('cascade');
-            
             $table->integer('catalog_rule_id')->unsigned();
-            $table->foreign('catalog_rule_id')->references('id')->on('catalog_rules')->onDelete('cascade');
-
             $table->integer('channel_id')->unsigned();
+
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->foreign('customer_group_id')->references('id')->on('customer_groups')->onDelete('cascade');
+            $table->foreign('catalog_rule_id')->references('id')->on('catalog_rules')->onDelete('cascade');
             $table->foreign('channel_id')->references('id')->on('channels')->onDelete('cascade');
         });
     }
@@ -45,4 +42,4 @@ class CreateCatalogRuleProductsTable extends Migration
     {
         Schema::dropIfExists('catalog_rule_products');
     }
-}
+};

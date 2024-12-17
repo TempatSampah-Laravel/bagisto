@@ -2,69 +2,32 @@
 
 namespace Webkul\Admin\Http\Controllers\Sales;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Event;
-
+use Webkul\Admin\DataGrids\Sales\OrderTransactionDataGrid;
 use Webkul\Admin\Http\Controllers\Controller;
+use Webkul\Admin\Http\Resources\TransactionResource;
 use Webkul\Payment\Facades\Payment;
-
+use Webkul\Sales\Models\Invoice;
+use Webkul\Sales\Models\Order;
+use Webkul\Sales\Repositories\InvoiceRepository;
 use Webkul\Sales\Repositories\OrderRepository;
 use Webkul\Sales\Repositories\OrderTransactionRepository;
-use Webkul\Sales\Repositories\InvoiceRepository;
+use Webkul\Sales\Repositories\ShipmentRepository;
 
 class TransactionController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    protected $_config;
-
-    /**
-     * OrderRepository object
-     *
-     * @var \Webkul\Sales\Repositories\OrderRepository
-     */
-    protected $orderRepository;
-
-    /**
-     * OrderRepository object
-     *
-     * @var \Webkul\Sales\Repositories\OrderTransactionRepository
-     */
-    protected $orderTransactionRepository;
-
-    /**
-     * InvoiceRepository object
-     *
-     * @var \Webkul\Sales\Repositories\InvoiceRepository
-     */
-    protected $invoiceRepository;
-
-    /**
      * Create a new controller instance.
      *
-     * @param  \Webkul\Sales\Repositories\OrderRepository  $orderRepository
-     * @param  \Webkul\Sales\Repositories\OrderTransactionRepository  $orderTransactionRepository
-     * @param  \Webkul\Sales\Repositories\InvoiceRepository  $invoiceRepository
      * @return void
      */
     public function __construct(
-        OrderRepository $orderRepository,
-        OrderTransactionRepository $orderTransactionRepository,
-        InvoiceRepository $invoiceRepository)
-    {
-        $this->middleware('admin');
-
-        $this->_config = request('_config');
-
-        $this->orderRepository = $orderRepository;
-
-        $this->orderTransactionRepository = $orderTransactionRepository;
-
-        $this->invoiceRepository = $invoiceRepository;
-    }
+        protected OrderRepository $orderRepository,
+        protected InvoiceRepository $invoiceRepository,
+        protected ShipmentRepository $shipmentRepository,
+        protected OrderTransactionRepository $orderTransactionRepository
+    ) {}
 
     /**
      * Display a listing of the resource.
@@ -73,125 +36,97 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        return view($this->_config['view']);
+        if (request()->ajax()) {
+            return datagrid(OrderTransactionDataGrid::class)->process();
+        }
+
+        $paymentMethods = Payment::getSupportedPaymentMethods();
+
+        return view('admin::sales.transactions.index', compact('paymentMethods'));
     }
 
     /**
-     * Display a form to save the tranaction.
-     *
-     * @return \Illuminate\View\View
+     * Save the transaction.
      */
-    public function create()
+    public function store(Request $request): JsonResponse
     {
-        $payment_methods = Payment::getSupportedPaymentMethods();
-        return view($this->_config['view'], compact('payment_methods'));
-    }
-
-    /**
-     * Save the tranaction.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function store(Request $request)
-    {
-        $validate = $this->validate(request(), [
+        $this->validate(request(), [
             'invoice_id'     => 'required',
             'payment_method' => 'required',
-            'amount'         => 'required|numeric'
+            'amount'         => 'required|numeric',
         ]);
 
-        $invoice = $this->invoiceRepository->where('increment_id', $request->invoice_id)->first();
+        $invoice = $this->invoiceRepository->where('id', $request->invoice_id)->first();
 
-        if ($invoice) {
-
-            if ($invoice->state == 'paid') {
-                session()->flash('info', trans('admin::app.sales.transactions.response.already-paid'));
-                return redirect(route('admin.sales.transactions.index'));
-            }
-
-            $order = $this->orderRepository->find($invoice->order_id);
-
-            $data = [
-                "paidAmount" => $request->amount
-            ];
-
-            $randomId = random_bytes(20);
-            $transactionId = bin2hex($randomId);
-
-            $transactionData['transaction_id'] = $transactionId;
-            $transactionData['type']           = $request->payment_method;
-            $transactionData['payment_method'] = $request->payment_method;
-            $transactionData['invoice_id']     = $invoice->id;
-            $transactionData['order_id']       = $invoice->order_id;
-            $transactionData['amount']         = $request->amount;
-            $transactionData['status']         = 'paid';
-            $transactionData['data']           = json_encode($data);
-
-            $this->orderTransactionRepository->create($transactionData);
-
-            $transactionTotal = $this->orderTransactionRepository->where('invoice_id', $invoice->id)->sum('amount');
-
-            if ($transactionTotal >= $invoice->base_grand_total) {
-                $shipments = $this->shipmentRepository->where('order_id', $invoice->order_id)->first();
-
-                if (isset($shipments)) {
-                    $this->orderRepository->updateOrderStatus($order, 'completed');
-                } else {
-                    $this->orderRepository->updateOrderStatus($order, 'processing');
-                }
-
-                $this->invoiceRepository->updateState($invoice, "paid");
-            }
-
-            session()->flash('success', trans('admin::app.sales.transactions.response.transaction-saved'));
-            return redirect(route('admin.sales.transactions.index'));
-
-        } else {
-            session()->flash('error', trans('admin::app.sales.transactions.response.invoice-missing'));
-            return redirect()->back();
+        if (! $invoice) {
+            return new JsonResponse([
+                'message' => trans('admin::app.sales.transactions.index.create.invoice-missing'),
+            ], 400);
         }
+
+        $transactionAmtBefore = $this->orderTransactionRepository->where('invoice_id', $invoice->id)->sum('amount');
+
+        $transactionAmtFinal = $request->amount + $transactionAmtBefore;
+
+        if ($invoice->state == 'paid') {
+            return new JsonResponse([
+                'message' => trans('admin::app.sales.transactions.index.create.already-paid'),
+            ], 400);
+        }
+
+        if ($transactionAmtFinal > $invoice->base_grand_total) {
+            return new JsonResponse([
+                'message' => trans('admin::app.sales.transactions.index.create.transaction-amount-exceeds'),
+            ], 400);
+        }
+
+        if ($request->amount <= 0) {
+            return new JsonResponse([
+                'message' => trans('admin::app.sales.transactions.index.create.transaction-amount-zero'),
+            ], 400);
+        }
+
+        $order = $this->orderRepository->find($invoice->order_id);
+
+        $this->orderTransactionRepository->create([
+            'transaction_id' => bin2hex(random_bytes(20)),
+            'type'           => $request->payment_method,
+            'payment_method' => $request->payment_method,
+            'invoice_id'     => $invoice->id,
+            'order_id'       => $invoice->order_id,
+            'amount'         => $request->amount,
+            'status'         => 'paid',
+            'data'           => json_encode([
+                'paidAmount' => $request->amount,
+            ]),
+        ]);
+
+        $transactionTotal = $this->orderTransactionRepository->where('invoice_id', $invoice->id)->sum('amount');
+
+        if ($transactionTotal >= $invoice->base_grand_total) {
+            $shipments = $this->shipmentRepository->where('order_id', $invoice->order_id)->first();
+
+            $status = isset($shipments)
+                ? Order::STATUS_COMPLETED
+                : Order::STATUS_PROCESSING;
+
+            $this->orderRepository->updateOrderStatus($order, $status);
+
+            $this->invoiceRepository->updateState($invoice, Invoice::STATUS_PAID);
+        }
+
+        return new JsonResponse([
+            'message' => trans('admin::app.sales.transactions.index.create.transaction-saved'),
+        ]);
     }
 
     /**
      * Show the view for the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\View\View
      */
-    public function view($id)
+    public function view(int $id): TransactionResource
     {
         $transaction = $this->orderTransactionRepository->findOrFail($id);
 
-        $transData = json_decode(json_encode(json_decode($transaction['data'])), true);
-
-        $transactionDeatilsData = $this->convertIntoSingleDimArray($transData);
-
-        return view($this->_config['view'], compact('transaction', 'transactionDeatilsData'));
-    }
-
-    /**
-     * Convert Transaction Details Data into single Dim Array.
-     *
-     * @param array $data
-     * @return array
-    */
-    public function convertIntoSingleDimArray($transData) {
-        static $detailsData = [];
-
-        foreach ($transData as $key => $data) {
-            if (is_array($data)) {
-                $this->convertIntoSingleDimArray($data);
-            } else {
-                $skipAttributes = ['sku', 'name', 'category', 'quantity'];
-
-                if (gettype($key) == 'integer' || in_array($key, $skipAttributes)) {
-                    continue;
-                }
-
-                $detailsData[$key] = $data;
-            }
-        }
-
-        return $detailsData;
+        return new TransactionResource($transaction);
     }
 }

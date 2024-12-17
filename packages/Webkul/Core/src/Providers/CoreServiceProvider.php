@@ -2,50 +2,35 @@
 
 namespace Webkul\Core\Providers;
 
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Foundation\AliasLoader;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
-use Webkul\Core\Core;
-use Webkul\Core\Exceptions\Handler;
-use Webkul\Core\Facades\Core as CoreFacade;
-use Webkul\Core\Models\SliderProxy;
-use Webkul\Core\Observers\SliderObserver;
-use Webkul\Core\View\Compilers\BladeCompiler;
 use Webkul\Theme\ViewRenderEventManager;
 
 class CoreServiceProvider extends ServiceProvider
 {
     /**
+     * Register services.
+     */
+    public function register(): void
+    {
+        include __DIR__.'/../Http/helpers.php';
+
+        $this->registerCommands();
+
+        $this->registerOverrides();
+    }
+
+    /**
      * Bootstrap services.
-     *
-     * @return void
      */
     public function boot(): void
     {
-        include __DIR__ . '/../Http/helpers.php';
+        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
 
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'core');
 
-        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'core');
-
-        Validator::extend('slug', 'Webkul\Core\Contracts\Validations\Slug@passes');
-
-        Validator::extend('code', 'Webkul\Core\Contracts\Validations\Code@passes');
-
-        Validator::extend('decimal', 'Webkul\Core\Contracts\Validations\Decimal@passes');
-
-        $this->publishes([
-            dirname(__DIR__) . '/Config/concord.php' => config_path('concord.php'),
-            dirname(__DIR__) . '/Config/scout.php'   => config_path('scout.php'),
-        ]);
-
-        $this->app->bind(ExceptionHandler::class, Handler::class);
-
-        SliderProxy::observe(SliderObserver::class);
-
-        $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'core');
+        $this->loadViewsFrom(__DIR__.'/../Resources/views', 'core');
 
         Event::listen('bagisto.shop.layout.body.after', static function (ViewRenderEventManager $viewRenderEventManager) {
             $viewRenderEventManager->addTemplate('core::blade.tracer.style');
@@ -55,76 +40,62 @@ class CoreServiceProvider extends ServiceProvider
             $viewRenderEventManager->addTemplate('core::blade.tracer.style');
         });
 
-        $this->app->extend('command.down', function () {
-            return new \Webkul\Core\Console\Commands\DownCommand;
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
+            $schedule->command('invoice:cron')->dailyAt('3:00');
         });
 
-        $this->app->extend('command.up', function () {
-            return new \Webkul\Core\Console\Commands\UpCommand;
-        });
-    }
-
-    /**
-     * Register services.
-     *
-     * @return void
-     */
-    public function register(): void
-    {
-        $this->registerFacades();
-
-        $this->registerCommands();
-
-        $this->registerBladeCompiler();
-    }
-
-    /**
-     * Register Bouncer as a singleton.
-     *
-     * @return void
-     */
-    protected function registerFacades(): void
-    {
-        $loader = AliasLoader::getInstance();
-        $loader->alias('core', CoreFacade::class);
-
-        $this->app->singleton('core', function () {
-            return app()->make(Core::class);
-        });
+        $this->app->register(EventServiceProvider::class);
+        $this->app->register(ImageServiceProvider::class);
+        $this->app->register(VisitorServiceProvider::class);
     }
 
     /**
      * Register the console commands of this package.
-     *
-     * @return void
      */
     protected function registerCommands(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \Webkul\Core\Console\Commands\BagistoVersion::class,
-                \Webkul\Core\Console\Commands\Install::class,
                 \Webkul\Core\Console\Commands\ExchangeRateUpdate::class,
-                \Webkul\Core\Console\Commands\BookingCron::class,
                 \Webkul\Core\Console\Commands\InvoiceOverdueCron::class,
             ]);
         }
-
-        $this->commands([
-            \Webkul\Core\Console\Commands\DownChannelCommand::class,
-            \Webkul\Core\Console\Commands\UpChannelCommand::class,
-        ]);
     }
 
     /**
-     * Register the Blade compiler implementation.
-     *
-     * @return void
+     * Register the overrides.
      */
-    public function registerBladeCompiler(): void
+    protected function registerOverrides(): void
     {
-        $this->app->singleton('blade.compiler', function ($app) {
-            return new BladeCompiler($app['files'], $app['config']['view.compiled']);
-        });
+        $this->app->extend(
+            \Illuminate\Foundation\Console\DownCommand::class,
+            fn () => new \Webkul\Core\Console\Commands\UpCommand
+        );
+
+        $this->app->extend(
+            \Illuminate\Foundation\Console\DownCommand::class,
+            fn () => new \Webkul\Core\Console\Commands\DownCommand
+        );
+
+        $this->app->bind(
+            \Illuminate\Contracts\Debug\ExceptionHandler::class,
+            \Webkul\Core\Exceptions\Handler::class
+        );
+
+        $this->app->bind(
+            \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
+            fn ($app) => new \Webkul\Core\Http\Middleware\PreventRequestsDuringMaintenance($app)
+        );
+
+        $this->app->singleton(
+            \Elastic\Elasticsearch\Client::class,
+            fn () => \Webkul\Core\Facades\ElasticSearch::getFacadeApplication()->connection()
+        );
+
+        $this->app->singleton(
+            'blade.compiler',
+            fn ($app) => new \Webkul\Core\View\Compilers\BladeCompiler($app['files'], $app['config']['view.compiled'])
+        );
     }
 }

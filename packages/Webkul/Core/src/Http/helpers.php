@@ -1,5 +1,10 @@
 <?php
 
+use Webkul\Core\Facades\Acl;
+use Webkul\Core\Facades\Core;
+use Webkul\Core\Facades\Menu;
+use Webkul\Core\Facades\SystemConfig;
+
 if (! function_exists('core')) {
     /**
      * Core helper.
@@ -8,7 +13,55 @@ if (! function_exists('core')) {
      */
     function core()
     {
-        return app()->make(\Webkul\Core\Core::class);
+        return Core::getFacadeRoot();
+    }
+}
+
+if (! function_exists('menu')) {
+    /**
+     * Menu helper.
+     *
+     * @return \Webkul\Core\Menu
+     */
+    function menu()
+    {
+        return Menu::getFacadeRoot();
+    }
+}
+
+if (! function_exists('acl')) {
+    /**
+     * Acl helper.
+     *
+     * @return \Webkul\Core\Acl
+     */
+    function acl()
+    {
+        return Acl::getFacadeRoot();
+    }
+}
+
+if (! function_exists('system_config')) {
+    /**
+     * System Config helper.
+     *
+     * @return \Webkul\Core\SystemConfig
+     */
+    function system_config()
+    {
+        return SystemConfig::getFacadeRoot();
+    }
+}
+
+if (! function_exists('clean_path')) {
+    /**
+     * Clean path.
+     */
+    function clean_path(string $path): string
+    {
+        return collect(explode('/', $path))
+            ->filter(fn ($segment) => ! empty($segment))
+            ->join('/');
     }
 }
 

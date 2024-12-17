@@ -8,18 +8,14 @@ class AdminRepository extends Repository
 {
     /**
      * Specify model class name.
-     *
-     * @return mixed
      */
-    function model(): string
+    public function model(): string
     {
-        return \Webkul\User\Contracts\Admin::class;
+        return 'Webkul\User\Contracts\Admin';
     }
 
     /**
      * Count admins with all access.
-     *
-     * @return int
      */
     public function countAdminsWithAllAccess(): int
     {
@@ -32,8 +28,6 @@ class AdminRepository extends Repository
 
     /**
      * Count admins with all access and active status.
-     *
-     * @return int
      */
     public function countAdminsWithAllAccessAndActiveStatus(): int
     {

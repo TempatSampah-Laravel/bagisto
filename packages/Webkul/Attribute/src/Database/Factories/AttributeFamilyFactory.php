@@ -2,8 +2,8 @@
 
 namespace Webkul\Attribute\Database\Factories;
 
-use Webkul\Attribute\Models\AttributeFamily;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Webkul\Attribute\Models\AttributeFamily;
 
 class AttributeFamilyFactory extends Factory
 {
@@ -17,7 +17,6 @@ class AttributeFamilyFactory extends Factory
     /**
      * Define the model's default state.
      *
-     * @return array
      * @throws \Exception
      */
     public function definition(): array

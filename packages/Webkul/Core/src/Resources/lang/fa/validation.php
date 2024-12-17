@@ -1,9 +1,11 @@
 <?php
 
 return [
-    'alpha-numeric-space' => 'The :attribute can only accept alpha, numeric and spaces.',
-    'code' => 'The :attribute must be valid.',
-    'decimal' => 'The :attribute must be valid.',
-    'phone-number' => 'The :attribute must be valid phone number.',
-    'slug' => 'The :attribute must be valid slug.',
+    'address'                 => 'attribute : فقط می تواند آلفا، عدد، فاصله، کاما و خط تیره را بپذیرد.',
+    'alpha-numeric-space'     => 'attribute : فقط می تواند آلفا، عدد و فاصله را بپذیرد.',
+    'code'                    => 'attribute : باید معتبر باشد.',
+    'decimal'                 => 'attribute : باید معتبر باشد.',
+    'phone-number'            => 'attribute : باید شماره تلفن معتبر باشد.',
+    'slug'                    => 'attribute : باید اسلاگ معتبر باشد.',
+    'comma-separated-integer' => 'فیلد :attribute باید عددی باشد و ممکن است حاوی کاما باشد.',
 ];

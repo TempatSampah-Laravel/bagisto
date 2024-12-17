@@ -3,32 +3,11 @@
 namespace Webkul\Admin\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Factory as ValidationFactory;
 
 class ConfigurationForm extends FormRequest
 {
-    /*
-        Added custom validator.
-     */
-    public function __construct(ValidationFactory $validationFactory)
-    {
-        /* added custom comma seperated integer validator */
-        $validationFactory->extend(
-            'comma_seperated_integer',
-            function ($attribute, $value, $parameters) {
-                $pages = explode(',', $value);
-                foreach($pages as $page){
-                    if (! is_numeric($page)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        );
-    }
-
     /**
-     * Determine if the Configuraion is authorized to make this request.
+     * Determine if the Configuration is authorized to make this request.
      *
      * @return bool
      */
@@ -44,65 +23,21 @@ class ConfigurationForm extends FormRequest
      */
     public function rules()
     {
-        $this->rules = [];
+        return collect(request()->input('keys', []))->mapWithKeys(function ($item) {
+            $data = json_decode($item, true);
 
-        if (request()->has('catalog.products.storefront.products_per_page')
-            && ! empty(request()->input('catalog.products.storefront.products_per_page'))
-        ) {
-            $this->rules = [
-                'catalog.products.storefront.products_per_page'  => 'comma_seperated_integer',
-            ];
-        }
+            return collect($data['fields'])->mapWithKeys(function ($field) use ($data) {
+                $key = $data['key'].'.'.$field['name'];
 
-        if (request()->has('general.design.admin_logo.logo_image')
-            && ! request()->input('general.design.admin_logo.logo_image.delete')
-        ) {
-            $this->rules = array_merge($this->rules, [
-                'general.design.admin_logo.logo_image'  => 'required|mimes:bmp,jpeg,jpg,png,webp|max:5000',
-            ]);
-        }
+                // Check delete key exist in the request
+                if (! $this->has($key.'.delete')) {
+                    $validation = isset($field['validation']) && $field['validation'] ? $field['validation'] : 'nullable';
 
-        if (request()->has('general.design.admin_logo.favicon')
-            && ! request()->input('general.design.admin_logo.favicon.delete')
-        ) {
-            $this->rules = array_merge($this->rules, [
-                'general.design.admin_logo.favicon'  => 'required|mimes:bmp,jpeg,jpg,png,webp|max:5000',
-            ]);
-        }
+                    return [$key => $validation];
+                }
 
-        if (request()->has('sales.invoice_setttings.invoice_slip_design.logo')
-            && ! request()->input('sales.invoice_setttings.invoice_slip_design.logo.delete')
-        ) {
-            $this->rules = array_merge($this->rules, [
-                'sales.invoice_setttings.invoice_slip_design.logo'  => 'required|mimes:bmp,jpeg,jpg,png,webp|max:5000',
-            ]);
-        }
-
-        return $this->rules;
-    }
-
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array
-     */
-    public function messages()
-    {
-        return [
-            'general.design.admin_logo.logo_image.mimes' => 'Invalid file format. Use only bmp, jpeg, jpg, png and webp.',
-            'catalog.products.storefront.products_per_page.comma_seperated_integer' => 'The "Product Per Page" field must be numeric and may contain comma.'
-        ];
-    }
-
-    /**
-     * Set the attribute name.
-     */
-    public function attributes()
-    {
-        return [
-            'general.design.admin_logo.logo_image' => 'Logo Image',
-            'general.design.admin_logo.favicon' => 'Favicon Image',
-            'sales.invoice_setttings.invoice_slip_design.logo' => 'Invoice Logo'
-        ];
+                return [];
+            })->toArray();
+        })->toArray();
     }
 }

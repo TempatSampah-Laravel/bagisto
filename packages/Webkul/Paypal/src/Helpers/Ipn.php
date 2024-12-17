@@ -3,8 +3,8 @@
 namespace Webkul\Paypal\Helpers;
 
 use Webkul\Paypal\Payment\Standard;
-use Webkul\Sales\Repositories\OrderRepository;
 use Webkul\Sales\Repositories\InvoiceRepository;
+use Webkul\Sales\Repositories\OrderRepository;
 
 class Ipn
 {
@@ -16,13 +16,6 @@ class Ipn
     protected $post;
 
     /**
-     * Standard $paypalStandard
-     *
-     * @var \Webkul\Paypal\Payment\Standard
-     */
-    protected $paypalStandard;
-
-    /**
      * Order $order
      *
      * @var \Webkul\Sales\Contracts\Order
@@ -30,39 +23,15 @@ class Ipn
     protected $order;
 
     /**
-     * OrderRepository $orderRepository
-     *
-     * @var \Webkul\Sales\Repositories\OrderRepository
-     */
-    protected $orderRepository;
-
-    /**
-     * InvoiceRepository $invoiceRepository
-     *
-     * @var \Webkul\Sales\Repositories\InvoiceRepository
-     */
-    protected $invoiceRepository;
-
-    /**
      * Create a new helper instance.
      *
-     * @param  \Webkul\Sales\Repositories\OrderRepository  $orderRepository
-     * @param  \Webkul\Sales\Repositories\InvoiceRepository  $invoiceRepository
-     * @param  \Webkul\Paypal\Payment\Standard  $paypalStandard
      * @return void
      */
     public function __construct(
-        Standard $paypalStandard,
-        OrderRepository $orderRepository,
-        InvoiceRepository $invoiceRepository
-    )
-    {
-        $this->paypalStandard = $paypalStandard;
-
-        $this->orderRepository = $orderRepository;
-
-        $this->invoiceRepository = $invoiceRepository;
-    }
+        protected Standard $paypalStandard,
+        protected OrderRepository $orderRepository,
+        protected InvoiceRepository $invoiceRepository
+    ) {}
 
     /**
      * This function process the IPN sent from paypal end.
@@ -79,7 +48,10 @@ class Ipn
         }
 
         try {
-            if (isset($this->post['txn_type']) && 'recurring_payment' == $this->post['txn_type']) {
+            if (
+                isset($this->post['txn_type'])
+                && $this->post['txn_type'] == 'recurring_payment'
+            ) {
 
             } else {
                 $this->getOrder();
@@ -152,10 +124,10 @@ class Ipn
 
         curl_setopt_array($request, [
             CURLOPT_URL            => $url,
-            CURLOPT_POST           => TRUE,
+            CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => http_build_query(['cmd' => '_notify-validate'] + $this->post),
-            CURLOPT_RETURNTRANSFER => TRUE,
-            CURLOPT_HEADER         => FALSE,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER         => false,
         ]);
 
         $response = curl_exec($request);

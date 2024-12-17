@@ -10,7 +10,6 @@ class Bouncer
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @param  string|null  $guard
      * @return mixed
      */
@@ -37,6 +36,8 @@ class Bouncer
         if ($this->isPermissionsEmpty()) {
             auth()->guard('admin')->logout();
 
+            session()->flash('error', __('admin::app.error.403.message'));
+
             return redirect()->route('admin.session.create');
         }
 
@@ -58,7 +59,10 @@ class Bouncer
             return false;
         }
 
-        if ($role->permission_type !== 'all' && empty($role->permissions)) {
+        if (
+            $role->permission_type !== 'all'
+            && empty($role->permissions)
+        ) {
             return true;
         }
 
@@ -74,10 +78,10 @@ class Bouncer
      */
     public function checkIfAuthorized()
     {
-        $acl = app('acl');
+        $roles = acl()->getRoles();
 
-        if ($acl && isset($acl->roles[Route::currentRouteName()])) {
-            bouncer()->allow($acl->roles[Route::currentRouteName()]);
+        if (isset($roles[Route::currentRouteName()])) {
+            bouncer()->allow($roles[Route::currentRouteName()]);
         }
     }
 }

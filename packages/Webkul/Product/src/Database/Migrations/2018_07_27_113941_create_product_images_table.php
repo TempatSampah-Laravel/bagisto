@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateProductImagesTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -18,6 +18,8 @@ class CreateProductImagesTable extends Migration
             $table->string('type')->nullable();
             $table->string('path');
             $table->integer('product_id')->unsigned();
+            $table->integer('position')->default(0)->unsigned();
+
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }
@@ -31,4 +33,4 @@ class CreateProductImagesTable extends Migration
     {
         Schema::dropIfExists('product_images');
     }
-}
+};

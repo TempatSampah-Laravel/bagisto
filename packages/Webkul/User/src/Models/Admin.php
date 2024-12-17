@@ -2,17 +2,19 @@
 
 namespace Webkul\User\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\HasApiTokens;
+use Webkul\Admin\Mail\Admin\ResetPasswordNotification;
 use Webkul\User\Contracts\Admin as AdminContract;
 use Webkul\User\Database\Factories\AdminFactory;
-use Webkul\User\Notifications\AdminResetPassword;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class Admin extends Authenticatable implements AdminContract, JWTSubject
+class Admin extends Authenticatable implements AdminContract
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,6 +25,7 @@ class Admin extends Authenticatable implements AdminContract, JWTSubject
         'name',
         'email',
         'password',
+        'image',
         'api_token',
         'role_id',
         'status',
@@ -40,6 +43,38 @@ class Admin extends Authenticatable implements AdminContract, JWTSubject
     ];
 
     /**
+     * Get image url for the product image.
+     */
+    public function image_url()
+    {
+        if (! $this->image) {
+            return;
+        }
+
+        return Storage::url($this->image);
+    }
+
+    /**
+     * Get image url for the product image.
+     */
+    public function getImageUrlAttribute()
+    {
+        return $this->image_url();
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        $array = parent::toArray();
+
+        $array['image_url'] = $this->image_url;
+
+        return $array;
+    }
+
+    /**
      * Get the role that owns the admin.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -52,12 +87,15 @@ class Admin extends Authenticatable implements AdminContract, JWTSubject
     /**
      * Checks if admin has permission to perform certain action.
      *
-     * @param  String  $permission
-     * @return Boolean
+     * @param  string  $permission
+     * @return bool
      */
     public function hasPermission($permission)
     {
-        if ($this->role->permission_type == 'custom' && ! $this->role->permissions) {
+        if (
+            $this->role->permission_type == 'custom'
+            && ! $this->role->permissions
+        ) {
             return false;
         }
 
@@ -72,36 +110,14 @@ class Admin extends Authenticatable implements AdminContract, JWTSubject
      */
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new AdminResetPassword($token));
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     /**
      * Create a new factory instance for the model.
-     *
-     * @return AdminFactory
      */
-    protected static function newFactory(): AdminFactory
+    protected static function newFactory(): Factory
     {
         return AdminFactory::new();
-    }
-
-    /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
-     */
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
-
-    /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
-     */
-    public function getJWTCustomClaims(): array
-    {
-        return [];
     }
 }

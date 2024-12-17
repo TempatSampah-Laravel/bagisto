@@ -3,73 +3,53 @@
 namespace Webkul\Customer\Repositories;
 
 use Webkul\Core\Eloquent\Repository;
-use Illuminate\Support\Facades\Event;
+use Webkul\Customer\Contracts\CustomerAddress;
 
 class CustomerAddressRepository extends Repository
 {
     /**
-     * Specify Model class name
-     *
-     * @return mixed
+     * Specify Model class name.
      */
-    function model()
+    public function model(): string
     {
-        return 'Webkul\Customer\Contracts\CustomerAddress';
+        return CustomerAddress::class;
     }
 
     /**
-     * @param  array  $data
-     * @return \Webkul\Customer\Contracts\CustomerAddress
+     * Create a new customer address.
      */
-    public function create(array $data)
+    public function create(array $data): CustomerAddress
     {
-        Event::dispatch('customer.addresses.create.before');
+        $defaultAddress = $this->findOneWhere(['customer_id' => $data['customer_id'], 'default_address' => 1]);
 
-        $data['default_address'] = isset($data['default_address']) ? 1 : 0;
-
-        $default_address = $this
-            ->findWhere(['customer_id' => $data['customer_id'], 'default_address' => 1])
-            ->first();
-
-        if (isset($default_address->id) && $data['default_address']) {
-            $default_address->update(['default_address' => 0]);
+        if ($defaultAddress) {
+            $defaultAddress->update(['default_address' => 0]);
         }
 
         $address = $this->model->create($data);
-
-        Event::dispatch('customer.addresses.create.after', $address);
 
         return $address;
     }
 
     /**
-     * @param  array  $data
+     * Update customer address.
+     *
      * @param  int  $id
-     * @return \Webkul\Customer\Contracts\CustomerAddress
      */
-    public function update(array $data, $id)
+    public function update(array $data, $id): CustomerAddress
     {
         $address = $this->find($id);
 
-        Event::dispatch('customer.addresses.update.before', $id);
+        $defaultAddress = $this->findOneWhere(['customer_id' => $address->customer_id, 'default_address' => 1]);
 
-        $data['default_address'] = isset($data['default_address']) ? 1 : 0;
-
-        $default_address = $this
-            ->findWhere(['customer_id' => $address->customer_id, 'default_address' => 1])
-            ->first();
-
-        if (isset($default_address->id) && $data['default_address']) {
-            if ($default_address->id != $address->id) {
-                $default_address->update(['default_address' => 0]);
-            }
-            
-            $address->update($data);
-        } else {
-            $address->update($data);
+        if (
+            $defaultAddress
+            && $defaultAddress->id != $address->id
+        ) {
+            $defaultAddress->update(['default_address' => 0]);
         }
 
-        Event::dispatch('customer.addresses.update.after', $id);
+        $address->update($data);
 
         return $address;
     }

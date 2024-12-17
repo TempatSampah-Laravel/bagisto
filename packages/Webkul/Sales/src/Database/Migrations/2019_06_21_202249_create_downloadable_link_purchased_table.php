@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateDownloadableLinkPurchasedTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -24,17 +24,15 @@ class CreateDownloadableLinkPurchasedTable extends Migration
             $table->integer('download_bought')->default(0);
             $table->integer('download_used')->default(0);
             $table->string('status')->nullable();
-            
             $table->integer('customer_id')->unsigned();
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-            
             $table->integer('order_id')->unsigned();
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-
             $table->integer('order_item_id')->unsigned();
-            $table->foreign('order_item_id')->references('id')->on('order_items')->onDelete('cascade');
-
+            $table->integer('download_canceled')->default(0);
             $table->timestamps();
+
+            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->foreign('order_item_id')->references('id')->on('order_items')->onDelete('cascade');
         });
     }
 
@@ -47,4 +45,4 @@ class CreateDownloadableLinkPurchasedTable extends Migration
     {
         Schema::dropIfExists('downloadable_link_purchased');
     }
-}
+};

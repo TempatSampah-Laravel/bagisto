@@ -2,6 +2,7 @@
 
 namespace Webkul\Rule\Helpers;
 
+use Webkul\Checkout\Contracts\Cart as CheckoutContract;
 use Webkul\Checkout\Facades\Cart;
 
 class Validator
@@ -11,7 +12,7 @@ class Validator
      *
      * @param  \Webkul\CartRule\Contracts\CartRule|\Webkul\CatalogRule\Contracts\CatalogRule  $rule
      * @param  \Webkul\Checkout\Contracts\Cart|\Webkul\Checkout\Contracts\CartItem|\Webkul\Product\Contracts\Product  $entity
-     * @return boolean
+     * @return bool
      */
     public function validate($rule, $entity)
     {
@@ -22,30 +23,36 @@ class Validator
         $validConditionCount = $totalConditionCount = 0;
 
         foreach ($rule->conditions as $condition) {
-            if (! $condition['attribute'] || ! isset($condition['value']) || is_null($condition['value']) ||  $condition['value'] == '') {
+            if (
+                ! $condition['attribute']
+                || empty($condition['value'])
+            ) {
                 continue;
             }
 
-            if ($entity instanceof \Webkul\Checkout\Contracts\Cart && strpos($condition['attribute'], 'cart|') === false) {
+            if (
+                $entity instanceof CheckoutContract
+                && strpos($condition['attribute'], 'cart|') === false
+            ) {
                 continue;
             }
 
             $totalConditionCount++;
 
-            if ($rule->condition_type == 1) {
+            if ($rule->condition_type == '1') {
                 if (! $this->validateObject($condition, $entity)) {
                     return false;
                 } else {
                     $validConditionCount++;
                 }
-            } else {
+            } elseif ($rule->condition_type == '2') {
                 if ($this->validateObject($condition, $entity)) {
                     return true;
                 }
             }
         }
 
-        return $validConditionCount == $totalConditionCount ? true : false;
+        return $validConditionCount == $totalConditionCount;
     }
 
     /**
@@ -53,7 +60,7 @@ class Validator
      *
      * @param  array  $condition
      * @param  \Webkul\Checkout\Contracts\CartItem|\Webkul\Product\Contracts\Product  $entity
-     * @return boolean
+     * @return bool
      */
     public function getAttributeValue($condition, $entity)
     {
@@ -65,7 +72,7 @@ class Validator
 
         switch (current($chunks)) {
             case 'cart':
-                $cart = $entity instanceof \Webkul\Checkout\Contracts\Cart ? $entity : $entity->cart;
+                $cart = $entity instanceof CheckoutContract ? $entity : $entity->cart;
 
                 if (in_array($attributeCode, ['postcode', 'state', 'country'])) {
                     if (! $cart->shipping_address) {
@@ -97,14 +104,14 @@ class Validator
             case 'product':
                 if ($attributeCode == 'category_ids') {
                     $value = $entity->product
-                             ? $entity->product->categories()->pluck('id')->toArray()
-                             : $entity->categories()->pluck('id')->toArray();
+                        ? $entity->product->categories()->pluck('id')->toArray()
+                        : $entity->categories()->pluck('id')->toArray();
 
                     return $value;
                 } else {
                     $value = $entity->product
-                             ? $entity->product->{$attributeCode}
-                              : $entity->{$attributeCode};
+                        ? $entity->product->{$attributeCode}
+                        : $entity->{$attributeCode};
 
                     if (! in_array($condition['attribute_type'], ['multiselect', 'checkbox'])) {
                         return $value;
@@ -177,8 +184,8 @@ class Validator
     /**
      * Validate attribute value for condition
      *
-     * @param  array $condition
-     * @param  mixed $attributeValue
+     * @param  array  $condition
+     * @param  mixed  $attributeValue
      * @return bool
      */
     public function validateAttribute($condition, $attributeValue)
@@ -220,7 +227,10 @@ class Validator
                 break;
 
             case '{}': case '!{}':
-                if (is_scalar($attributeValue) && is_array($condition['value'])) {
+                if (
+                    is_scalar($attributeValue)
+                    && is_array($condition['value'])
+                ) {
                     foreach ($condition['value'] as $item) {
                         if (stripos($attributeValue, $item) !== false) {
                             $result = true;
@@ -254,25 +264,23 @@ class Validator
 
     /**
      * Validate the condition value against a multi dimensional array recursively
-     *
-     * @param array  $attributeValue
-     * @param string $conditionValue
-     *
-     * @return bool
      */
     private static function validateArrayValues(array $attributeValue, string $conditionValue): bool
     {
         if (in_array($conditionValue, $attributeValue, true) === true) {
             return true;
         }
-        
+
         foreach ($attributeValue as $subValue) {
-            if (is_array($subValue)) {
-                if (self::validateArrayValues($subValue, $conditionValue) === true) {
-                    return true;
-                }
+            if (! is_array($subValue)) {
+                continue;
+            }
+
+            if (self::validateArrayValues($subValue, $conditionValue) === true) {
+                return true;
             }
         }
+
         return false;
     }
 }

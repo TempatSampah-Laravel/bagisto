@@ -1,382 +1,593 @@
-@extends('admin::layouts.content')
+<x-admin::layouts>
+    <x-slot:title>
+        @lang('admin::app.catalog.families.edit.title')
+    </x-slot>
 
-@section('page_title')
-    {{ __('admin::app.catalog.families.edit-title') }}
-@stop
+    <!-- Input Form -->
+    <x-admin::form
+        method="PUT"
+        :action="route('admin.catalog.families.update', $attributeFamily->id)"
+    >
 
-@section('content')
-    <div class="content">
-        <form method="POST" action="{{ route('admin.catalog.families.update', $attributeFamily->id) }}" @submit.prevent="onSubmit">
+        {!! view_render_event('bagisto.admin.catalog.families.edit.edit_form_control.before', ['attributeFamily' => $attributeFamily]) !!}
 
-            <div class="page-header">
-                <div class="page-title">
-                    <h1>
-                        <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.catalog.families.index') }}'"></i>
+        <!-- Page Header -->
+        <div class="flex items-center justify-between gap-4 max-sm:flex-wrap">
+            <p class="text-xl font-bold text-gray-800 dark:text-white">
+                @lang('admin::app.catalog.families.edit.title')
+            </p>
 
-                        {{ __('admin::app.catalog.families.edit-title') }}
-                    </h1>
-                </div>
+            <div class="flex items-center gap-x-2.5">
+                <a
+                    href="{{ route('admin.catalog.families.index') }}"
+                    class="transparent-button hover:bg-gray-200 dark:text-white dark:hover:bg-gray-800"
+                >
+                    @lang('admin::app.catalog.families.edit.back-btn')
+                </a>
 
-                <div class="page-action">
-                    <button type="submit" class="btn btn-lg btn-primary">
-                        {{ __('admin::app.catalog.families.save-btn-title') }}
-                    </button>
-                </div>
-            </div>
-
-            <div class="page-content">
-
-                <div class="form-container">
-                    @csrf()
-                    <input name="_method" type="hidden" value="PUT">
-
-                    {!! view_render_event('bagisto.admin.catalog.family.edit_form_accordian.general.before', ['attributeFamily' => $attributeFamily]) !!}
-
-                    <accordian :title="'{{ __('admin::app.catalog.families.general') }}'" :active="true">
-                        <div slot="body">
-
-                            {!! view_render_event('bagisto.admin.catalog.family.edit_form_accordian.general.controls.before', ['attributeFamily' => $attributeFamily]) !!}
-
-                            <div class="control-group" :class="[errors.has('code') ? 'has-error' : '']">
-                                <input type="text" v-validate="'required'" name="code" class="control" id="code" value="{{ old('code') ?: $attributeFamily->code }}" disabled="disabled" data-vv-as="&quot;{{ __('admin::app.catalog.families.code') }}&quot;" v-code/>
-                                <input type="hidden" name="code" value="{{ $attributeFamily->code }}"/>
-                                <span class="control-error" v-if="errors.has('code')">@{{ errors.first('code') }}</span>
-                            </div>
-
-                            <div class="control-group" :class="[errors.has('name') ? 'has-error' : '']">
-                                <label for="name" class="required">{{ __('admin::app.catalog.families.name') }}</label>
-                                <input type="text" v-validate="'required'" class="control" id="name" name="name" value="{{ old('name') ?: $attributeFamily->name }}" data-vv-as="&quot;{{ __('admin::app.catalog.families.name') }}&quot;"/>
-                                <span class="control-error" v-if="errors.has('name')">@{{ errors.first('name') }}</span>
-                            </div>
-
-                            {!! view_render_event('bagisto.admin.catalog.family.edit_form_accordian.general.controls.after', ['attributeFamily' => $attributeFamily]) !!}
-
-                        </div>
-                    </accordian>
-
-                    {!! view_render_event('bagisto.admin.catalog.family.edit_form_accordian.general.after', ['attributeFamily' => $attributeFamily]) !!}
-
-
-                    {!! view_render_event('bagisto.admin.catalog.family.edit_form_accordian.groups.before', ['attributeFamily' => $attributeFamily]) !!}
-
-                    <accordian :title="'{{ __('admin::app.catalog.families.groups') }}'" :active="true">
-                        <div slot="body">
-
-                            {!! view_render_event('bagisto.admin.catalog.family.edit_form_accordian.groups.controls.before', ['attributeFamily' => $attributeFamily]) !!}
-
-                            <button type="button" style="margin-bottom : 20px" class="btn btn-md btn-primary" @click="showModal('addGroup')">
-                                {{ __('admin::app.catalog.families.add-group-title') }}
-                            </button>
-
-                            <group-list></group-list>
-
-                            {!! view_render_event('bagisto.admin.catalog.family.edit_form_accordian.groups.controls.before', ['attributeFamily' => $attributeFamily]) !!}
-
-                        </div>
-                    </accordian>
-
-                    {!! view_render_event('bagisto.admin.catalog.family.edit_form_accordian.groups.after', ['attributeFamily' => $attributeFamily]) !!}
-                </div>
-            </div>
-
-        </form>
-    </div>
-
-    <modal id="addGroup" :is-open="modalIds.addGroup">
-        <h3 slot="header">{{ __('admin::app.catalog.families.add-group-title') }}</h3>
-
-        <div slot="body">
-            <group-form></group-form>
-        </div>
-    </modal>
-@stop
-
-@push('scripts')
-
-    <script type="text/x-template" id="group-form-template">
-        <form method="POST" action="{{ route('admin.catalog.families.store') }}" data-vv-scope="add-group-form" @submit.prevent="addGroup('add-group-form')">
-
-            <div class="page-content">
-                <div class="form-container">
-                    @csrf()
-
-                    <div class="control-group" :class="[errors.has('add-group-form.groupName') ? 'has-error' : '']">
-                        <label for="groupName" class="required">{{ __('admin::app.catalog.families.name') }}</label>
-                        <input type="text" v-validate="'required'" v-model="group.groupName" class="control" id="groupName" name="groupName" data-vv-as="&quot;{{ __('admin::app.catalog.families.name') }}&quot;"/>
-                        <span class="control-error" v-if="errors.has('add-group-form.groupName')">@{{ errors.first('add-group-form.groupName') }}</span>
-                    </div>
-
-                    <div class="control-group" :class="[errors.has('add-group-form.position') ? 'has-error' : '']">
-                        <label for="position" class="required">{{ __('admin::app.catalog.families.position') }}</label>
-                        <input type="text" v-validate="'required|numeric'" v-model="group.position" class="control" id="position" name="position" data-vv-as="&quot;{{ __('admin::app.catalog.families.position') }}&quot;"/>
-                        <span class="control-error" v-if="errors.has('add-group-form.position')">@{{ errors.first('add-group-form.position') }}</span>
-                    </div>
-
-                    <button type="submit" class="btn btn-lg btn-primary">
-                        {{ __('admin::app.catalog.families.add-group-title') }}
-                    </button>
-
-                </div>
-            </div>
-
-        </form>
-    </script>
-
-    <script type="text/x-template" id="group-list-template">
-        <div style="margin-top: 20px">
-            <group-item v-for='(group, index) in groups' :group="group" :custom_attributes="custom_attributes" :key="index" :index="index" @onRemoveGroup="removeGroup($event)" @onAttributeAdd="addAttributes(index, $event)" @onAttributeRemove="removeAttribute(index, $event)"></group-item>
-        </div>
-    </script>
-
-    <script type="text/x-template" id="group-item-template">
-        <accordian :title="group.groupName" :active="true">
-            <div slot="header">
-                <i class="icon expand-icon left"></i>
-                <h1>@{{ group.name ? group.name : group.groupName }}</h1>
-                <i class="icon trash-icon" @click="removeGroup()" v-if="group.is_user_defined"></i>
-            </div>
-
-            <div slot="body">
-                <input type="hidden" :name="[groupInputName + '[name]']" :value="group.name ? group.name : group.groupName"/>
-                <input type="hidden":name="[groupInputName + '[position]']" :value="group.position"/>
-
-                <div class="table" v-if="group.custom_attributes.length" style="margin-bottom: 20px;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>{{ __('admin::app.catalog.families.attribute-code') }}</th>
-                                <th>{{ __('admin::app.catalog.families.name') }}</th>
-                                <th>{{ __('admin::app.catalog.families.type') }}</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr v-for='(attribute, index) in group.custom_attributes'>
-                                <td>
-                                    <input type="hidden" :name="[groupInputName + '[custom_attributes][][id]']" :value="attribute.id"/>
-                                    @{{ attribute.code }}
-                                </td>
-                                <td>@{{ attribute.admin_name }}</td>
-                                <td>@{{ attribute.type }}</td>
-                                <td class="actions">
-                                    <i class="icon trash-icon" @click="removeAttribute(attribute)" v-if="attribute.is_user_defined || attribute.removable"></i>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <button type="button" class="btn btn-md btn-primary dropdown-toggle">
-                    {{ __('admin::app.catalog.families.add-attribute-title') }}
+                <button 
+                    type="submit" 
+                    class="primary-button"
+                >
+                    @lang('admin::app.catalog.families.edit.save-btn')
                 </button>
+            </div>
+        </div>
 
-                <div class="dropdown-list" style="width: 240px">
-                    <div class="search-box">
-                        <input type="text" class="control" placeholder="{{ __('admin::app.catalog.families.search') }}">
+        <!-- Container -->
+        <div class="mt-3.5 flex gap-2.5 max-xl:flex-wrap">
+            <!-- Left Container -->
+
+            {!! view_render_event('bagisto.admin.catalog.families.edit.card.attributes-panel.before', ['attributeFamily' => $attributeFamily]) !!}
+
+            <div class="box-shadow flex flex-1 flex-col gap-2 rounded bg-white dark:bg-gray-900 max-xl:flex-auto">
+                <v-family-attributes>
+                    <x-admin::shimmer.catalog.families.attributes-panel />
+                </v-family-attributes>
+            </div>
+
+            {!! view_render_event('bagisto.admin.catalog.families.edit.card.attributes-panel.after', ['attributeFamily' => $attributeFamily]) !!}
+
+            {!! view_render_event('bagisto.admin.catalog.families.edit.card.accordion.general.before', ['attributeFamily' => $attributeFamily]) !!}
+    
+            <!-- Right Container -->
+            <div class="flex w-[360px] max-w-full select-none flex-col gap-2">
+                <!-- General Panel -->
+                <x-admin::accordion>
+                    <!-- Panel Header -->
+                    <x-slot:header>
+                        <p class="p-2.5 text-base font-semibold text-gray-800 dark:text-white">
+                            @lang('admin::app.catalog.families.edit.general')
+                        </p>
+                    </x-slot>
+                
+                    <!-- Panel Content -->
+                    <x-slot:content>
+                        <x-admin::form.control-group>
+                            <x-admin::form.control-group.label class="!text-gray-800 dark:!text-white">
+                                @lang('admin::app.catalog.families.edit.code')
+                            </x-admin::form.control-group.label>
+
+                            <x-admin::form.control-group.control
+                                type="text"
+                                name="code"
+                                rules="required"
+                                value="{{ old('code') ?? $attributeFamily->code }}"
+                                disabled="disabled"
+                                :label="trans('admin::app.catalog.families.create.code')"
+                                :placeholder="trans('admin::app.catalog.families.edit.enter-code')"
+                            />
+
+                            <input
+                                type="hidden"
+                                name="code"
+                                value="{{ $attributeFamily->code }}"
+                            />
+
+                            <x-admin::form.control-group.error control-name="code" />
+                        </x-admin::form.control-group>
+
+                        <!-- Name -->
+                        <x-admin::form.control-group class="!mb-0">
+                            <x-admin::form.control-group.label class="!text-gray-800 dark:!text-white">
+                                @lang('admin::app.catalog.families.edit.name')
+                            </x-admin::form.control-group.label>
+
+                            <x-admin::form.control-group.control
+                                type="text"
+                                name="name"
+                                rules="required"
+                                value="{{ old('name') ?? $attributeFamily->name }}"
+                                :label="trans('admin::app.catalog.families.create.name')"
+                                :placeholder="trans('admin::app.catalog.families.edit.enter-name')"
+                            />
+
+                            <x-admin::form.control-group.error control-name="name" />
+                        </x-admin::form.control-group>
+                    </x-slot>
+                </x-admin::accordion>
+            </div>
+
+            {!! view_render_event('bagisto.admin.catalog.families.edit.card.accordion.general.after', ['attributeFamily' => $attributeFamily]) !!}
+        </div>
+
+        {!! view_render_event('bagisto.admin.catalog.families.edit.edit_form_control.after', ['attributeFamily' => $attributeFamily]) !!}
+
+    </x-admin::form>
+
+    @pushOnce('scripts')
+        <script
+            type="text/x-template"
+            id="v-family-attributes-template"
+        >
+            <div class="">
+                <!-- Panel Header -->
+                <div class="mb-2.5 flex flex-wrap justify-between gap-2.5 p-4">
+                    <!-- Panel Header -->
+                    <div class="flex flex-col gap-2">
+                        <p class="text-base font-semibold text-gray-800 dark:text-white">
+                            @lang('admin::app.catalog.families.edit.groups')
+                        </p>
+
+                        <p class="text-xs font-medium text-gray-500 dark:text-gray-300">
+                            @lang('admin::app.catalog.families.edit.groups-info')
+                        </p>
                     </div>
+                    
+                    <!-- Panel Content -->
+                    <div class="flex items-center gap-x-1">
+                        <!-- Delete Group Button -->
+                        <div
+                            class="transparent-button text-red-600"
+                            @click="deleteGroup"
+                        >
+                            @lang('admin::app.catalog.families.edit.delete-group-btn')
+                        </div>
 
-                    <div class="dropdown-container">
-                        <ul>
-                            <li v-for='(attribute, index) in custom_attributes' :data-id="attribute.id">
-                                <span class="checkbox">
-                                    <input type="checkbox" :id="attribute.id" :value="attribute.id"/>
-                                    <label class="checkbox-view" :for="attribute.id"></label>
-                                    @{{ attribute.admin_name }}
-                                </span>
-                            </li>
-                        </ul>
-
-                        <button type="button" class="btn btn-lg btn-primary" @click="addAttributes($event)">
-                            {{ __('admin::app.catalog.families.add-attribute-title') }}
-                        </button>
+                        <!-- Add Group Button -->
+                        <div
+                            class="secondary-button"
+                            @click="$refs.addGroupModal.open()"
+                        >
+                            @lang('admin::app.catalog.families.edit.add-group-btn')
+                        </div>
                     </div>
                 </div>
+
+                <!-- Panel Content -->
+                <div class="flex [&>*]:flex-1 gap-5 justify-between px-4">
+                    <!-- Attributes Groups Container -->
+                    <div v-for="(groups, column) in columnGroups">
+                        <!-- Attributes Groups Header -->
+                        <div class="mb-4 flex flex-col">
+                            <p class="font-semibold leading-6 text-gray-600 dark:text-gray-300">
+                                @{{
+                                    column == 1
+                                    ? "@lang('admin::app.catalog.families.edit.main-column')"
+                                    : "@lang('admin::app.catalog.families.edit.right-column')"
+                                }}
+                            </p>
+                            
+                            <p class="text-xs font-medium text-gray-800 dark:text-white">
+                                @lang('admin::app.catalog.families.edit.edit-group-info')
+                            </p>
+                        </div>
+
+                        <!-- Draggable Attribute Groups -->
+                        <draggable
+                            class="h-[calc(100vh-285px)] overflow-auto border-gray-200 pb-4 ltr:border-r rtl:border-l"
+                            ghost-class="draggable-ghost"
+                            handle=".icon-drag"
+                            v-bind="{animation: 200}"
+                            :list="groups"
+                            item-key="id"
+                            group="groups"
+                        >
+                            <template #item="{ element, index }">
+                                <div class="">
+                                    <!-- Group Container -->
+                                    <div class="group flex items-center">
+                                        <!-- Toggle -->
+                                        <i
+                                            class="icon-sort-down cursor-pointer rounded-md text-xl transition-all hover:bg-gray-100 group-hover:text-gray-800 dark:hover:bg-gray-950 dark:group-hover:text-white"
+                                            @click="element.hide = ! element.hide"
+                                        ></i>
+
+                                        <!-- Group Name -->
+                                        <div
+                                            class="group_node group flex max-w-max gap-1.5 rounded py-1.5 text-gray-600 transition-all dark:text-gray-300 ltr:pr-1.5 rtl:pl-1.5"
+                                            :class="{'bg-blue-600 text-white group-hover:[&>*]:text-white': selectedGroup.id == element.id}"
+                                            @click.stop="groupSelected(element)"
+                                        >
+                                            <i class="icon-drag cursor-grab text-xl text-inherit transition-all group-hover:text-gray-800 dark:group-hover:text-white"></i>
+
+                                            <i
+                                                class="text-xl text-inherit transition-all group-hover:text-gray-800 dark:group-hover:text-white"
+                                                :class="[element.is_user_defined ? 'icon-folder' : 'icon-folder-block']"
+                                            ></i>
+
+                                            <span
+                                                class="font-regular text-sm text-inherit transition-all group-hover:text-gray-800 dark:group-hover:text-white"
+                                                v-show="editableGroup.id != element.id"
+                                            >
+                                                @{{ element.name }}
+                                            </span>
+
+                                            <input
+                                                type="hidden"
+                                                :name="'attribute_groups[' + element.id + '][code]'"
+                                                :value="element.code"
+                                            />
+                                            
+                                            <input
+                                                type="text"
+                                                :name="'attribute_groups[' + element.id + '][name]'"
+                                                class="group_node text-sm !text-gray-600 dark:text-gray-300"
+                                                v-model="element.name"
+                                                v-show="editableGroup.id == element.id"
+                                            />
+
+                                            <input
+                                                type="hidden"
+                                                :name="'attribute_groups[' + element.id + '][position]'"
+                                                :value="index + 1"
+                                            />
+
+                                            <input
+                                                type="hidden"
+                                                :name="'attribute_groups[' + element.id + '][column]'"
+                                                :value="column"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Group Attributes -->
+                                    <draggable
+                                        class="ltr:ml-11 rtl:mr-11"
+                                        ghost-class="draggable-ghost"
+                                        handle=".icon-drag"
+                                        v-bind="{animation: 200}"
+                                        :list="getGroupAttributes(element)"
+                                        item-key="id"
+                                        group="attributes"
+                                        :move="onMove"
+                                        @end="onEnd"
+                                        v-show="! element.hide"
+                                    >
+                                        <template #item="{ element, index }">
+                                            <div class="group flex max-w-max gap-1.5 rounded py-1.5 text-gray-600 dark:text-gray-300 ltr:pr-1.5 rtl:pl-1.5">
+                                                <i class="icon-drag cursor-grab text-xl transition-all group-hover:text-gray-800 dark:group-hover:text-white"></i>
+
+                                                <i
+                                                    class="text-xl transition-all group-hover:text-gray-800 dark:group-hover:text-white"
+                                                    :class="[parseInt(element.is_user_defined) ? 'icon-attribute' : 'icon-attribute-block']"
+                                                ></i>
+                                                
+                                                <span class="font-regular text-sm transition-all group-hover:text-gray-800 dark:group-hover:text-white max-xl:text-xs">
+                                                    @{{ element.admin_name }}
+                                                </span>
+
+                                                <input
+                                                    type="hidden"
+                                                    :name="'attribute_groups[' + element.group_id + '][custom_attributes][' + index + '][id]'"
+                                                    class="text-sm text-gray-600 dark:text-gray-300"
+                                                    v-model="element.id"
+                                                />
+
+                                                <input
+                                                    type="hidden"
+                                                    :name="'attribute_groups[' + element.group_id + '][custom_attributes][' + index + '][position]'"
+                                                    class="text-sm text-gray-600 dark:text-gray-300"
+                                                    :value="index + 1"
+                                                />
+                                            </div>
+                                        </template>
+                                    </draggable>
+                                </div>
+                            </template>
+                        </draggable>
+                    </div>
+
+                    <!-- Unassigned Attributes Container -->
+                    <div class="">
+                        <!-- Unassigned Attributes Header -->
+                        <div class="mb-4 flex flex-col">
+                            <p class="font-semibold leading-6 text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.catalog.families.edit.unassigned-attributes')
+                            </p>
+
+                            <p class="text-xs font-medium text-gray-800 dark:text-white">
+                                @lang('admin::app.catalog.families.edit.unassigned-attributes-info')
+                            </p>
+                        </div>
+
+                        <!-- Draggable Unassigned Attributes -->
+                        <draggable
+                            id="unassigned-attributes"
+                            class="h-[calc(100vh-285px)] overflow-auto pb-4"
+                            ghost-class="draggable-ghost"
+                            handle=".icon-drag"
+                            v-bind="{animation: 200}"
+                            :list="unassignedAttributes"
+                            item-key="id"
+                            group="attributes"
+                        >
+                            <template #item="{ element }">
+                                <div class="group flex max-w-max gap-1.5 rounded py-1.5 text-gray-600 dark:text-gray-300 ltr:pr-1.5 rtl:pl-1.5">
+                                    <i class="icon-drag cursor-grab text-xl transition-all group-hover:text-gray-800 dark:group-hover:text-white"></i>
+
+                                    <i class="icon-attribute text-xl transition-all group-hover:text-gray-800 dark:group-hover:text-white"></i>
+
+                                    <span class="font-regular text-sm transition-all group-hover:text-gray-800 dark:group-hover:text-white max-xl:text-xs">
+                                        @{{ element.admin_name }}
+                                    </span>
+                                </div>
+                            </template>
+                        </draggable>
+                    </div>
+                </div>
+
+                <x-admin::form
+                    v-slot="{ meta, errors, handleSubmit }"
+                    as="div"
+                >
+                    <form @submit="handleSubmit($event, addGroup)">
+                        <x-admin::modal ref="addGroupModal">
+                            <!-- Modal Header -->
+                            <x-slot:header>
+                                <p class="text-lg font-bold text-gray-800 dark:text-white">
+                                    @lang('admin::app.catalog.families.edit.add-group-title')
+                                </p>
+                            </x-slot>
+
+                            <!-- Modal Content -->
+                            <x-slot:content>
+                                <x-admin::form.control-group>
+                                    <x-admin::form.control-group.label class="required">
+                                        @lang('admin::app.catalog.families.edit.code')
+                                    </x-admin::form.control-group.label>
+
+                                    <x-admin::form.control-group.control
+                                        type="text"
+                                        name="code"
+                                        rules="required"
+                                        :label="trans('admin::app.catalog.families.edit.code')"
+                                        :placeholder="trans('admin::app.catalog.families.edit.code')"
+                                    />
+
+                                    <x-admin::form.control-group.error control-name="code" />
+                                </x-admin::form.control-group>
+
+                                <x-admin::form.control-group>
+                                    <x-admin::form.control-group.label class="required">
+                                        @lang('admin::app.catalog.families.edit.name')
+                                    </x-admin::form.control-group.label>
+
+                                    <x-admin::form.control-group.control
+                                        type="text"
+                                        name="name"
+                                        rules="required"
+                                        :label="trans('admin::app.catalog.families.edit.name')"
+                                        :placeholder="trans('admin::app.catalog.families.edit.name')"
+                                    />
+
+                                    <x-admin::form.control-group.error control-name="name" />
+                                </x-admin::form.control-group>
+
+                                <x-admin::form.control-group class="mb-4">
+                                    <x-admin::form.control-group.label class="required">
+                                        @lang('admin::app.catalog.families.edit.column')
+                                    </x-admin::form.control-group.label>
+
+                                    <x-admin::form.control-group.control
+                                        type="select"
+                                        name="column"
+                                        rules="required"
+                                        :label="trans('admin::app.catalog.families.edit.column')"
+                                    >
+                                        <!-- Default Option -->
+                                        <option value="">
+                                            @lang('admin::app.catalog.families.create.select-group')
+                                        </option>
+
+                                        <option value="1">
+                                            @lang('admin::app.catalog.families.edit.main-column')
+                                        </option>
+
+                                        <option value="2">
+                                            @lang('admin::app.catalog.families.edit.right-column')
+                                        </option>
+                                    </x-admin::form.control-group.control>
+
+                                    <x-admin::form.control-group.error control-name="column" />
+                                </x-admin::form.control-group>
+                            </x-slot>
+
+                            <!-- Modal Footer -->
+                            <x-slot:footer>
+                                <!-- Save Button -->
+                                <x-admin::button
+                                    button-type="button"
+                                    class="primary-button"
+                                    :title="trans('admin::app.catalog.families.edit.add-group-btn')"
+                                />
+                            </x-slot>
+                        </x-admin::modal>
+                    </form>
+                </x-admin::form>
             </div>
-        </accordian>
-    </script>
+        </script>
 
-    <script>
-        var groups = @json($attributeFamily->attribute_groups);
-        var custom_attributes = @json($custom_attributes);
+        <script type="module">
+            app.component('v-family-attributes', {
+                template: '#v-family-attributes-template',
 
-        Vue.component('group-form', {
+                data: function () {
+                    return {
+                        selectedGroup: {
+                            id: null,
+                            code: null,
+                            name: null,
+                        },
 
-            data: function() {
-                return {
-                    group: {
-                        'groupName': '',
-                        'position': '',
-                        'custom_attributes': []
+                        editableGroup: {
+                            id: null,
+                            code: null,
+                            name: null,
+                        },
+
+                        columnGroups: @json($attributeFamily->attribute_groups->groupBy('column')),
+
+                        customAttributes: @json($customAttributes),
+
+                        dropReverted: false,
                     }
-                }
-            },
+                },
 
-            template: '#group-form-template',
+                created() {
+                    window.addEventListener('click', this.handleFocusOut);
+                },
 
-            methods: {
-                addGroup: function (formScope) {
-                    var this_this = this;
+                computed: {
+                    unassignedAttributes() {
+                        this.columnGroups[1] = this.columnGroups[1] || [];
+                        this.columnGroups[2] = this.columnGroups[2] || [];
 
-                    this.$validator.validateAll(formScope).then(function (result) {
-                        if (result) {
+                        return this.customAttributes.filter(attribute => {
+                            const isInGroup1 = this.columnGroups[1].some(group => 
+                                group.custom_attributes.some(customAttribute => customAttribute.id === attribute.id)
+                            );
 
-                            var filteredGroups = groups.filter(function(group) {
-                                return this_this.group.groupName.trim() === (group.name ? group.name.trim() : group.groupName.trim())
-                            })
+                            const isInGroup2 = this.columnGroups[2].some(group => 
+                                group.custom_attributes.some(customAttribute => customAttribute.id === attribute.id)
+                            );
 
-                            if (filteredGroups.length) {
-                                const field = this.$validator.fields.find({ name: 'groupName', scope: 'add-group-form' });
+                            return !isInGroup1 && !isInGroup2;
+                        });
+                    },
+                },
 
-                                if (field) {
-                                    this.$validator.errors.add({
-                                        id: field.id,
-                                        field: 'groupName',
-                                        msg: "{{ __('admin::app.catalog.families.group-exist-error') }}",
-                                        scope: 'add-group-form',
-                                    });
-                                }
-                            } else {
-                                groups.push(this_this.group);
+                methods: {
+                    onMove: function(e) {
+                        if (
+                            e.to.id === 'unassigned-attributes'
+                            && ! e.draggedContext.element.is_user_defined
+                        ) {
+                            this.dropReverted = true;
 
-                                groups = this_this.sortGroups();
+                            return false;
+                        } else {
+                            this.dropReverted = false;
+                        }
+                    },
 
-                                this.group = {'groupName': '', 'position': '', 'is_user_defined': 1, 'custom_attributes': []};
+                    onEnd: function(e) {
+                        if (this.dropReverted) {
+                            this.$emitter.emit('add-flash', { type: 'warning', message: "@lang('admin::app.catalog.families.create.removal-not-possible')" });
+                        }
+                    },
 
-                                this_this.$parent.closeModal();
+                    getGroupAttributes(group) {
+                        group.custom_attributes.forEach((attribute, index) => {
+                            attribute.group_id = group.id;
+                        });
+
+                        return group.custom_attributes;
+                    },
+
+                    groupSelected(group) {
+                        if (this.selectedGroup.id) {
+                            this.editableGroup = this.selectedGroup.id == group.id
+                                ? group
+                                : {
+                                    id: null,
+                                    code: null,
+                                    name: null,
+                                };
+                        }
+
+                        this.selectedGroup = group;
+                    },
+
+                    addGroup(params, { resetForm, setErrors }) {
+                        let isGroupCodeAlreadyExists = this.isGroupCodeAlreadyExists(params.code);
+
+                        let isGroupNameAlreadyExists = this.isGroupNameAlreadyExists(params.name);
+
+                        if (isGroupCodeAlreadyExists || isGroupCodeAlreadyExists) {
+                            if (isGroupCodeAlreadyExists) {
+                                setErrors({'code': ["@lang('admin::app.catalog.families.edit.group-code-already-exists')"]});
                             }
+
+                            if (isGroupNameAlreadyExists) {
+                                setErrors({'name': ["@lang('admin::app.catalog.families.edit.group-name-already-exists')"]});
+                            }
+
+                            return;
                         }
-                    });
-                },
 
-                sortGroups: function () {
-                    return groups.sort(function(a, b) {
-                        return a.position - b.position;
-                    });
-                }
-            }
-        });
-
-        Vue.component('group-list', {
-
-            template: '#group-list-template',
-
-            data: function() {
-                return {
-                    groups: groups,
-                    custom_attributes: custom_attributes
-                }
-            },
-
-            created: function () {
-                this.groups.forEach(function(group) {
-                    group.custom_attributes.forEach(function(attribute) {
-                        var attribute = this.custom_attributes.filter(function (attributeTemp) {
-                            return attributeTemp.id == attribute.id;
+                        this.columnGroups[params.column].push({
+                            'id': 'group_' + params.column + '_' + this.columnGroups[params.column].length,
+                            'code': params.code,
+                            'name': params.name,
+                            'is_user_defined': 1,
+                            'custom_attributes': [],
                         });
 
-                        if (attribute.length) {
-                            let index = this.custom_attributes.indexOf(attribute[0])
+                        resetForm();
 
-                            this.custom_attributes.splice(index, 1)
-                        }
+                        this.$refs.addGroupModal.close();
+                    },
+                    
+                    isGroupCodeAlreadyExists(code) {
+                        return this.columnGroups[1].find(group => group.code == code) || this.columnGroups[2].find(group => group.code == code);
+                    },
+                    
+                    isGroupNameAlreadyExists(name) {
+                        return this.columnGroups[1].find(group => group.name == name) || this.columnGroups[2].find(group => group.name == name);
+                    },
+                    
+                    isGroupContainsSystemAttributes(group) {
+                        return group.custom_attributes.find(attribute => ! attribute.is_user_defined);
+                    },
 
-                    });
-                });
-            },
+                    deleteGroup() {
+                        this.$emitter.emit('open-confirm-modal', {
+                            agree: () => {
+                                if (! this.selectedGroup.id) {
+                                    this.$emitter.emit('add-flash', { type: 'warning', message: "@lang('admin::app.catalog.families.edit.select-group')" });
 
-            methods: {
-                removeGroup: function (group) {
-                    group.custom_attributes.forEach(function(attribute) {
-                        this.custom_attributes.push(attribute);
-                    })
+                                    return;
+                                }
 
-                    this.custom_attributes = this.sortAttributes();
+                                if (this.isGroupContainsSystemAttributes(this.selectedGroup)) {
+                                    this.$emitter.emit('add-flash', { type: 'warning', message: "@lang('admin::app.catalog.families.edit.group-contains-system-attributes')" });
 
-                    let index = groups.indexOf(group)
+                                    return;
+                                }
 
-                    groups.splice(index, 1)
-                },
+                                for (const [key, groups] of Object.entries(this.columnGroups)) {
+                                    let index = groups.indexOf(this.selectedGroup);
 
-                addAttributes: function (groupIndex, attributeIds) {
-                    attributeIds.forEach(function(attributeId) {
-                        var attribute = this.custom_attributes.filter(function (attribute) {
-                            return attribute.id == attributeId;
+                                    if (index > -1) {
+                                        groups.splice(index, 1);
+                                    }
+                                }
+                            }
                         });
+                    },
 
-                        attribute[0].removable = true;
-
-                        this.groups[groupIndex].custom_attributes.push(attribute[0]);
-
-                        let index = this.custom_attributes.indexOf(attribute[0])
-
-                        this.custom_attributes.splice(index, 1)
-                    })
-                },
-
-                removeAttribute: function (groupIndex, attribute) {
-                    let index = this.groups[groupIndex].custom_attributes.indexOf(attribute)
-
-                    this.groups[groupIndex].custom_attributes.splice(index, 1)
-
-                    this.custom_attributes.push(attribute);
-
-                    this.custom_attributes = this.sortAttributes();
-                },
-
-                sortAttributes: function () {
-                    return this.custom_attributes.sort(function(a, b) {
-                        return a.id - b.id;
-                    });
-                }
-            }
-        })
-
-        Vue.component('group-item', {
-            props: ['index', 'group', 'custom_attributes'],
-
-            template: "#group-item-template",
-
-            computed: {
-                groupInputName: function () {
-                    if (this.group.id)
-                        return "attribute_groups[" + this.group.id + "]";
-
-                    return "attribute_groups[group_" + this.index + "]";
-                }
-            },
-
-            methods: {
-                removeGroup: function () {
-                    this.$emit('onRemoveGroup', this.group)
-                },
-
-                addAttributes: function (e) {
-                    var attributeIds = [];
-
-                    $(e.target).prev().find('li input').each(function() {
-                        var attributeId = $(this).val();
-
-                        if ($(this).is(':checked')) {
-                            attributeIds.push(attributeId);
-
-                            $(this).prop('checked', false);
+                    handleFocusOut(e) {
+                        if (! e.target.classList.contains('group_node')) {
+                            this.editableGroup = {
+                                id: null,
+                                code: null,
+                                name: null,
+                            };
                         }
-                    });
-
-                    $('body').trigger('click')
-
-                    this.$emit('onAttributeAdd', attributeIds)
-                },
-
-                removeAttribute: function (attribute) {
-                    var confirmDelete = confirm('Are you sure to do this?')
-
-                    if (confirmDelete) {
-                        this.$emit('onAttributeRemove', attribute)
-                    }
+                    },
                 }
-            }
-        });
-    </script>
-@endpush
+            });
+        </script>
+    @endPushOnce
+</x-admin::layouts>

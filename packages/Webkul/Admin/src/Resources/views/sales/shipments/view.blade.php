@@ -1,283 +1,289 @@
-@extends('admin::layouts.master')
+<x-admin::layouts>
+    <x-slot:title>
+        @lang('admin::app.sales.shipments.view.title', ['shipment_id' => $shipment->id])
+    </x-slot>
 
-@section('page_title')
-    {{ __('admin::app.sales.shipments.view-title', ['shipment_id' => $shipment->id]) }}
-@stop
+    @php $order = $shipment->order; @endphp
 
-@section('content-wrapper')
-    <?php $order = $shipment->order; ?>
+    <div class="grid">
+        <div class="flex items-center justify-between gap-4 max-sm:flex-wrap">
+            <p class="text-xl font-bold leading-6 text-gray-800 dark:text-white">
+                @lang('admin::app.sales.shipments.view.title', ['shipment_id' => $shipment->id])
+            </p>
 
-    <div class="content full-page">
-        <div class="page-header">
-            <div class="page-title">
-                <h1>
-                    <i class="icon angle-left-icon back-link" onclick="window.location = '{{ route('admin.sales.shipments.index') }}'"></i>
-
-                    {{ __('admin::app.sales.shipments.view-title', ['shipment_id' => $shipment->id]) }}
-                </h1>
-            </div>
-
-            <div class="page-action">
-            </div>
-        </div>
-
-        <div class="page-content">
-            <div class="sale-container">
-
-                <accordian :title="'{{ __('admin::app.sales.orders.order-and-account') }}'" :active="true">
-                    <div slot="body">
-
-                        <div class="sale-section">
-                            <div class="secton-title">
-                                <span>{{ __('admin::app.sales.orders.order-info') }}</span>
-                            </div>
-
-                            <div class="section-content">
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.shipments.order-id') }}
-                                    </span>
-
-                                    <span class="value">
-                                        <a href="{{ route('admin.sales.orders.view', $order->id) }}">#{{ $order->increment_id }}</a>
-                                    </span>
-                                </div>
-
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.orders.order-date') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ $order->created_at }}
-                                    </span>
-                                </div>
-
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.orders.order-status') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ $order->status_label }}
-                                    </span>
-                                </div>
-
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.orders.channel') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ $order->channel_name }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="sale-section">
-                            <div class="secton-title">
-                                <span>{{ __('admin::app.sales.orders.account-info') }}</span>
-                            </div>
-
-                            <div class="section-content">
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.orders.customer-name') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ $shipment->order->customer_full_name }}
-                                    </span>
-                                </div>
-
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.orders.email') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ $shipment->order->customer_email }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </accordian>
-
-                @if ($order->billing_address || $order->shipping_address)
-                    <accordian :title="'{{ __('admin::app.sales.orders.address') }}'" :active="true">
-                        <div slot="body">
-
-                            @if ($order->billing_address)
-                                <div class="sale-section">
-                                    <div class="secton-title">
-                                        <span>{{ __('admin::app.sales.orders.billing-address') }}</span>
-                                    </div>
-
-                                    <div class="section-content">
-
-                                        @include ('admin::sales.address', ['address' => $order->billing_address])
-
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if ($order->shipping_address)
-                                <div class="sale-section">
-                                    <div class="secton-title">
-                                        <span>{{ __('admin::app.sales.orders.shipping-address') }}</span>
-                                    </div>
-
-                                    <div class="section-content">
-
-                                        @include ('admin::sales.address', ['address' => $order->shipping_address])
-
-                                    </div>
-                                </div>
-                            @endif
-
-                        </div>
-                    </accordian>
-                @endif
-
-                <accordian :title="'{{ __('admin::app.sales.orders.payment-and-shipping') }}'" :active="true">
-                    <div slot="body">
-
-                        <div class="sale-section">
-                            <div class="secton-title">
-                                <span>{{ __('admin::app.sales.orders.payment-info') }}</span>
-                            </div>
-
-                            <div class="section-content">
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.orders.payment-method') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ core()->getConfigData('sales.paymentmethods.' . $order->payment->method . '.title') }}
-                                    </span>
-                                </div>
-
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.orders.currency') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ $order->order_currency_code }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="sale-section">
-                            <div class="secton-title">
-                                <span>{{ __('admin::app.sales.orders.shipping-info') }}</span>
-                            </div>
-
-                            <div class="section-content">
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.orders.shipping-method') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ $order->shipping_title }}
-                                    </span>
-                                </div>
-
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.orders.shipping-price') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ core()->formatBasePrice($order->base_shipping_amount) }}
-                                    </span>
-                                </div>
-
-                                @if ($shipment->inventory_source || $shipment->inventory_source_name)
-                                    <div class="row">
-                                        <span class="title">
-                                            {{ __('admin::app.sales.shipments.inventory-source') }}
-                                        </span>
-
-                                        <span class="value">
-                                            {{ $shipment->inventory_source ? $shipment->inventory_source->name : $shipment->inventory_source_name }}
-                                        </span>
-                                    </div>
-                                @endif
-
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.shipments.carrier-title') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ $shipment->carrier_title }}
-                                    </span>
-                                </div>
-
-                                <div class="row">
-                                    <span class="title">
-                                        {{ __('admin::app.sales.shipments.tracking-number') }}
-                                    </span>
-
-                                    <span class="value">
-                                        {{ $shipment->track_number }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </accordian>
-
-                <accordian :title="'{{ __('admin::app.sales.orders.products-ordered') }}'" :active="true">
-                    <div slot="body">
-
-                        <div class="table">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>{{ __('admin::app.sales.orders.SKU') }}</th>
-                                        <th>{{ __('admin::app.sales.orders.product-name') }}</th>
-                                        <th>{{ __('admin::app.sales.orders.qty') }}</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-
-                                    @foreach ($shipment->items as $item)
-                                        <tr>
-                                            <td>{{ $item->sku }}</td>
-                                            <td>
-                                                {{ $item->name }}
-
-                                                @if (isset($item->additional['attributes']))
-                                                    <div class="item-options">
-
-                                                        @foreach ($item->additional['attributes'] as $attribute)
-                                                            <b>{{ $attribute['attribute_name'] }} : </b>{{ $attribute['option_label'] }}</br>
-                                                        @endforeach
-
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td>{{ $item->qty }}</td>
-                                        </tr>
-                                    @endforeach
-
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </accordian>
-
+            <div class="flex items-center gap-x-2.5">
+                <!-- Back Button -->
+                <a
+                    href="{{ route('admin.sales.shipments.index') }}"
+                    class="transparent-button hover:bg-gray-200 dark:text-white dark:hover:bg-gray-800"
+                >
+                    @lang('admin::app.account.edit.back-btn')
+                </a>
             </div>
         </div>
     </div>
-@stop
+
+    <!-- body content -->
+    <div class="mt-3.5 flex gap-2.5 max-xl:flex-wrap">
+        <!-- Left sub-component -->
+        <div class="flex flex-1 flex-col gap-2 max-xl:flex-auto">
+            <!-- General -->
+            <div class="box-shadow rounded bg-white dark:bg-gray-900">
+                <p class="mb-4 p-4 text-base font-semibold text-gray-800 dark:text-white">
+                    @lang('admin::app.sales.shipments.view.ordered-items') ({{count($shipment->items)}})
+                </p>
+
+                <div class="grid">
+                    <!-- Shipment Items -->
+                    @foreach ($shipment->items as $index => $item)
+                        <div class="flex justify-between gap-2.5 px-4 py-6">
+                            <div class="flex gap-2.5">
+                                <!-- Image -->
+                                @if ($item->product?->base_image_url)
+                                    <img
+                                        class="relative h-[60px] max-h-[60px] w-full max-w-[60px] rounded"
+                                        src="{{ $item->product->base_image_url }}"
+                                    >
+                                @else
+                                    <div class="relative h-[60px] max-h-[60px] w-full max-w-[60px] rounded border border-dashed border-gray-300 dark:border-gray-800 dark:mix-blend-exclusion dark:invert">
+                                        <img src="{{ bagisto_asset('images/product-placeholders/front.svg') }}">
+
+                                        <p class="absolute bottom-1.5 w-full text-center text-[6px] font-semibold text-gray-400">
+                                            @lang('admin::app.sales.invoices.view.product-image')
+                                        </p>
+                                    </div>
+                                @endif
+
+                                <div class="grid place-content-start gap-1.5">
+                                    <p class="break-all text-base font-semibold text-gray-800 dark:text-white">
+                                        {{ $item->name }}
+                                    </p>
+
+                                    <div class="flex flex-col place-items-start gap-1.5">
+                                        @if (isset($item->additional['attributes']))
+                                            <p class="text-gray-600 dark:text-gray-300">
+                                                @foreach ($item->additional['attributes'] as $attribute)
+                                                    {{ $attribute['attribute_name'] }} : {{ $attribute['option_label'] }}
+                                                @endforeach
+                                            </p>
+                                        @endif
+
+                                        <p class="text-gray-600 dark:text-gray-300">
+                                            @lang('admin::app.sales.shipments.view.sku', ['sku' =>  $item->sku ])
+                                        </p>
+
+                                        <p class="text-gray-600 dark:text-gray-300">
+                                            @lang('admin::app.sales.shipments.view.qty', ['qty' =>  $item->qty ])
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if ($index < count($shipment->items) - 1)
+                            <span class="block w-full border-b dark:border-gray-800"></span>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- Right sub-component -->
+        <div class="flex w-[360px] max-w-full flex-col gap-2 max-sm:w-full">
+            <!-- component 1 -->
+            <x-admin::accordion>
+                <x-slot:header>
+                    <p class="p-2.5 text-base font-semibold text-gray-600 dark:text-gray-300">
+                        @lang('admin::app.sales.shipments.view.customer')
+                    </p>
+                </x-slot>
+
+                <x-slot:content>
+                    <div class="flex flex-col pb-4">
+                        <!-- Customer Full Name -->
+                        <p class="font-semibold text-gray-800 dark:text-white">
+                            {{ $shipment->order->customer_full_name }}
+                        </p>
+
+                        <!-- Customer Email -->
+                        <p class="text-gray-600 dark:text-gray-300">
+                            @lang('admin::app.sales.shipments.view.email', ['email' =>  $shipment->order->customer_email ])
+                        </p>
+                    </div>
+
+                    <span class="block w-full border-b dark:border-gray-800"></span>
+
+                    @if ($order->billing_address || $order->shipping_address)
+                        <!-- Billing Address -->
+                        @if ($order->billing_address)
+                            <div class="flex items-center justify-between">
+                                <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
+                                    @lang('admin::app.sales.shipments.view.billing-address')
+                                </p>
+                            </div>
+
+                            @include ('admin::sales.address', ['address' => $order->billing_address])
+
+                        @endif
+
+                        <!-- Shipping Address -->
+                        @if ($order->shipping_address)
+                            <span class="mt-4 block w-full border-b dark:border-gray-800"></span>
+
+                            <div class="flex items-center justify-between">
+                                <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
+                                    @lang('admin::app.sales.shipments.view.shipping-address')
+                                </p>
+                            </div>
+
+                            @include ('admin::sales.address', ['address' => $order->shipping_address])
+
+                        @endif
+                    @endif
+                </x-slot>
+            </x-admin::accordion>
+
+            <!-- component 2 -->
+            <x-admin::accordion>
+                <x-slot:header>
+                    <p class="p-2.5 text-base font-semibold text-gray-600 dark:text-gray-300">
+                        @lang('admin::app.sales.shipments.view.order-information')
+                    </p>
+                </x-slot>
+
+                <x-slot:content>
+                    <div class="flex w-full justify-start gap-5">
+                        <div class="flex flex-col gap-y-1.5">
+                            <p class="text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.sales.shipments.view.order-id')
+                            </p>
+
+                            <p class="text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.sales.shipments.view.order-date')
+                           </p>
+
+                            <p class="text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.sales.shipments.view.order-status')
+                            </p>
+
+                            <p class="text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.sales.shipments.view.channel')
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col gap-y-1.5">
+                            <!-- Order Id -->
+                            <p class="font-semibold text-blue-600">
+                                <a href="{{ route('admin.sales.orders.view', $order->id) }}">
+                                    #{{ $order->increment_id }}
+                                </a>
+                            </p>
+
+                            <!-- Order Date -->
+                            <p class="text-gray-600 dark:text-gray-300">
+                                {{ core()->formatDate($order->created_at) }}
+                            </p>
+
+                            <!-- Order Status -->
+                            <p class="text-gray-600 dark:text-gray-300">
+                                {{ $order->status_label }}
+                            </p>
+
+                            <!-- Order Channel -->
+                            <p class="text-gray-600 dark:text-gray-300">
+                                {{ $order->channel_name }}
+                            </p>
+                        </div>
+                    </div>
+                </x-slot>
+            </x-admin::accordion>
+
+            <!-- Component 3 -->
+            <x-admin::accordion>
+                <x-slot:header>
+                    <p class="p-2.5 text-base font-semibold text-gray-600 dark:text-gray-300">
+                        @lang('admin::app.sales.shipments.view.payment-and-shipping')
+                    </p>
+                </x-slot>
+
+                <x-slot:content>
+                    <div class="pb-4">
+                        <!-- Payment method -->
+                        <p class="font-semibold text-gray-800 dark:text-white">
+                            {{ core()->getConfigData('sales.payment_methods.' . $order->payment->method . '.title') }}
+                        </p>
+
+                        <p class="text-gray-600 dark:text-gray-300">
+                            @lang('admin::app.sales.shipments.view.payment-method')
+                        </p>
+
+                        <!-- Currency Code -->
+                        <p class="pt-4 font-semibold text-gray-800 dark:text-white">
+                            {{ $order->order_currency_code }}
+                        </p>
+
+                        <p class="text-gray-600 dark:text-gray-300">
+                            @lang('admin::app.sales.shipments.view.currency')
+                        </p>
+                    </div>
+
+                    <!-- Horizontal Line -->
+                    <span class="block w-full border-b dark:border-gray-800"></span>
+
+                    <div class="pt-4">
+                        <!-- Shipping Menthod -->
+                        <p class="font-semibold text-gray-800 dark:text-white">
+                            {{ $order->shipping_title }}
+                        </p>
+
+                        <p class="text-gray-600 dark:text-gray-300">
+                            @lang('admin::app.sales.shipments.view.shipping-method')
+                        </p>
+
+                        <!-- Inventory Source -->
+                        <p class="pt-4 font-semibold text-gray-800 dark:text-white">
+                            {{ core()->formatBasePrice($order->base_shipping_amount) }}
+                        </p>
+
+                        <p class="text-gray-600 dark:text-gray-300">
+                            @lang('admin::app.sales.shipments.view.shipping-price')
+                        </p>
+
+                        @if (
+                            $shipment->inventory_source
+                            || $shipment->inventory_source_name
+                        )
+                            <p class="pt-4 font-semibold text-gray-800 dark:text-white">
+                                {{ $shipment->inventory_source ? $shipment->inventory_source->name : $shipment->inventory_source_name }}
+                            </p>
+
+                            <p class="text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.sales.shipments.view.inventory-source')
+                            </p>
+                        @endif
+
+                        @if ($shipment->carrier_title)
+                            <p class="pt-4 font-semibold text-gray-800 dark:text-white">
+                                {{ $shipment->carrier_title }}
+                            </p>
+
+                            <p class="text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.sales.shipments.view.carrier-title')
+                            </p>
+                        @endif
+
+                        @if ($shipment->track_number)
+                            <p class="pt-4 font-semibold text-gray-800 dark:text-white">
+                                {{ $shipment->track_number }}
+                            </p>
+
+                            <p class="text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.sales.shipments.view.tracking-number')
+                            </p>
+                        @endif
+                    </div>
+                </x-slot>
+            </x-admin::accordion>
+        </div>
+    </div>
+</x-admin::layouts>

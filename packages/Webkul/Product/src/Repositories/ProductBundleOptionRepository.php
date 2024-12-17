@@ -2,42 +2,28 @@
 
 namespace Webkul\Product\Repositories;
 
-use Illuminate\Container\Container as App;
-use Webkul\Core\Eloquent\Repository;
+use Illuminate\Container\Container;
 use Illuminate\Support\Str;
+use Webkul\Core\Eloquent\Repository;
 
 class ProductBundleOptionRepository extends Repository
 {
     /**
-     * ProductBundleOptionProductRepository object
-     *
-     * @var \Webkul\Product\Repositories\ProductBundleOptionProductRepository
-     */
-    protected $productBundleOptionProductRepository;
-
-    /**
      * Create a new repository instance.
      *
-     * @param  Webkul\Product\Repositories\ProductBundleOptionProductRepository  $productBundleOptionProductRepository
-     * @param  \Illuminate\Container\Container  $app
      * @return void
      */
     public function __construct(
-        ProductBundleOptionProductRepository $productBundleOptionProductRepository,
-        App $app
-    )
-    {
-        $this->productBundleOptionProductRepository = $productBundleOptionProductRepository;
-
-        parent::__construct($app);
+        protected ProductBundleOptionProductRepository $productBundleOptionProductRepository,
+        Container $container
+    ) {
+        parent::__construct($container);
     }
 
     /**
      * Specify Model class name
-     *
-     * @return string
      */
-    public function model()
+    public function model(): string
     {
         return 'Webkul\Product\Contracts\ProductBundleOption';
     }
@@ -47,7 +33,7 @@ class ProductBundleOptionRepository extends Repository
      * @param  \Webkul\Product\Contracts\Product  $product
      * @return void
      */
-    public function saveBundleOptons($data, $product)
+    public function saveBundleOptions($data, $product)
     {
         $previousBundleOptionIds = $product->bundle_options()->pluck('id');
 
@@ -67,7 +53,7 @@ class ProductBundleOptionRepository extends Repository
                     $this->update($bundleOptionInputs, $bundleOptionId);
                 }
 
-                $this->productBundleOptionProductRepository->saveBundleOptonProducts($bundleOptionInputs, $productBundleOption);
+                $this->productBundleOptionProductRepository->saveBundleOptionProducts($bundleOptionInputs, $productBundleOption);
             }
         }
 

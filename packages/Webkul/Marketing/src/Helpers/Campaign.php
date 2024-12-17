@@ -12,51 +12,18 @@ use Webkul\Marketing\Repositories\EventRepository;
 class Campaign
 {
     /**
-     * EventRepository object
-     *
-     * @var \Webkul\Marketing\Repositories\EventRepository
-     */
-    protected $eventRepository;
-
-    /**
-     * CampaignRepository object
-     *
-     * @var \Webkul\Marketing\Repositories\CampaignRepository
-     */
-    protected $campaignRepository;
-
-    /**
-     * TemplateRepository object
-     *
-     * @var \Webkul\Marketing\Repositories\TemplateRepository
-     */
-    protected $templateRepository;
-
-    /**
      * Create a new helper instance.
      *
-     * @param  \Webkul\Marketing\Repositories\EventRepository  $eventRepository
-     * @param  \Webkul\Marketing\Repositories\CampaignRepository  $campaignRepository
-     * @param  \Webkul\Marketing\Repositories\TemplateRepository  $templateRepository
      *
      * @return void
      */
     public function __construct(
-        EventRepository $eventRepository,
-        CampaignRepository $campaignRepository,
-        CampaignRepository $templateRepository
-    ) {
-        $this->eventRepository = $eventRepository;
-
-        $this->campaignRepository = $campaignRepository;
-
-        $this->templateRepository = $templateRepository;
-    }
+        protected EventRepository $eventRepository,
+        protected CampaignRepository $campaignRepository
+    ) {}
 
     /**
      * Process the email.
-     *
-     * @return void
      */
     public function process(): void
     {

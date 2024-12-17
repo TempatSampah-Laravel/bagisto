@@ -3,90 +3,24 @@
 namespace Webkul\Shop\Http\Controllers;
 
 use Illuminate\Support\Facades\Storage;
-use Webkul\Category\Repositories\CategoryRepository;
 use Webkul\Product\Repositories\ProductAttributeValueRepository;
 use Webkul\Product\Repositories\ProductDownloadableLinkRepository;
 use Webkul\Product\Repositories\ProductDownloadableSampleRepository;
-use Webkul\Product\Repositories\ProductFlatRepository;
 use Webkul\Product\Repositories\ProductRepository;
 
 class ProductController extends Controller
 {
     /**
-     * Product repository instance.
-     *
-     * @var \Webkul\Product\Repositories\ProductRepository
-     */
-    protected $productRepository;
-
-    /**
-     * Product flat repository instance.
-     *
-     * @var \Webkul\Product\Repositories\ProductFlatRepository
-     */
-    protected $productFlatRepository;
-
-    /**
-     * Product attribute value repository instance.
-     *
-     * @var \Webkul\Product\Repositories\ProductAttributeValueRepository
-     */
-    protected $productAttributeValueRepository;
-
-    /**
-     * Product downloadable sample repository instance.
-     *
-     * @var \Webkul\Product\Repositories\ProductDownloadableSampleRepository
-     */
-    protected $productDownloadableSampleRepository;
-
-    /**
-     * Product downloadable link repository instance.
-     *
-     * @var \Webkul\Product\Repositories\ProductDownloadableLinkRepository
-     */
-    protected $productDownloadableLinkRepository;
-
-    /**
-     * Category repository instance.
-     *
-     * @var \Webkul\Category\Repositories\CategoryRepository
-     */
-    protected $categoryRepository;
-
-    /**
      * Create a new controller instance.
      *
-     * @param  \Webkul\Product\Repositories\ProductRepository  $productRepository
-     * @param  \Webkul\Product\Repositories\ProductFlatRepository  $productFlatRepository
-     * @param  \Webkul\Product\Repositories\ProductAttributeValueRepository  $productAttributeValueRepository
-     * @param  \Webkul\Product\Repositories\ProductDownloadableSampleRepository  $productDownloadableSampleRepository
-     * @param  \Webkul\Product\Repositories\ProductDownloadableLinkRepository  $productDownloadableLinkRepository
-     * @param  \Webkul\Category\Repositories\CategoryRepository  $categoryRepository
      * @return void
      */
     public function __construct(
-        ProductRepository $productRepository,
-        ProductFlatRepository $productFlatRepository,
-        ProductAttributeValueRepository $productAttributeValueRepository,
-        ProductDownloadableSampleRepository $productDownloadableSampleRepository,
-        ProductDownloadableLinkRepository $productDownloadableLinkRepository,
-        CategoryRepository $categoryRepository
-    ) {
-        $this->productRepository = $productRepository;
-
-        $this->productFlatRepository = $productFlatRepository;
-
-        $this->productAttributeValueRepository = $productAttributeValueRepository;
-
-        $this->productDownloadableSampleRepository = $productDownloadableSampleRepository;
-
-        $this->productDownloadableLinkRepository = $productDownloadableLinkRepository;
-
-        $this->categoryRepository = $categoryRepository;
-
-        parent::__construct();
-    }
+        protected ProductRepository $productRepository,
+        protected ProductAttributeValueRepository $productAttributeValueRepository,
+        protected ProductDownloadableSampleRepository $productDownloadableSampleRepository,
+        protected ProductDownloadableLinkRepository $productDownloadableLinkRepository
+    ) {}
 
     /**
      * Download image or file.
@@ -136,6 +70,12 @@ class ProductController extends Controller
             } else {
                 $productDownloadableSample = $this->productDownloadableSampleRepository->findOrFail(request('id'));
 
+                if ($product = $this->productRepository->findOrFail($productDownloadableSample->product_id)) {
+                    if (! $product->visible_individually) {
+                        return redirect()->back();
+                    }
+                }
+
                 if ($productDownloadableSample->type == 'file') {
                     return Storage::download($productDownloadableSample->file);
                 } else {
@@ -151,45 +91,5 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             abort(404);
         }
-    }
-
-    /**
-     * Get filter attributes for product.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function getFilterAttributes($categoryId)
-    {
-        $category = $this->categoryRepository->find($categoryId);
-
-        if ($category) {
-            return response()->json([
-                'filter_attributes' => $this->productFlatRepository->getFilterAttributes($category)
-            ]);
-        }
-
-        return response()->json([
-            'filter_attributes' => []
-        ]);
-    }
-
-    /**
-     * Get category product maximum price.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function getCategoryProductMaximumPrice($categoryId)
-    {
-        $category = $this->categoryRepository->find($categoryId);
-
-        if ($category) {
-            return response()->json([
-                'max_price' => $this->productFlatRepository->handleCategoryProductMaximumPrice($category)
-            ]);
-        }
-
-        return response()->json([
-            'max_price' => 0
-        ]);
     }
 }

@@ -2,205 +2,166 @@
 
 namespace Webkul\Product\Helpers;
 
-class Toolbar extends AbstractProduct
+use Illuminate\Support\Collection;
+
+class Toolbar
 {
     /**
-     * Returns available sort orders
-     *
-     * @return array
+     * Returns available sort orders.
      */
-    public function getAvailableOrders()
+    public function getAvailableOrders(): Collection
     {
-        return [
-            'name-asc'        => 'from-a-z',
-            'name-desc'       => 'from-z-a',
-            'created_at-desc' => 'newest-first',
-            'created_at-asc'  => 'oldest-first',
-            'price-asc'       => 'cheapest-first',
-            'price-desc'      => 'expensive-first',
-        ];
-    }
-    /**
-     * Returns available limits
-     *
-     * @return array
-     */
-    public function getAvailableLimits()
-    {
-        if (core()->getConfigData('catalog.products.storefront.products_per_page')) {
-            $pages = explode(',', core()->getConfigData('catalog.products.storefront.products_per_page'));
-
-            return $pages;
-        }
-
-        return [9, 15, 21, 28];
-    }
-
-    /**
-     * Returns the sort order url
-     *
-     * @param  string $key
-     * @return string
-     */
-    public function getOrderUrl($key)
-    {
-        $keys = explode('-', $key);
-
-        return $this->fullUrlWithQuery([
-            'sort'  => current($keys),
-            'order' => end($keys),
+        return collect([
+            [
+                'title'    => trans('product::app.sort-by.options.from-a-z'),
+                'value'    => 'name-asc',
+                'sort'     => 'name',
+                'order'    => 'asc',
+                'position' => 1,
+            ],
+            [
+                'title'    => trans('product::app.sort-by.options.from-z-a'),
+                'value'    => 'name-desc',
+                'sort'     => 'name',
+                'order'    => 'desc',
+                'position' => 2,
+            ],
+            [
+                'title'    => trans('product::app.sort-by.options.latest-first'),
+                'value'    => 'created_at-desc',
+                'sort'     => 'created_at',
+                'order'    => 'desc',
+                'position' => 3,
+            ],
+            [
+                'title'    => trans('product::app.sort-by.options.oldest-first'),
+                'value'    => 'created_at-asc',
+                'sort'     => 'created_at',
+                'order'    => 'asc',
+                'position' => 4,
+            ],
+            [
+                'title'    => trans('product::app.sort-by.options.cheapest-first'),
+                'value'    => 'price-asc',
+                'sort'     => 'price',
+                'order'    => 'asc',
+                'position' => 5,
+            ],
+            [
+                'title'    => trans('product::app.sort-by.options.expensive-first'),
+                'value'    => 'price-desc',
+                'sort'     => 'price',
+                'order'    => 'desc',
+                'position' => 6,
+            ],
         ]);
     }
 
     /**
-     * Returns the limit url
-     *
-     * @param  int  $limit
-     * @return string
+     * Get default order. This is a crucial part of our system configuration.
+     * It should either be available or fail. There should be no further proceeding.
      */
-    public function getLimitUrl($limit)
+    public function getDefaultOrder(): array
     {
-        return $this->fullUrlWithQuery([
-            'limit' => $limit,
-        ]);
+        return $this->getAvailableOrders()
+            ->where('value', core()->getConfigData('catalog.products.storefront.sort_by') ?? 'price-desc')
+            ->firstOrFail();
     }
 
     /**
-     * Returns the mode url
-     *
-     * @param  string $mode
-     * @return string
+     * Get order.
      */
-    public function getModeUrl($mode)
+    public function getOrder(array $params = []): array
     {
-        return $this->fullUrlWithQuery([
-            'mode' => $mode,
-        ]);
-    }
-
-    /**
-     * Checks if sort order is active
-     *
-     * @param  string $key
-     * @return bool
-     */
-    public function isOrderCurrent($key)
-    {
-        $params = request()->input();
-        $orderDirection = $params['order'] ?? 'asc';
-
-        if (isset($params['sort']) && $key == $params['sort'] . '-' . $orderDirection) {
-            return true;
-        } elseif (! isset($params['sort'])) {
-            $sortBy = core()->getConfigData('catalog.products.storefront.sort_by')
-                   ? core()->getConfigData('catalog.products.storefront.sort_by')
-                   : 'name-desc';
-
-            if ($key == $sortBy) {
-                return true;
-            }
+        if (! isset($params['sort'])) {
+            return $this->getDefaultOrder();
         }
 
-        return false;
+        $order = $this->getAvailableOrders()
+            ->where('value', $params['sort'])
+            ->first();
+
+        return $order ?: $this->getDefaultOrder();
     }
 
     /**
-     * Checks if limit is active
-     *
-     * @param  int  $limit
-     * @return bool
+     * Returns available limits.
      */
-    public function isLimitCurrent($limit)
+    public function getAvailableLimits(): Collection
     {
-        $params = request()->input();
+        if ($productsPerPage = core()->getConfigData('catalog.products.storefront.products_per_page')) {
+            $pages = explode(',', $productsPerPage);
 
-        if (isset($params['limit']) && $limit == $params['limit']) {
-            return true;
+            return collect($pages);
         }
 
-        return false;
+        return collect([12, 24, 36, 48]);
     }
 
     /**
-     * Checks if mode is active
-     *
-     * @param  string  $key
-     * @return bool
+     * Returns default limit. By default it will be 12. Leaved a
+     * space for the admin configuration and customization.
      */
-    public function isModeActive($key)
+    public function getDefaultLimit(): int
     {
-        $params = request()->input();
-
-        $defaultMode = core()->getConfigData('catalog.products.storefront.mode')
-        ? core()->getConfigData('catalog.products.storefront.mode')
-        : 'grid';
-
-        if (request()->input() == null && $key == $defaultMode) {
-            return true;
-        } else if (isset($params['mode']) && $key == $params['mode']) {
-            return true;
-        }
-
-        return false;
+        return $this->getAvailableLimits()->first();
     }
 
     /**
-     * Returns the current mode
-     *
-     * @return string
+     * Get limit.
      */
-    public function getCurrentMode()
+    public function getLimit(array $params): int
     {
-        $params = request()->input();
+        /**
+         * Set a default value for the 'limit' parameter,
+         * in case it is not provided or is not a valid integer.
+         */
+        $limit = (int) ($params['limit'] ?? $this->getDefaultLimit());
 
-        if (isset($params['mode'])) {
-            return $params['mode'];
-        }
-
-        return core()->getConfigData('catalog.products.storefront.mode')
-               ? core()->getConfigData('catalog.products.storefront.mode')
-               : 'grid';
+        /**
+         * If the 'limit' parameter is present but value not present
+         * in available limits, use the default value instead.
+         */
+        return in_array($limit, $this->getAvailableLimits()->toArray())
+            ? $limit
+            : $this->getDefaultLimit();
     }
 
     /**
-     * Returns the view option if mode is set by param then it will overwrite default one and return new mode
-     *
-     * @return string
+     * Returns available modes.
      */
-    public function getViewOption()
+    public function getAvailableModes(): Collection
     {
-        /* checking default option first */
-        $viewOption = core()->getConfigData('catalog.products.storefront.mode');
-
-        /* checking mode param if exist then overwrite the default option */
-        if ($this->isModeActive('grid')) {
-            $viewOption = 'grid';
-        }
-
-        /* checking mode param if exist then overwrite the default option */
-        if ($this->isModeActive('list')) {
-            $viewOption = 'list';
-        }
-
-        /* if still default config is not set from the admin then in last needed hardcoded value */
-        return $viewOption ?? 'grid';
+        return collect(['grid', 'list']);
     }
 
     /**
-     * Returns the query string. As request built in method does not able to handle the
-     * multiple question marks, this method will check the query string and append the query string.
+     * Returns default mode.
      *
-     * @param  array  $additionalQuery
-     * @return string
+     * @return int
      */
-    public function fullUrlWithQuery($additionalQuery)
+    public function getDefaultMode(): string
     {
-        $queryString = request()->getQueryString();
+        return core()->getConfigData('catalog.products.storefront.mode') ?? 'grid';
+    }
 
-        $additionalQueryString = http_build_query($additionalQuery);
+    /**
+     * Get mode.
+     */
+    public function getMode(array $params): string
+    {
+        /**
+         * Set a default value for the 'mode' parameter,
+         * in case it is not provided.
+         */
+        $mode = $params['mode'] ?? $this->getDefaultMode();
 
-        return $queryString
-            ? url()->current() . '?' . $queryString . '&' . $additionalQueryString
-            : url()->current() . '?' . $additionalQueryString;
+        /**
+         * If the 'mode' parameter is present but value not present
+         * in available modes, use the default mode instead.
+         */
+        return in_array($mode, $this->getAvailableModes()->toArray())
+            ? $mode
+            : $this->getDefaultMode();
     }
 }

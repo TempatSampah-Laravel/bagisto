@@ -7,18 +7,21 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use Laravel\Sanctum\HasApiTokens;
+use Shetabit\Visitor\Traits\Visitor;
 use Webkul\Checkout\Models\CartProxy;
+use Webkul\Core\Models\ChannelProxy;
 use Webkul\Core\Models\SubscribersListProxy;
 use Webkul\Customer\Contracts\Customer as CustomerContract;
 use Webkul\Customer\Database\Factories\CustomerFactory;
-use Webkul\Customer\Notifications\CustomerResetPassword;
 use Webkul\Product\Models\ProductReviewProxy;
+use Webkul\Sales\Models\InvoiceProxy;
 use Webkul\Sales\Models\OrderProxy;
+use Webkul\Shop\Mail\Customer\ResetPasswordNotification;
 
-class Customer extends Authenticatable implements CustomerContract, JWTSubject
+class Customer extends Authenticatable implements CustomerContract
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Visitor;
 
     /**
      * The table associated with the model.
@@ -26,6 +29,15 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
      * @var string
      */
     protected $table = 'customers';
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'subscribed_to_news_letter' => 'boolean',
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -41,12 +53,13 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
         'phone',
         'password',
         'api_token',
-        'customer_group_id',
-        'subscribed_to_news_letter',
-        'is_verified',
         'token',
-        'notes',
+        'customer_group_id',
+        'channel_id',
+        'subscribed_to_news_letter',
         'status',
+        'is_verified',
+        'is_suspended',
     ];
 
     /**
@@ -61,44 +74,20 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
     ];
 
     /**
-     * Create a new factory instance for the model.
+     * The accessors to append to the model's array form.
      *
-     * @return \Webkul\Customer\Database\Factories\CustomerFactory
+     * @var array
      */
-    protected static function newFactory()
-    {
-        return CustomerFactory::new();
-    }
+    protected $appends = ['image_url'];
 
     /**
      * Send the password reset notification.
      *
      * @param  string  $token
-     * @return void
      */
     public function sendPasswordResetNotification($token): void
     {
-        $this->notify(new CustomerResetPassword($token));
-    }
-
-    /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
-     */
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
-
-    /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
-     */
-    public function getJWTCustomClaims(): array
-    {
-        return [];
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     /**
@@ -113,12 +102,10 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
 
     /**
      * Get the customer full name.
-     *
-     * @return string
      */
     public function getNameAttribute(): string
     {
-        return ucfirst($this->first_name) . ' ' . ucfirst($this->last_name);
+        return ucfirst($this->first_name).' '.ucfirst($this->last_name);
     }
 
     /**
@@ -139,7 +126,6 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
      * Is email exists or not.
      *
      * @param  string  $email
-     * @return bool
      */
     public function emailExists($email): bool
     {
@@ -184,6 +170,16 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
     }
 
     /**
+     * Customer's relation with invoice .
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\hasManyThrough
+     */
+    public function invoices()
+    {
+        return $this->hasManyThrough(InvoiceProxy::modelClass(), OrderProxy::modelClass());
+    }
+
+    /**
      * Customer's relation with wishlist items.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -195,14 +191,10 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
 
     /**
      * Is wishlist shared by the customer.
-     *
-     * @return bool
      */
     public function isWishlistShared(): bool
     {
-        return $this->wishlist_items()->where('shared', 1)->first()
-            ? true
-            : false;
+        return (bool) $this->wishlist_items()->where('shared', 1)->first();
     }
 
     /**
@@ -213,7 +205,7 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
     public function getWishlistSharedLink()
     {
         return $this->isWishlistShared()
-            ? URL::signedRoute('customer.wishlist.shared', ['id' => $this->id])
+            ? URL::signedRoute('shop.customer.wishlist.shared', ['id' => $this->id])
             : null;
     }
 
@@ -254,7 +246,7 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function all_orders()
+    public function orders()
     {
         return $this->hasMany(OrderProxy::modelClass(), 'customer_id');
     }
@@ -264,9 +256,19 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function all_reviews()
+    public function reviews()
     {
         return $this->hasMany(ProductReviewProxy::modelClass(), 'customer_id');
+    }
+
+    /**
+     * Get all notes of a customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function notes()
+    {
+        return $this->hasMany(CustomerNoteProxy::modelClass(), 'customer_id');
     }
 
     /**
@@ -277,5 +279,25 @@ class Customer extends Authenticatable implements CustomerContract, JWTSubject
     public function subscription()
     {
         return $this->hasOne(SubscribersListProxy::modelClass(), 'customer_id');
+    }
+
+    /**
+     * Get the channel that owns the customer.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function channel()
+    {
+        return $this->belongsTo(ChannelProxy::modelClass(), 'channel_id');
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return \Webkul\Customer\Database\Factories\CustomerFactory
+     */
+    protected static function newFactory()
+    {
+        return CustomerFactory::new();
     }
 }

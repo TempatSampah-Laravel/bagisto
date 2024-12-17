@@ -7,11 +7,9 @@ use Webkul\Core\Eloquent\Repository;
 class TemplateRepository extends Repository
 {
     /**
-     * Specify Model class name
-     *
-     * @return mixed
+     * Specify model class name.
      */
-    function model()
+    public function model(): string
     {
         return 'Webkul\Marketing\Contracts\Template';
     }

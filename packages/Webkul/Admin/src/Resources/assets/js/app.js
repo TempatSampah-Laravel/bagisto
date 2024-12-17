@@ -1,184 +1,73 @@
 /**
- * Main imports.
+ * This will track all the images and fonts for publishing.
  */
-import Vue from 'vue';
-import VeeValidate from 'vee-validate';
-import './bootstrap';
+import.meta.glob(["../images/**", "../fonts/**"]);
 
 /**
- * Lang imports.
+ * Main vue bundler.
  */
-import de from 'vee-validate/dist/locale/de';
-import ar from 'vee-validate/dist/locale/ar';
-import fa from 'vee-validate/dist/locale/fa';
-import fr from 'vee-validate/dist/locale/fr';
-import nl from 'vee-validate/dist/locale/nl';
-import tr from 'vee-validate/dist/locale/tr';
+import { createApp } from "vue/dist/vue.esm-bundler";
 
 /**
- * Vue plugins.
+ * Main root application registry.
  */
-Vue.use(VeeValidate, {
-    dictionary: {
-        ar: ar,
-        de: de,
-        fa: fa,
-        fr: fr,
-        nl: nl,
-        tr: tr
+window.app = createApp({
+    data() {
+        return {};
     },
-    events: 'input|change|blur'
-});
 
-/**
- * Vue prototype.
- */
-Vue.prototype.$http = axios;
+    methods: {
+        onSubmit() {},
 
-/**
- * Window assignation.
- */
-window.Vue = Vue;
-window.eventBus = new Vue();
-window.VeeValidate = VeeValidate;
+        onInvalidSubmit({ values, errors, results }) {
+            setTimeout(() => {
+                const errorKeys = Object.entries(errors)
+                    .map(([key, value]) => ({ key, value }))
+                    .filter(error => error["value"].length);
 
-/**
- * Global components.
- */
-Vue.component(
-    'nav-slide-button',
-    require('./components/navigation/nav-slide-button').default
-);
-Vue.component(
-    'required-if',
-    require('./components/validators/required-if').default
-);
+                let firstErrorElement = document.querySelector('[name="' + errorKeys[0]["key"] + '"]');
 
-$(function() {
-    Vue.config.ignoredElements = ['option-wrapper', 'group-form', 'group-list'];
-
-    let app = new Vue({
-        el: '#app',
-
-        data: {
-            modalIds: {}
-        },
-
-        mounted() {
-            this.addServerErrors();
-
-            this.addFlashMessages();
-
-            this.$validator.localize(document.documentElement.lang);
-        },
-
-        methods: {
-            onSubmit: function(e) {
-                this.toggleButtonDisable(true);
-
-                if (typeof tinyMCE !== 'undefined') tinyMCE.triggerSave();
-
-                this.$validator.validateAll().then(result => {
-                    if (result) {
-                        e.target.submit();
-                    } else {
-                        this.activateAutoScroll();
-
-                        this.toggleButtonDisable(false);
-
-                        eventBus.$emit('onFormError');
-                    }
+                firstErrorElement.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
                 });
-            },
-
-            activateAutoScroll: function() {
-                /**
-                 * This is accordion element.
-                 */
-                const accordionElement = document.querySelector(
-                    '.accordian.error'
-                );
-
-                /**
-                 * This is normal element.
-                 */
-                const normalElement = document.querySelector(
-                    '.control-error:first-of-type'
-                );
-
-                /**
-                 * Scroll configs.
-                 */
-                const scrollConfigs = {
-                    behavior: 'smooth',
-                    block: 'end',
-                    inline: 'nearest'
-                };
-
-                /**
-                 * If accordion error is not found then scroll will fall to the normal element.
-                 */
-                if (accordionElement) {
-                    accordionElement.scrollIntoView(scrollConfigs);
-                    return;
-                }
-
-                normalElement.scrollIntoView(scrollConfigs);
-            },
-
-            toggleButtonDisable: function(value) {
-                let buttons = document.getElementsByTagName('button');
-
-                for (let i = 0; i < buttons.length; i++) {
-                    buttons[i].disabled = value;
-                }
-            },
-
-            addServerErrors: function(scope = null) {
-                for (let key in serverErrors) {
-                    let inputNames = [];
-
-                    key.split('.').forEach(function(chunk, index) {
-                        if (index) {
-                            inputNames.push('[' + chunk + ']');
-                        } else {
-                            inputNames.push(chunk);
-                        }
-                    });
-
-                    let inputName = inputNames.join('');
-
-                    const field = this.$validator.fields.find({
-                        name: inputName,
-                        scope: scope
-                    });
-
-                    if (field) {
-                        this.$validator.errors.add({
-                            id: field.id,
-                            field: inputName,
-                            msg: serverErrors[key][0],
-                            scope: scope
-                        });
-                    }
-                }
-            },
-
-            addFlashMessages: function() {
-                if (typeof flashMessages == 'undefined') {
-                    return;
-                }
-
-                const flashes = this.$refs.flashes;
-
-                flashMessages.forEach(function(flash) {
-                    flashes.addFlash(flash);
-                }, this);
-            },
-
-            showModal: function(id) {
-                this.$set(this.modalIds, id, true);
-            }
-        }
-    });
+            }, 100);
+        },
+    },
 });
+
+/**
+ * Global plugins registration.
+ */
+import Admin from "./plugins/admin";
+import Axios from "./plugins/axios";
+import CreateElement from "./plugins/createElement";
+import Emitter from "./plugins/emitter";
+import Flatpickr from "./plugins/flatpickr";
+import VeeValidate from "./plugins/vee-validate";
+import Draggable from "./plugins/draggable";
+
+[
+    Admin,
+    Axios,
+    CreateElement,
+    Emitter,
+    Flatpickr,
+    VeeValidate,
+    Draggable,
+].forEach((plugin) => app.use(plugin));
+
+/**
+ * Global directives.
+ */
+import Slugify from "./directives/slugify";
+import SlugifyTarget from "./directives/slugify-target";
+import Debounce from "./directives/debounce";
+import Code from "./directives/code";
+
+app.directive("slugify", Slugify);
+app.directive("slugify-target", SlugifyTarget);
+app.directive("debounce", Debounce);
+app.directive("code", Code);
+
+export default app;

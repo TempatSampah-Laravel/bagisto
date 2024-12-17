@@ -8,10 +8,8 @@ class CatalogRuleProductRepository extends Repository
 {
     /**
      * Specify Model class name
-     *
-     * @return mixed
      */
-    function model()
+    public function model(): string
     {
         return 'Webkul\CatalogRule\Contracts\CatalogRuleProduct';
     }

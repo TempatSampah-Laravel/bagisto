@@ -1,37 +1,53 @@
 <?php
 
 return [
-    'default' => 'default',
+    /*
+    |--------------------------------------------------------------------------
+    | Shop Theme Configuration
+    |--------------------------------------------------------------------------
+    |
+    | All the configurations are related to the shop themes.
+    |
+    */
 
-    'themes' => [
+    'shop-default' => 'default',
+
+    'shop' => [
         'default' => [
-            'views_path' => 'resources/themes/default/views',
-            'assets_path' => 'public/themes/default/assets',
-            'name' => 'Default'
-        ],
+            'name'        => 'Default',
+            'assets_path' => 'public/themes/shop/default',
+            'views_path'  => 'resources/themes/default/views',
 
-        // 'bliss' => [
-        //     'views_path' => 'resources/themes/bliss/views',
-        //     'assets_path' => 'public/themes/bliss/assets',
-        //     'name' => 'Bliss',
-        //     'parent' => 'default'
-        // ]
-
-        'velocity' => [
-            'views_path' => 'resources/themes/velocity/views',
-            'assets_path' => 'public/themes/velocity/assets',
-            'name' => 'Velocity',
-            'parent' => 'default'
+            'vite'        => [
+                'hot_file'                 => 'shop-default-vite.hot',
+                'build_directory'          => 'themes/shop/default/build',
+                'package_assets_directory' => 'src/Resources/assets',
+            ],
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Theme Configuration
+    |--------------------------------------------------------------------------
+    |
+    | All the configurations are related to the admin themes.
+    |
+    */
+
     'admin-default' => 'default',
 
-    'admin-themes' => [
+    'admin' => [
         'default' => [
-            'views_path' => 'resources/admin-themes/default/views',
-            'assets_path' => 'public/admin-themes/default/assets',
-            'name' => 'Default'
-        ]
-    ]
+            'name'        => 'Default',
+            'assets_path' => 'public/themes/admin/default',
+            'views_path'  => 'resources/admin-themes/default/views',
+
+            'vite'        => [
+                'hot_file'                 => 'admin-default-vite.hot',
+                'build_directory'          => 'themes/admin/default/build',
+                'package_assets_directory' => 'src/Resources/assets',
+            ],
+        ],
+    ],
 ];

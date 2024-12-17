@@ -3,18 +3,13 @@
 namespace Webkul\Core\Repositories;
 
 use Webkul\Core\Eloquent\Repository;
-use Prettus\Repository\Traits\CacheableRepository;
 
 class SubscribersListRepository extends Repository
 {
-    use CacheableRepository;
-
     /**
      * Specify Model class name
-     *
-     * @return mixed
      */
-    function model()
+    public function model(): string
     {
         return 'Webkul\Core\Contracts\SubscribersList';
     }

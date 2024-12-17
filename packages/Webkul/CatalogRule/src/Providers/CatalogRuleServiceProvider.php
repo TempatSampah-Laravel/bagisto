@@ -2,25 +2,12 @@
 
 namespace Webkul\CatalogRule\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Event;
 use Webkul\CatalogRule\Console\Commands\PriceRuleIndex;
 
 class CatalogRuleServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap services.
-     *
-     * @return void
-     */
-    public function boot(Router $router)
-    {
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
-
-        Event::listen('catalog.product.update.after', 'Webkul\CatalogRule\Listeners\Product@createProductRuleIndex');
-    }
-
     /**
      * Register services.
      *
@@ -32,7 +19,23 @@ class CatalogRuleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the console commands of this package
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
+            $schedule->command('product:price-rule:index')->dailyAt('00:01');
+        });
+
+        $this->app->register(EventServiceProvider::class);
+    }
+
+    /**
+     * Register the console commands of this package.
      */
     protected function registerCommands()
     {

@@ -2,112 +2,104 @@
 
 namespace Webkul\Core\Exceptions;
 
-use App\Exceptions\Handler as AppExceptionHandler;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use PDOException;
+use Illuminate\Foundation\Exceptions\Handler as BaseHandler;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
-class Handler extends AppExceptionHandler
+class Handler extends BaseHandler
 {
     /**
-     * Json errors.
-     *
-     * @var array
+     * Register the exception handling callbacks for the application.
      */
-    protected $jsonErrorMessages = [
-        404 => 'Resource Not Found',
-        403 => '403 Forbidden Error',
-        401 => 'Unauthenticated',
-        500 => '500 Internal Server Error',
-    ];
-
-    /**
-     * Render an exception into an HTTP response.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Throwable  $exception
-     * @return \Illuminate\Http\Response
-     */
-    public function render($request, Throwable $exception)
+    public function register(): void
     {
-        if (! config('app.debug')) {
-            return $this->renderCustomResponse($request, $exception);
+        if (config('app.debug')) {
+            return;
         }
 
-        return parent::render($request, $exception);
+        $this->handleAuthenticationException();
+
+        $this->handleHttpException();
+
+        $this->handleValidationException();
+
+        $this->handleServerException();
     }
 
     /**
-     * Convert an authentication exception into a response.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Auth\AuthenticationException  $exception
-     * @return \Illuminate\Http\Response
+     * Handle the authentication exception.
      */
-    protected function unauthenticated($request, AuthenticationException $exception)
+    protected function handleAuthenticationException(): void
     {
-        if ($request->expectsJson()) {
-            return response()->json(['error' => $this->jsonErrorMessages[401]], 401);
-        }
+        $this->renderable(function (AuthenticationException $exception, Request $request) {
+            $namespace = $request->is(config('app.admin_url').'/*') ? 'admin' : 'shop';
 
-        return redirect()->guest(route('customer.session.index'));
+            if ($request->wantsJson()) {
+                return response()->json(['error' => trans("{$namespace}::app.errors.401.description")], 401);
+            }
+
+            if ($namespace !== 'admin') {
+                return redirect()->guest(route('shop.customer.session.index'));
+            }
+
+            return redirect()->guest(route('admin.session.create'));
+        });
     }
 
     /**
-     * Is admin uri.
-     *
-     * @return boolean
+     * Handle the http exceptions.
      */
-    private function isAdminUri()
+    protected function handleHttpException(): void
     {
-        return strpos(\Illuminate\Support\Facades\Request::path(), 'admin') !== false ? true : false;
-    }
+        $this->renderable(function (HttpException $exception, Request $request) {
+            $namespace = $request->is(config('app.admin_url').'/*') ? 'admin' : 'shop';
 
-    /**
-     * Render custom HTTP response.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Throwable  $exception
-     * @return \Illuminate\Http\Response|null
-     */
-    private function renderCustomResponse($request, Throwable $exception)
-    {
-        $path = $this->isAdminUri() ? 'admin' : 'shop';
-
-        if ($exception instanceof HttpException) {
-            $statusCode = in_array($exception->getStatusCode(), [401, 403, 404, 503])
+            $errorCode = in_array($exception->getStatusCode(), [401, 403, 404, 503])
                 ? $exception->getStatusCode()
                 : 500;
 
-            return $this->response($path, $statusCode);
-        } elseif ($exception instanceof ModelNotFoundException) {
-            return $this->response($path, 404);
-        } elseif ($exception instanceof PDOException) {
-            return $this->response($path, 500);
-        } else {
-            return parent::render($request, $exception);
-        }
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error'       => trans("{$namespace}::app.errors.{$errorCode}.title"),
+                    'description' => trans("{$namespace}::app.errors.{$errorCode}.description"),
+                ], $errorCode);
+            }
+
+            return response()->view("{$namespace}::errors.index", compact('errorCode'));
+        });
     }
 
     /**
-     * Response.
-     *
-     * @param  string  $path
-     * @param  int  $statusCode
-     * @return \Illuminate\Http\Response
+     * Handle validation exceptions.
      */
-    private function response($path, $statusCode)
+    protected function handleValidationException(): void
     {
-        if (request()->expectsJson()) {
-            return response()->json([
-                'error' => isset($this->jsonErrorMessages[$statusCode])
-                    ? $this->jsonErrorMessages[$statusCode]
-                    : 'Something went wrong, please try again later.'
-            ], $statusCode);
-        }
+        $this->renderable(function (ValidationException $exception, Request $request) {
+            return parent::convertValidationExceptionToResponse($exception, $request);
+        });
+    }
 
-        return response()->view("{$path}::errors.{$statusCode}", [], $statusCode);
+    /**
+     * Handle the server exceptions.
+     */
+    protected function handleServerException(): void
+    {
+        $this->renderable(function (Throwable $throwable, Request $request) {
+            $namespace = $request->is(config('app.admin_url').'/*') ? 'admin' : 'shop';
+
+            $errorCode = 500;
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error'       => trans("{$namespace}::app.errors.{$errorCode}.title"),
+                    'description' => trans("{$namespace}::app.shop.errors.{$errorCode}.description"),
+                ], $errorCode);
+            }
+
+            return response()->view("{$namespace}::errors.index", compact('errorCode'));
+        });
     }
 }

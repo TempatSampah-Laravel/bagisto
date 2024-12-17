@@ -2,24 +2,35 @@
 
 namespace Webkul\Sales\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Webkul\Sales\Database\Factories\RefundFactory;
-use Webkul\Sales\Contracts\Refund as RefundContract;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Webkul\Sales\Contracts\Refund as RefundContract;
+use Webkul\Sales\Database\Factories\RefundFactory;
 
 class Refund extends Model implements RefundContract
 {
     use HasFactory;
 
+    /**
+     * Define the guarded property to the model.
+     *
+     * @var array
+     */
     protected $guarded = [
         'id',
         'created_at',
         'updated_at',
     ];
 
+    /**
+     * Define the status label.
+     *
+     * @var array
+     */
     protected $statusLabel = [];
 
     /**
@@ -44,7 +55,7 @@ class Refund extends Model implements RefundContract
     public function items(): HasMany
     {
         return $this->hasMany(RefundItemProxy::modelClass())
-                    ->whereNull('parent_id');
+            ->whereNull('parent_id');
     }
 
     /**
@@ -73,10 +84,8 @@ class Refund extends Model implements RefundContract
 
     /**
      * Create a new factory instance for the model.
-     *
-     * @return RefundFactory
      */
-    protected static function newFactory(): RefundFactory
+    protected static function newFactory(): Factory
     {
         return RefundFactory::new();
     }

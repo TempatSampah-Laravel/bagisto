@@ -1,27 +1,29 @@
-@extends('admin::layouts.content')
+<x-admin::layouts>
+    <x-slot:title>
+        @lang('admin::app.marketing.promotions.catalog-rules.index.title')
+    </x-slot>
 
-@section('page_title')
-    {{ __('admin::app.promotions.catalog-rules.title') }}
-@stop
+    <div class="mt-3 flex items-center justify-between gap-4 max-sm:flex-wrap">
+        <p class="text-xl font-bold text-gray-800 dark:text-white">
+            @lang('admin::app.marketing.promotions.catalog-rules.index.title')
+        </p>
 
-@section('content')
-
-    <div class="content">
-        <div class="page-header">
-            <div class="page-title">
-                <h1>{{ __('admin::app.promotions.catalog-rules.title') }}</h1>
-            </div>
-
-            <div class="page-action">
-                <a href="{{ route('admin.catalog-rules.create') }}" class="btn btn-lg btn-primary">
-                    {{ __('admin::app.promotions.catalog-rules.add-title') }}
+        <div class="flex items-center gap-x-2.5">
+            @if (bouncer()->hasPermission('marketing.promotions.catalog_rules.create'))
+                <a 
+                    href="{{ route('admin.marketing.promotions.catalog_rules.create') }}"
+                    class="primary-button"
+                >
+                    @lang('admin::app.marketing.promotions.catalog-rules.index.create-btn')
                 </a>
-            </div>
-        </div>
-
-        <div class="page-content">
-            @inject('catalogRuleGrid','Webkul\Admin\DataGrids\CatalogRuleDataGrid')
-            {!! $catalogRuleGrid->render() !!}
+            @endif
         </div>
     </div>
-@endsection
+    
+    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.list.before') !!}
+
+    <x-admin::datagrid :src="route('admin.marketing.promotions.catalog_rules.index')" />
+
+    {!! view_render_event('bagisto.admin.marketing.promotions.catalog_rules.list.after') !!}
+
+</x-admin::layouts>

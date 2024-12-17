@@ -1,26 +1,31 @@
-@extends('admin::layouts.content')
+<x-admin::layouts>
+    <!-- Page Title -->
+    <x-slot:title>
+        @lang('admin::app.settings.channels.index.title')
+    </x-slot>
 
-@section('page_title')
-    {{ __('admin::app.settings.channels.title') }}
-@stop
-
-@section('content')
-    <div class="content">
-        <div class="page-header">
-            <div class="page-title">
-                <h1>{{ __('admin::app.settings.channels.title') }}</h1>
-            </div>
-
-            <div class="page-action">
-                <a href="{{ route('admin.channels.create') }}" class="btn btn-lg btn-primary">
-                    {{ __('admin::app.settings.channels.add-title') }}
+    <div class="flex items-center justify-between">
+        <p class="text-xl font-bold text-gray-800 dark:text-white">
+            @lang('admin::app.settings.channels.index.title')
+        </p>
+        
+        <div class="flex items-center gap-x-2.5">
+            <!-- Create New Channel Button -->
+            @if (bouncer()->hasPermission('settings.channels.create'))
+                <a 
+                    href="{{ route('admin.settings.channels.create') }}"
+                    class="primary-button"
+                >
+                    @lang('admin::app.settings.channels.index.create-btn')
                 </a>
-            </div>
-        </div>
-
-        <div class="page-content">
-            @inject('channels','Webkul\Admin\DataGrids\ChannelDataGrid')
-            {!! $channels->render() !!}
+            @endif
         </div>
     </div>
-@stop
+
+    {!! view_render_event('bagisto.settings.channels.list.before') !!}
+    
+    <x-admin::datagrid :src="route('admin.settings.channels.index')" />
+
+    {!! view_render_event('bagisto.settings.channels.list.after') !!}
+
+</x-admin::layouts>

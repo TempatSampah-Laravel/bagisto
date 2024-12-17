@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateCartruleCustomersTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -16,11 +16,10 @@ class CreateCartruleCustomersTable extends Migration
         Schema::create('cart_rule_customers', function (Blueprint $table) {
             $table->increments('id');
             $table->bigInteger('times_used')->unsigned()->default(0);
-
-            $table->integer('cart_rule_id')->unsigned();
-            $table->foreign('cart_rule_id')->references('id')->on('cart_rules')->onDelete('cascade');
-
             $table->integer('customer_id')->unsigned();
+            $table->integer('cart_rule_id')->unsigned();
+
+            $table->foreign('cart_rule_id')->references('id')->on('cart_rules')->onDelete('cascade');
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
         });
     }
@@ -34,4 +33,4 @@ class CreateCartruleCustomersTable extends Migration
     {
         Schema::dropIfExists('cart_rule_customers');
     }
-}
+};

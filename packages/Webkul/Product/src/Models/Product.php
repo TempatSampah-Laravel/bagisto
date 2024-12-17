@@ -3,31 +3,31 @@
 namespace Webkul\Product\Models;
 
 use Exception;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Shetabit\Visitor\Traits\Visitable;
 use Webkul\Attribute\Models\AttributeFamilyProxy;
 use Webkul\Attribute\Models\AttributeProxy;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Webkul\Product\Database\Factories\ProductFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Attribute\Repositories\AttributeRepository;
+use Webkul\CatalogRule\Models\CatalogRuleProductPriceProxy;
 use Webkul\Category\Models\CategoryProxy;
+use Webkul\Core\Models\ChannelProxy;
 use Webkul\Inventory\Models\InventorySourceProxy;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webkul\Product\Contracts\Product as ProductContract;
-use Webkul\Product\Database\Eloquent\Builder;
+use Webkul\Product\Database\Factories\ProductFactory;
 use Webkul\Product\Type\AbstractType;
-use Webkul\BookingProduct\Models\BookingProductProxy;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model implements ProductContract
 {
-    use HasFactory;
+    use HasFactory, Visitable;
 
     /**
      * The attributes that are mass assignable.
-     *
-     * @var $fillable
      */
     protected $fillable = [
         'type',
@@ -38,8 +38,6 @@ class Product extends Model implements ProductContract
 
     /**
      * The attributes that should be cast.
-     *
-     * @var $casts
      */
     protected $casts = [
         'additional' => 'array',
@@ -48,64 +46,9 @@ class Product extends Model implements ProductContract
     /**
      * The type of product.
      *
-     * @var $typeInstance
+     * @var \Webkul\Product\Type\AbstractType
      */
     protected $typeInstance;
-
-    /**
-     * Loaded attribute values.
-     *
-     * @var $loadedAttributeValues
-     */
-    public static $loadedAttributeValues = [];
-
-    /**
-     * The "booted" method of the model.
-     *
-     * @return void
-     */
-    protected static function booted(): void
-    {
-        parent::boot();
-
-        static::deleting(function ($product) {
-            foreach ($product->product_flats as $productFlat) {
-                $productFlat->unsearchable();
-            }
-
-            foreach ($product->variants as $variant) {
-                foreach ($variant->product_flats as $productFlat) {
-                    $productFlat->unsearchable();
-                }
-            }
-        });
-    }
-
-    /**
-     * Refresh the loaded attribute values.
-     *
-     * @return void
-     */
-    public function refreshloadedAttributeValues(): void
-    {
-        self::$loadedAttributeValues = [];
-    }
-
-    /**
-     * Get the product attribute family that owns the product.
-     */
-    public function attribute_family(): BelongsTo
-    {
-        return $this->belongsTo(AttributeFamilyProxy::modelClass());
-    }
-
-    /**
-     * Get the product attribute values that owns the product.
-     */
-    public function attribute_values(): HasMany
-    {
-        return $this->hasMany(ProductAttributeValueProxy::modelClass());
-    }
 
     /**
      * Get the product flat entries that are associated with product.
@@ -117,11 +60,93 @@ class Product extends Model implements ProductContract
     }
 
     /**
-     * Get the product variants that owns the product.
+     * Get the product that owns the product.
      */
-    public function variants(): HasMany
+    public function parent(): BelongsTo
     {
-        return $this->hasMany(static::class, 'parent_id');
+        return $this->belongsTo(static::class, 'parent_id');
+    }
+
+    /**
+     * Get the product attribute family that owns the product.
+     */
+    public function attribute_family(): BelongsTo
+    {
+        return $this->belongsTo(AttributeFamilyProxy::modelClass());
+    }
+
+    /**
+     * The super attributes that belong to the product.
+     */
+    public function super_attributes(): BelongsToMany
+    {
+        return $this->belongsToMany(AttributeProxy::modelClass(), 'product_super_attributes');
+    }
+
+    /**
+     * Get the product attribute values that owns the product.
+     */
+    public function attribute_values(): HasMany
+    {
+        return $this->hasMany(ProductAttributeValueProxy::modelClass());
+    }
+
+    /**
+     * Get the product customer group prices that owns the product.
+     */
+    public function customer_group_prices(): HasMany
+    {
+        return $this->hasMany(ProductCustomerGroupPriceProxy::modelClass());
+    }
+
+    /**
+     * Get the product customer group prices that owns the product.
+     */
+    public function catalog_rule_prices(): HasMany
+    {
+        return $this->hasMany(CatalogRuleProductPriceProxy::modelClass());
+    }
+
+    /**
+     * Get the price indices that owns the product.
+     */
+    public function price_indices(): HasMany
+    {
+        return $this->hasMany(ProductPriceIndexProxy::modelClass());
+    }
+
+    /**
+     * Get the inventory indices that owns the product.
+     */
+    public function inventory_indices(): HasMany
+    {
+        return $this->hasMany(ProductInventoryIndexProxy::modelClass());
+    }
+
+    /**
+     * The categories that belong to the product.
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(CategoryProxy::modelClass(), 'product_categories');
+    }
+
+    /**
+     * The images that belong to the product.
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImageProxy::modelClass(), 'product_id')
+            ->orderBy('position');
+    }
+
+    /**
+     * The videos that belong to the product.
+     */
+    public function videos(): HasMany
+    {
+        return $this->hasMany(ProductVideoProxy::modelClass(), 'product_id')
+            ->orderBy('position');
     }
 
     /**
@@ -133,19 +158,32 @@ class Product extends Model implements ProductContract
     }
 
     /**
-     * Get the product that owns the product.
+     * Get the approved product reviews.
      */
-    public function parent(): BelongsTo
+    public function approvedReviews(): HasMany
     {
-        return $this->belongsTo(static::class, 'parent_id');
+        return $this->reviews()->where('status', 'approved');
     }
 
     /**
-     * The categories that belong to the product.
+     * The inventory sources that belong to the product.
      */
-    public function categories(): BelongsToMany
+    public function inventory_sources(): BelongsToMany
     {
-        return $this->belongsToMany(CategoryProxy::modelClass(), 'product_categories');
+        return $this->belongsToMany(InventorySourceProxy::modelClass(), 'product_inventories')
+            ->withPivot('id', 'qty');
+    }
+
+    /**
+     * Get inventory source quantity.
+     *
+     * @return bool
+     */
+    public function inventory_source_qty($inventorySourceId)
+    {
+        return $this->inventories()
+            ->where('inventory_source_id', $inventorySourceId)
+            ->sum('qty');
     }
 
     /**
@@ -165,74 +203,19 @@ class Product extends Model implements ProductContract
     }
 
     /**
-     * The inventory sources that belong to the product.
+     * Get the product variants that owns the product.
      */
-    public function inventory_sources(): BelongsToMany
+    public function variants(): HasMany
     {
-        return $this->belongsToMany(InventorySourceProxy::modelClass(), 'product_inventories')
-                    ->withPivot('id', 'qty');
+        return $this->hasMany(static::class, 'parent_id');
     }
 
     /**
-     * The super attributes that belong to the product.
+     * Get the grouped products that owns the product.
      */
-    public function super_attributes(): BelongsToMany
+    public function grouped_products(): HasMany
     {
-        return $this->belongsToMany(AttributeProxy::modelClass(), 'product_super_attributes');
-    }
-
-    /**
-     * The images that belong to the product.
-     */
-    public function images(): HasMany
-    {
-        return $this->hasMany(ProductImageProxy::modelClass(), 'product_id');
-    }
-
-    /**
-     * The videos that belong to the product.
-     */
-    public function videos(): HasMany
-    {
-        return $this->hasMany(ProductVideoProxy::modelClass(), 'product_id');
-    }
-
-    /**
-     * The images that belong to the product.
-     */
-    public function getBaseImageUrlAttribute()
-    {
-        $image = $this->images()
-                      ->first();
-
-        return $image->url ?? null;
-    }
-
-    /**
-     * The related products that belong to the product.
-     */
-    public function related_products(): BelongsToMany
-    {
-        return $this->belongsToMany(static::class, 'product_relations', 'parent_id', 'child_id')
-                    ->limit(4);
-    }
-
-    /**
-     * The up sells that belong to the product.
-     */
-    public function up_sells(): BelongsToMany
-    {
-        return $this->belongsToMany(static::class, 'product_up_sells', 'parent_id', 'child_id')
-                    ->limit(4);
-    }
-
-    /**
-     * The cross sells that belong to the product.
-     */
-    public function cross_sells(): BelongsToMany
-    {
-        return $this->belongsToMany(static::class, 'product_cross_sells', 'parent_id', 'child_id')
-                    ->limit(4);
+        return $this->hasMany(ProductGroupedProductProxy::modelClass());
     }
 
     /**
@@ -252,14 +235,6 @@ class Product extends Model implements ProductContract
     }
 
     /**
-     * Get the grouped products that owns the product.
-     */
-    public function grouped_products(): HasMany
-    {
-        return $this->hasMany(ProductGroupedProductProxy::modelClass());
-    }
-
-    /**
      * Get the bundle options that owns the product.
      */
     public function bundle_options(): HasMany
@@ -268,31 +243,90 @@ class Product extends Model implements ProductContract
     }
 
     /**
-     * Get the product customer group prices that owns the product.
+     * The related products that belong to the product.
      */
-    public function customer_group_prices(): HasMany
+    public function related_products(): BelongsToMany
     {
-        return $this->hasMany(ProductCustomerGroupPriceProxy::modelClass());
+        return $this->belongsToMany(static::class, 'product_relations', 'parent_id', 'child_id');
     }
 
     /**
-     * Get inventory source quantity.
-     *
-     * @param $inventorySourceId
-     *
-     * @return bool
+     * The up sells that belong to the product.
      */
-    public function inventory_source_qty($inventorySourceId)
+    public function up_sells(): BelongsToMany
     {
-        return $this->inventories()
-                    ->where('inventory_source_id', $inventorySourceId)
-                    ->sum('qty');
+        return $this->belongsToMany(static::class, 'product_up_sells', 'parent_id', 'child_id');
+    }
+
+    /**
+     * The cross sells that belong to the product.
+     */
+    public function cross_sells(): BelongsToMany
+    {
+        return $this->belongsToMany(static::class, 'product_cross_sells', 'parent_id', 'child_id');
+    }
+
+    /**
+     * The cross sells that belong to the product.
+     */
+    public function channels(): BelongsToMany
+    {
+        return $this->belongsToMany(ChannelProxy::modelClass(), 'product_channels', 'product_id', 'channel_id');
+    }
+
+    /**
+     * Is saleable.
+     *
+     * @param  string  $key
+     *
+     * @throws \Exception
+     */
+    public function isSaleable(): bool
+    {
+        return $this->getTypeInstance()
+            ->isSaleable();
+    }
+
+    /**
+     * Is stockable.
+     *
+     *
+     * @throws \Exception
+     */
+    public function isStockable(): bool
+    {
+        return $this->getTypeInstance()
+            ->isStockable();
+    }
+
+    /**
+     * Total quantity.
+     *
+     *
+     * @throws \Exception
+     */
+    public function totalQuantity(): int
+    {
+        return $this->getTypeInstance()
+            ->totalQuantity();
+    }
+
+    /**
+     * Have sufficient quantity.
+     *
+     *
+     * @throws \Exception
+     */
+    public function haveSufficientQuantity(int $qty): bool
+    {
+        return $this->getTypeInstance()
+            ->haveSufficientQuantity($qty);
     }
 
     /**
      * Get type instance.
      *
-     * @return AbstractType
+     *
      * @throws \Exception
      */
     public function getTypeInstance(): AbstractType
@@ -301,7 +335,7 @@ class Product extends Model implements ProductContract
             return $this->typeInstance;
         }
 
-        $this->typeInstance = app(config('product_types.' . $this->type . '.class'));
+        $this->typeInstance = app(config('product_types.'.$this->type.'.class'));
 
         if (! $this->typeInstance instanceof AbstractType) {
             throw new Exception("Please ensure the product type '{$this->type}' is configured in your application.");
@@ -313,62 +347,21 @@ class Product extends Model implements ProductContract
     }
 
     /**
-     * Is saleable.
+     * The images that belong to the product.
      *
-     * @param  string  $key
-     *
-     * @return bool
-     * @throws \Exception
+     * @return string
      */
-    public function isSaleable(): bool
+    public function getBaseImageUrlAttribute()
     {
-        return $this->getTypeInstance()
-                    ->isSaleable();
-    }
+        $image = $this->images->first();
 
-    /**
-     * Total quantity.
-     *
-     * @return integer
-     * @throws \Exception
-     */
-    public function totalQuantity(): int
-    {
-        return $this->getTypeInstance()
-                    ->totalQuantity();
-    }
-
-    /**
-     * Have sufficient quantity.
-     *
-     * @param  int  $qty
-     *
-     * @return bool
-     * @throws \Exception
-     */
-    public function haveSufficientQuantity(int $qty): bool
-    {
-        return $this->getTypeInstance()
-                    ->haveSufficientQuantity($qty);
-    }
-
-    /**
-     * Is stockable.
-     *
-     * @return bool
-     * @throws \Exception
-     */
-    public function isStockable(): bool
-    {
-        return $this->getTypeInstance()
-                    ->isStockable();
+        return $image->url ?? null;
     }
 
     /**
      * Get an attribute from the model.
      *
      * @param  string  $key
-     *
      * @return mixed
      */
     public function getAttribute($key)
@@ -379,13 +372,10 @@ class Product extends Model implements ProductContract
                 'parent_id',
                 'attribute_family_id',
             ])
-            && ! isset($this->attributes[$key])) {
+            && ! isset($this->attributes[$key])
+        ) {
             if (isset($this->id)) {
-                $this->attributes[$key] = '';
-
-                $attribute = core()
-                    ->getSingletonInstance(AttributeRepository::class)
-                    ->getAttributeByCode($key);
+                $attribute = $this->checkInLoadedFamilyAttributes()->where('code', $key)->first();
 
                 $this->attributes[$key] = $this->getCustomAttributeValue($attribute);
 
@@ -402,13 +392,12 @@ class Product extends Model implements ProductContract
      * @param  Group  $group
      * @param  bool  $skipSuperAttribute
      *
-     * @return \Illuminate\Support\Collection
      * @throws \Exception
      */
     public function getEditableAttributes($group = null, $skipSuperAttribute = true): Collection
     {
         return $this->getTypeInstance()
-                    ->getEditableAttributes($group, $skipSuperAttribute);
+            ->getEditableAttributes($group, $skipSuperAttribute);
     }
 
     /**
@@ -422,47 +411,60 @@ class Product extends Model implements ProductContract
             return;
         }
 
-        $locale = core()->checkRequestedLocaleCodeInRequestedChannel();
+        $locale = core()->getRequestedLocaleCodeInRequestedChannel();
+
         $channel = core()->getRequestedChannelCode();
 
-        if (array_key_exists($this->id, self::$loadedAttributeValues)
-            && array_key_exists($attribute->id, self::$loadedAttributeValues[$this->id])) {
-            return self::$loadedAttributeValues[$this->id][$attribute->id];
+        if (empty($this->attribute_values->count())) {
+            $this->load('attribute_values');
         }
 
         if ($attribute->value_per_channel) {
             if ($attribute->value_per_locale) {
-                $attributeValue = $this->attribute_values()
-                                       ->where('channel', $channel)
-                                       ->where('locale', $locale)
-                                       ->where('attribute_id', $attribute->id)
-                                       ->first();
+                $attributeValue = $this->attribute_values
+                    ->where('channel', $channel)
+                    ->where('locale', $locale)
+                    ->where('attribute_id', $attribute->id)
+                    ->first();
+
+                if (empty($attributeValue[$attribute->column_name])) {
+                    $attributeValue = $this->attribute_values
+                        ->where('channel', core()->getDefaultChannelCode())
+                        ->where('locale', core()->getDefaultLocaleCodeFromDefaultChannel())
+                        ->where('attribute_id', $attribute->id)
+                        ->first();
+                }
             } else {
-                $attributeValue = $this->attribute_values()
-                                       ->where('channel', $channel)
-                                       ->where('attribute_id', $attribute->id)
-                                       ->first();
+                $attributeValue = $this->attribute_values
+                    ->where('channel', $channel)
+                    ->where('attribute_id', $attribute->id)
+                    ->first();
             }
         } else {
             if ($attribute->value_per_locale) {
-                $attributeValue = $this->attribute_values()
-                                       ->where('locale', $locale)
-                                       ->where('attribute_id', $attribute->id)
-                                       ->first();
+                $attributeValue = $this->attribute_values
+                    ->where('locale', $locale)
+                    ->where('attribute_id', $attribute->id)
+                    ->first();
+
+                if (empty($attributeValue[$attribute->column_name])) {
+                    $attributeValue = $this->attribute_values
+                        ->where('locale', core()->getDefaultLocaleCodeFromDefaultChannel())
+                        ->where('attribute_id', $attribute->id)
+                        ->first();
+                }
             } else {
-                $attributeValue = $this->attribute_values()
-                                       ->where('attribute_id', $attribute->id)
-                                       ->first();
+                $attributeValue = $this->attribute_values
+                    ->where('attribute_id', $attribute->id)
+                    ->first();
             }
         }
 
-        return self::$loadedAttributeValues[$this->id][$attribute->id] = $attributeValue[ProductAttributeValue::$attributeTypeFields[$attribute->type]] ?? null;
+        return $attributeValue[$attribute->column_name] ?? $attribute->default_value;
     }
 
     /**
      * Attributes to array.
-     *
-     * @return array
      */
     public function attributesToArray(): array
     {
@@ -486,66 +488,19 @@ class Product extends Model implements ProductContract
     }
 
     /**
-     * Overrides the default Eloquent query builder.
-     *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     *
-     * @return \Webkul\Product\Database\Eloquent\Builder
-     */
-    public function newEloquentBuilder($query)
-    {
-        return new Builder($query);
-    }
-
-    /**
-     * Return the product id attribute.
-     */
-    public function getProductIdAttribute()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Return the product attribute.
-     */
-    public function getProductAttribute()
-    {
-        return $this;
-    }
-
-    /**
      * Check in loaded family attributes.
-     *
-     * @return object
      */
     public function checkInLoadedFamilyAttributes(): object
     {
-        static $loadedFamilyAttributes = [];
-
-        if (array_key_exists($this->attribute_family_id, $loadedFamilyAttributes)) {
-            return $loadedFamilyAttributes[$this->attribute_family_id];
-        }
-
-        return $loadedFamilyAttributes[$this->attribute_family_id] = core()
-            ->getSingletonInstance(AttributeRepository::class)
+        return core()->getSingletonInstance(AttributeRepository::class)
             ->getFamilyAttributes($this->attribute_family);
     }
 
     /**
      * Create a new factory instance for the model.
-     *
-     * @return ProductFactory
      */
-    protected static function newFactory(): ProductFactory
+    protected static function newFactory(): Factory
     {
         return ProductFactory::new();
-    }
-
-    /**
-     * Get the booking that owns the product.
-     */
-    public function booking_product()
-    {
-        return $this->hasOne(BookingProductProxy::modelClass());
     }
 }

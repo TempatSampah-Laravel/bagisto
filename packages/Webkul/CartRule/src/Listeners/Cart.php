@@ -7,31 +7,21 @@ use Webkul\CartRule\Helpers\CartRule;
 class Cart
 {
     /**
-     * CartRule object
-     *
-     * @var \Webkul\CartRule\Helpers\CartRule
-     */
-    protected $cartRuleHepler;
-
-    /**
      * Create a new listener instance.
      *
-     * @param  \Webkul\CartRule\Repositories\CartRule  $cartRuleHepler
+     * @param  \Webkul\CartRule\Repositories\CartRule  $cartRuleHelper
      * @return void
      */
-    public function __construct(CartRule $cartRuleHepler)
-    {
-        $this->cartRuleHepler = $cartRuleHepler;
-    }
+    public function __construct(protected CartRule $cartRuleHelper) {}
 
     /**
-     * Aplly valid cart rules to cart
-     * 
+     * Apply valid cart rules to cart
+     *
      * @param  \Webkul\Checkout\Contracts\Cart  $cart
      * @return void
      */
     public function applyCartRules($cart)
     {
-        $this->cartRuleHepler->collect();
+        $this->cartRuleHelper->collect($cart);
     }
 }

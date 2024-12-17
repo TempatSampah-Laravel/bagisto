@@ -2,14 +2,15 @@
 
 namespace Webkul\Sales\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Webkul\Inventory\Models\InventorySource;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Webkul\Sales\Database\Factories\ShipmentFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Webkul\Inventory\Models\InventorySource;
 use Webkul\Sales\Contracts\Shipment as ShipmentContract;
+use Webkul\Sales\Database\Factories\ShipmentFactory;
 
 class Shipment extends Model implements ShipmentContract
 {
@@ -59,15 +60,13 @@ class Shipment extends Model implements ShipmentContract
     public function address(): BelongsTo
     {
         return $this->belongsTo(OrderAddressProxy::modelClass(), 'order_address_id')
-                    ->where('address_type', OrderAddress::ADDRESS_TYPE_SHIPPING);
+            ->where('address_type', OrderAddress::ADDRESS_TYPE_SHIPPING);
     }
 
     /**
      * Create a new factory instance for the model.
-     *
-     * @return ShipmentFactory
      */
-    protected static function newFactory(): ShipmentFactory
+    protected static function newFactory(): Factory
     {
         return ShipmentFactory::new();
     }

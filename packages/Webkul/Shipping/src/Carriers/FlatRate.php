@@ -37,10 +37,8 @@ class FlatRate extends AbstractShipping
 
     /**
      * Get rate.
-     *
-     * @return \Webkul\Checkout\Models\CartShippingRate
      */
-    public function getRate(): \Webkul\Checkout\Models\CartShippingRate
+    public function getRate(): CartShippingRate
     {
         $cart = Cart::getCart();
 
@@ -51,13 +49,12 @@ class FlatRate extends AbstractShipping
         $cartShippingRate->method = $this->getMethod();
         $cartShippingRate->method_title = $this->getConfigData('title');
         $cartShippingRate->method_description = $this->getConfigData('description');
-        $cartShippingRate->is_calculate_tax = $this->getConfigData('is_calculate_tax');
         $cartShippingRate->price = 0;
         $cartShippingRate->base_price = 0;
 
         if ($this->getConfigData('type') == 'per_unit') {
             foreach ($cart->items as $item) {
-                if ($item->product->getTypeInstance()->isStockable()) {
+                if ($item->getTypeInstance()->isStockable()) {
                     $cartShippingRate->price += core()->convertPrice($this->getConfigData('default_rate')) * $item->quantity;
                     $cartShippingRate->base_price += $this->getConfigData('default_rate') * $item->quantity;
                 }

@@ -2,93 +2,46 @@
 
 namespace Webkul\CatalogRule\Repositories;
 
-use Illuminate\Container\Container as App;
-use Webkul\Core\Eloquent\Repository;
+use Illuminate\Container\Container;
 use Webkul\Attribute\Repositories\AttributeFamilyRepository;
 use Webkul\Attribute\Repositories\AttributeRepository;
 use Webkul\Category\Repositories\CategoryRepository;
+use Webkul\Core\Eloquent\Repository;
 use Webkul\Tax\Repositories\TaxCategoryRepository;
 
 class CatalogRuleRepository extends Repository
 {
     /**
-     * AttributeFamilyRepository object
-     *
-     * @var \Webkul\Attribute\Repositories\AttributeFamilyRepository
-     */
-    protected $attributeFamilyRepository;
-
-    /**
-     * AttributeRepository object
-     *
-     * @var \Webkul\Attribute\Repositories\AttributeRepository
-     */
-    protected $attributeRepository;
-
-    /**
-     * CategoryRepository class
-     *
-     * @var \Webkul\Category\Repositories\CategoryRepository
-     */
-    protected $categoryRepository;
-
-    /**
-     * TaxCategoryRepository class
-     *
-     * @var \Webkul\CaTaxtegory\Repositories\axCategoryRepository
-     */
-    protected $taxCategoryRepository;
-
-    /**
      * Create a new repository instance.
      *
-     * @param  \Webkul\Attribute\Repositories\AttributeFamilyRepository  $attributeFamilyRepository
-     * @param  \Webkul\Attribute\Repositories\AttributeRepository  $attributeRepository
-     * @param  \Webkul\Category\Repositories\CategoryRepository  $categoryRepository
-     * @param  \Webkul\Tax\Repositories\TaxCategoryRepository  $taxCategoryRepository
-     * @param  \Illuminate\Container\Container  $app
      * @return void
      */
     public function __construct(
-        AttributeFamilyRepository $attributeFamilyRepository,
-        AttributeRepository $attributeRepository,
-        CategoryRepository $categoryRepository,
-        TaxCategoryRepository $taxCategoryRepository,
-        App $app
-    )
-    {
-        $this->attributeFamilyRepository = $attributeFamilyRepository;
-
-        $this->attributeRepository = $attributeRepository;
-
-        $this->categoryRepository = $categoryRepository;
-
-        $this->taxCategoryRepository = $taxCategoryRepository;
-
-        parent::__construct($app);
+        protected AttributeFamilyRepository $attributeFamilyRepository,
+        protected AttributeRepository $attributeRepository,
+        protected CategoryRepository $categoryRepository,
+        protected TaxCategoryRepository $taxCategoryRepository,
+        Container $container
+    ) {
+        parent::__construct($container);
     }
 
     /**
-     * Specify Model class name
-     *
-     * @return mixed
+     * Specify model class name.
      */
-    function model()
+    public function model(): string
     {
         return 'Webkul\CatalogRule\Contracts\CatalogRule';
     }
 
     /**
-     * @param  array  $data
+     * Create.
+     *
      * @return \Webkul\CatalogRule\Contracts\CatalogRule
      */
     public function create(array $data)
     {
-        $data['starts_from'] = $data['starts_from'] ?: null;
-
-        $data['ends_till'] = $data['ends_till'] ?: null;
-
-        $data['status'] = ! isset($data['status']) ? 0 : 1;
+        $data = $this->transformFormData($data);
 
         $catalogRule = parent::create($data);
 
@@ -100,24 +53,18 @@ class CatalogRuleRepository extends Repository
     }
 
     /**
-     * @param  array  $data
+     * Update.
+     *
      * @param  int  $id
-     * @param  string  $attribute
      * @return \Webkul\CatalogRule\Contracts\CatalogRule
      */
-    public function update(array $data, $id, $attribute = "id")
+    public function update(array $data, $id)
     {
-        $data['starts_from'] = $data['starts_from'] ?: null;
-
-        $data['ends_till'] = $data['ends_till'] ?: null;
-
-        $data['status'] = ! isset($data['status']) ? 0 : 1;
-
-        $data['conditions'] = $data['conditions'] ?? [];
+        $data = $this->transformFormData($data);
 
         $catalogRule = $this->find($id);
 
-        parent::update($data, $id, $attribute);
+        parent::update($data, $id);
 
         $catalogRule->channels()->sync($data['channels']);
 
@@ -127,7 +74,21 @@ class CatalogRuleRepository extends Repository
     }
 
     /**
-     * Returns attributes for catalog rule conditions
+     * Transform form data.
+     */
+    public function transformFormData(array $data): array
+    {
+        return [
+            ...$data,
+            'starts_from' => ! empty($data['starts_from']) ? $data['starts_from'] : null,
+            'ends_till'   => ! empty($data['ends_till']) ? $data['ends_till'] : null,
+            'status'      => isset($data['status']),
+            'conditions'  => $data['conditions'] ?? [],
+        ];
+    }
+
+    /**
+     * Returns attributes for catalog rule conditions.
      *
      * @return array
      */
@@ -136,21 +97,21 @@ class CatalogRuleRepository extends Repository
         $attributes = [
             [
                 'key'      => 'product',
-                'label'    => trans('admin::app.promotions.catalog-rules.product-attribute'),
+                'label'    => trans('admin::app.marketing.promotions.catalog-rules.create.product-attribute'),
                 'children' => [
                     [
                         'key'     => 'product|category_ids',
                         'type'    => 'multiselect',
-                        'label'   => trans('admin::app.promotions.catalog-rules.categories'),
+                        'label'   => trans('admin::app.marketing.promotions.catalog-rules.create.categories'),
                         'options' => $this->categoryRepository->getCategoryTree(),
                     ], [
                         'key'     => 'product|attribute_family_id',
                         'type'    => 'select',
-                        'label'   => trans('admin::app.promotions.catalog-rules.attribute_family'),
+                        'label'   => trans('admin::app.marketing.promotions.catalog-rules.create.attribute-family'),
                         'options' => $this->getAttributeFamilies(),
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         foreach ($this->attributeRepository->findWhereNotIn('type', ['textarea', 'image', 'file']) as $attribute) {
@@ -166,14 +127,16 @@ class CatalogRuleRepository extends Repository
                 }
             }
 
-            if ($attribute->validation == 'decimal')
+            if ($attribute->validation == 'decimal') {
                 $attributeType = 'decimal';
+            }
 
-            if ($attribute->validation == 'numeric')
+            if ($attribute->validation == 'numeric') {
                 $attributeType = 'integer';
+            }
 
             $attributes[0]['children'][] = [
-                'key'     => 'product|' . $attribute->code,
+                'key'     => 'product|'.$attribute->code,
                 'type'    => $attribute->type,
                 'label'   => $attribute->name,
                 'options' => $options,
@@ -184,7 +147,7 @@ class CatalogRuleRepository extends Repository
     }
 
     /**
-     * Returns all tax categories
+     * Returns all tax categories.
      *
      * @return array
      */
@@ -203,7 +166,7 @@ class CatalogRuleRepository extends Repository
     }
 
     /**
-     * Returns all attribute families
+     * Returns all attribute families.
      *
      * @return array
      */

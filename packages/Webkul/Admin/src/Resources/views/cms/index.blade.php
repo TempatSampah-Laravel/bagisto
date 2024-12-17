@@ -1,46 +1,33 @@
-@extends('admin::layouts.content')
+<x-admin::layouts>
+    <x-slot:title>
+        @lang('admin::app.cms.index.title')
+    </x-slot>
 
-@section('page_title')
-    {{ __('admin::app.cms.pages.title') }}
-@stop
+    <div class="flex items-center justify-between">
+        <p class="text-xl font-bold text-gray-800 dark:text-white">
+            @lang('admin::app.cms.index.title')
+        </p>
 
-@section('content')
+        <div class="flex items-center gap-x-2.5">
+            <!-- Export Modal -->
+            <x-admin::datagrid.export :src="route('admin.cms.index')" />
 
-    <div class="content">
-        <div class="page-header">
-            <div class="page-title">
-                <h1>{{ __('admin::app.cms.pages.pages') }}</h1>
-            </div>
-            <div class="page-action">
-                <div class="export-import" @click="showModal('downloadDataGrid')">
-                    <i class="export-icon"></i>
-                    <span >
-                        {{ __('admin::app.export.export') }}
-                    </span>
-                </div>
-
-                <a href="{{ route('admin.cms.create') }}" class="btn btn-lg btn-primary">
-                    {{ __('admin::app.cms.pages.add-title') }}
+            <!-- Create New Pages Button -->
+            @if (bouncer()->hasPermission('cms.create'))
+                <a
+                    href="{{ route('admin.cms.create') }}"
+                    class="primary-button"
+                >
+                    @lang('admin::app.cms.index.create-btn')
                 </a>
-            </div>
-        </div>
-
-        <div class="page-content">
-            @inject('cmsGrid', 'Webkul\Admin\DataGrids\CMSPageDataGrid')
-
-            {!! $cmsGrid->render() !!}
+            @endif
         </div>
     </div>
 
-    <modal id="downloadDataGrid" :is-open="modalIds.downloadDataGrid">
-        <h3 slot="header">{{ __('admin::app.export.download') }}</h3>
-        <div slot="body">
-            <export-form></export-form>
-        </div>
-    </modal>
-@stop
+    {!! view_render_event('bagisto.admin.cms.pages.list.before') !!}
 
-@push('scripts')
-    @include('admin::export.export', ['gridName' => $cmsGrid])
-@endpush
+    <x-admin::datagrid :src="route('admin.cms.index')" />
+    
+    {!! view_render_event('bagisto.admin.cms.pages.list.after') !!}
 
+</x-admin::layouts>

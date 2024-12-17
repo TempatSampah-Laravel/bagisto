@@ -24,7 +24,7 @@ class TinyMCEController extends Controller
 
         if (! empty($media)) {
             return response()->json([
-                'location' => $media['file_url']
+                'location' => $media['file_url'],
             ]);
         }
 
@@ -38,14 +38,14 @@ class TinyMCEController extends Controller
      */
     public function storeMedia()
     {
-        if (request()->hasFile('file')) {
-            return [
-                'file'      => $path = request()->file('file')->store($this->storagePath),
-                'file_name' => request()->file('file')->getClientOriginalName(),
-                'file_url'  => Storage::url($path),
-            ];
+        if (! request()->hasFile('file')) {
+            return [];
         }
 
-        return [];
+        return [
+            'file'      => $path = request()->file('file')->store($this->storagePath),
+            'file_name' => request()->file('file')->getClientOriginalName(),
+            'file_url'  => Storage::url($path),
+        ];
     }
 }

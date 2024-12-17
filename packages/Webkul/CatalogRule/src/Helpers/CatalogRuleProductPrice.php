@@ -3,64 +3,19 @@
 namespace Webkul\CatalogRule\Helpers;
 
 use Carbon\Carbon;
-use Webkul\Customer\Repositories\CustomerGroupRepository;
 use Webkul\CatalogRule\Repositories\CatalogRuleProductPriceRepository;
 
 class CatalogRuleProductPrice
 {
     /**
-     * CatalogRuleProductPriceRepository object
-     *
-     * @var \Webkul\CatalogRule\Repositories\CatalogRuleProductPriceRepository
-     */
-    protected $catalogRuleProductPriceRepository;
-
-    /**
-     * CatalogRuleProduct object
-     *
-     * @var \Webkul\CatalogRule\Helpers\CatalogRuleProduct
-     */
-    protected $catalogRuleProductHelper;
-
-    /**
-     * CustomerGroupRepository object
-     *
-     * @var \Webkul\Customer\Repositories\CustomerGroupRepository
-     */
-    protected $customerGroupRepository;
-
-    /**
      * Create a new helper instance.
      *
-     * @param  \Webkul\Attribute\Repositories\CatalogRuleProductPriceRepository  $catalogRuleProductPriceRepository
-     * @param  \Webkul\CatalogRule\Repositories\CatalogRuleProduct  $catalogRuleProductHelper
-     * @param  \Webkul\Customer\Repositories\CustomerGroupRepository  $customerGroupRepository
      * @return void
      */
     public function __construct(
-        CatalogRuleProductPriceRepository $catalogRuleProductPriceRepository,
-        CatalogRuleProduct $catalogRuleProductHelper,
-        CustomerGroupRepository $customerGroupRepository
-    )
-    {
-        $this->catalogRuleProductPriceRepository = $catalogRuleProductPriceRepository;
-
-        $this->catalogRuleProductHelper = $catalogRuleProductHelper;
-
-        $this->customerGroupRepository = $customerGroupRepository;
-    }
-
-    /**
-     * Return current logged in customer
-     *
-     * @return  \Webkul\Customer\Contracts\Customer|bool
-     */
-    public function getCurrentCustomer()
-    {
-        $guard = request()->has('token') ? 'api' : 'customer';
-
-        return auth()->guard($guard);
-    }
+        protected CatalogRuleProductPriceRepository $catalogRuleProductPriceRepository,
+        protected CatalogRuleProduct $catalogRuleProductHelper
+    ) {}
 
     /**
      * Collect discount on cart
@@ -84,23 +39,33 @@ class CatalogRuleProductPrice
         $catalogRuleProducts = $this->catalogRuleProductHelper->getCatalogRuleProducts($product);
 
         foreach ($catalogRuleProducts as $row) {
-            $productKey = $row->product_id . '-' . $row->channel_id . '-' . $row->customer_group_id;
+            $productKey = $row->product_id.'-'.$row->channel_id.'-'.$row->customer_group_id;
 
-            if ($previousKey && $previousKey != $productKey) {
+            if (
+                $previousKey
+                && $previousKey != $productKey
+            ) {
                 $endRuleFlags = [];
 
                 if (count($prices) > $batchCount) {
-                    $this->catalogRuleProductPriceRepository->getModel()->insert($prices);
+                    $this->catalogRuleProductPriceRepository->insert($prices);
 
                     $prices = [];
                 }
             }
 
             foreach ($dates as $key => $date) {
-                if ((! $row->starts_from || $date >= $row->starts_from)
-                    && (! $row->ends_till || $date <= $row->ends_till)
+                if (
+                    (
+                        ! $row->starts_from
+                        || $date >= $row->starts_from
+                    )
+                    && (
+                        ! $row->ends_till
+                        || $date <= $row->ends_till
+                    )
                 ) {
-                    $priceKey = $date->getTimestamp() . '-' . $productKey;
+                    $priceKey = $date->getTimestamp().'-'.$productKey;
 
                     if (isset($endRuleFlags[$priceKey])) {
                         continue;
@@ -134,7 +99,7 @@ class CatalogRuleProductPrice
             $previousKey = $productKey;
         }
 
-        $this->catalogRuleProductPriceRepository->getModel()->insert($prices);
+        $this->catalogRuleProductPriceRepository->insert($prices);
     }
 
     /**
@@ -146,7 +111,7 @@ class CatalogRuleProductPrice
      */
     public function calculate($rule, $productData = null)
     {
-        $price = $productData && isset($productData['price']) ? $productData['price'] : $rule->price;
+        $price = $productData['price'] ?? $rule->price;
 
         switch ($rule->action_type) {
             case 'to_fixed':
@@ -174,42 +139,19 @@ class CatalogRuleProductPrice
     }
 
     /**
-     * Clean product price index
+     * Clean products price indices
      *
      * @param  array  $productIds
      * @return void
      */
-    public function cleanProductPriceIndex($productIds = [])
+    public function cleanProductPriceIndices($productIds = [])
     {
         if (count($productIds)) {
-            $this->catalogRuleProductPriceRepository->getModel()->whereIn('product_id', $productIds)->delete();
+            $this->catalogRuleProductPriceRepository->whereIn('product_id', $productIds)->delete();
         } else {
             $this->catalogRuleProductPriceRepository->deleteWhere([
-                ['product_id', 'like', '%%']
+                ['product_id', 'like', '%%'],
             ]);
         }
-    }
-
-    /**
-     * Get catalog rules product price for specific date, channel and customer group.
-     *
-     * @param  \Webkul\Product\Contracts\Product  $product
-     * @return array|void
-     */
-    public function getRulePrice($product)
-    {
-        if ($this->getCurrentCustomer()->check()) {
-            $customerGroupId = $this->getCurrentCustomer()->user()->customer_group_id;
-        } else {
-            $customerGroup = $this->customerGroupRepository->getCustomerGuestGroup();
-
-            if (! $customerGroup) {
-                return;
-            }
-
-            $customerGroupId = $customerGroup->id;
-        }
-
-        return $this->catalogRuleProductPriceRepository->checkInLoadedCatalogRulePrice($product, $customerGroupId);
     }
 }

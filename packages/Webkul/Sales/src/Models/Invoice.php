@@ -2,24 +2,40 @@
 
 namespace Webkul\Sales\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Webkul\Sales\Contracts\Invoice as InvoiceContract;
-use Webkul\Sales\Traits\PaymentTerm;
-use Webkul\Sales\Database\Factories\InvoiceFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Webkul\Sales\Contracts\Invoice as InvoiceContract;
+use Webkul\Sales\Database\Factories\InvoiceFactory;
 use Webkul\Sales\Traits\InvoiceReminder;
+use Webkul\Sales\Traits\PaymentTerm;
 
 class Invoice extends Model implements InvoiceContract
 {
-    use PaymentTerm, InvoiceReminder, HasFactory;
+    use HasFactory, InvoiceReminder, PaymentTerm;
+
+    /**
+     * Pending Invoice.
+     */
+    public const STATUS_PENDING = 'pending';
+
+    /**
+     * Paid Invoice.
+     */
+    public const STATUS_PAID = 'paid';
+
+    /**
+     * Refunded invoice.
+     */
+    public const STATUS_REFUNDED = 'refunded';
 
     /**
      * The attributes that aren't mass assignable.
      *
-     * @var string[]|bool
+     * @var string[]
      */
     protected $guarded = [
         'id',
@@ -33,9 +49,9 @@ class Invoice extends Model implements InvoiceContract
      * @var array
      */
     protected $statusLabel = [
-        'pending' => 'Pending',
-        'paid' => 'Paid',
-        'refunded' => 'Refunded',
+        self::STATUS_PENDING  => 'Pending',
+        self::STATUS_PAID     => 'Paid',
+        self::STATUS_REFUNDED => 'Refunded',
     ];
 
     /**
@@ -60,7 +76,7 @@ class Invoice extends Model implements InvoiceContract
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItemProxy::modelClass())
-                    ->whereNull('parent_id');
+            ->whereNull('parent_id');
     }
 
     /**
@@ -85,15 +101,13 @@ class Invoice extends Model implements InvoiceContract
     public function address(): BelongsTo
     {
         return $this->belongsTo(OrderAddressProxy::modelClass(), 'order_address_id')
-                    ->where('address_type', OrderAddress::ADDRESS_TYPE_BILLING);
+            ->where('address_type', OrderAddress::ADDRESS_TYPE_BILLING);
     }
 
     /**
      * Create a new factory instance for the model.
-     *
-     * @return InvoiceFactory
      */
-    protected static function newFactory(): InvoiceFactory
+    protected static function newFactory(): Factory
     {
         return InvoiceFactory::new();
     }
